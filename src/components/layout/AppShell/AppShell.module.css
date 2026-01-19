@@ -1,0 +1,24 @@
+.appShell {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Desktop layout - content offset by sidebar */
+.content.desktop {
+  margin-left: var(--nav-width-desktop);
+  min-height: 100vh;
+}
+
+/* Mobile layout - content offset by bottom nav */
+.content.mobile {
+  margin-bottom: var(--nav-height-mobile);
+  min-height: calc(100vh - var(--nav-height-mobile));
+}

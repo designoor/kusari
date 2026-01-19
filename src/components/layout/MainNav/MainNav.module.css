@@ -1,0 +1,129 @@
+.mainNav {
+  display: flex;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* Vertical orientation (desktop) */
+.mainNav.vertical {
+  flex-direction: column;
+  width: var(--nav-width-desktop);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-right: 1px solid var(--color-border);
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+}
+
+/* Horizontal orientation (mobile) */
+.mainNav.horizontal {
+  flex-direction: row;
+  height: var(--nav-height-mobile);
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  border-top: 1px solid var(--color-border);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  z-index: var(--z-fixed);
+}
+
+/* Logo area (vertical only) */
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--nav-width-desktop);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-content-primary);
+}
+
+/* Nav list */
+.navList {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mainNav.vertical .navList {
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  flex: 1;
+}
+
+.mainNav.horizontal .navList {
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* Nav item */
+.navItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--color-content-secondary);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  position: relative;
+  cursor: pointer;
+}
+
+.navItem:hover {
+  color: var(--color-content-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.navItem.active {
+  color: var(--color-accent);
+  background-color: rgba(91, 255, 140, 0.1);
+}
+
+/* Vertical nav item */
+.navItem.vertical {
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Horizontal nav item */
+.navItem.horizontal {
+  flex-direction: column;
+  padding: var(--spacing-xs);
+  min-width: 60px;
+}
+
+/* Icon wrapper */
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Label */
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Badge positioning */
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+}
