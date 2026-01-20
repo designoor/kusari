@@ -1,5 +1,47 @@
-import type { Client, Dm } from '@xmtp/browser-sdk';
+import type { Client, Dm, Group } from '@xmtp/browser-sdk';
 import type { Conversation } from '@/types/conversation';
+
+/**
+ * Type guard to check if a conversation is a DM
+ *
+ * This relies on the XMTP browser SDK's type structure where:
+ * - Dm has a `peerInboxId()` method (returns the other participant's inbox ID)
+ * - Group does NOT have this method
+ *
+ * SDK Contract: @xmtp/browser-sdk ^0.x
+ * If this breaks after an SDK update, check the Dm/Group type definitions
+ * in the SDK and update the discriminating property accordingly.
+ *
+ * @param conversation Conversation instance (Dm or Group)
+ * @returns true if conversation is a Dm
+ */
+export function isDm(conversation: Conversation): conversation is Dm {
+  return (
+    'peerInboxId' in conversation &&
+    typeof conversation.peerInboxId === 'function'
+  );
+}
+
+/**
+ * Type guard to check if a conversation is a Group
+ *
+ * This relies on the XMTP browser SDK's type structure where:
+ * - Group has group management methods like `addMembers()`, `removeMembers()`
+ * - Dm does NOT have these methods
+ *
+ * SDK Contract: @xmtp/browser-sdk ^0.x
+ * If this breaks after an SDK update, check the Dm/Group type definitions
+ * in the SDK and update the discriminating property accordingly.
+ *
+ * @param conversation Conversation instance (Dm or Group)
+ * @returns true if conversation is a Group
+ */
+export function isGroup(conversation: Conversation): conversation is Group {
+  return (
+    'addMembers' in conversation &&
+    typeof conversation.addMembers === 'function'
+  );
+}
 
 /**
  * List all conversations (DMs and Groups) for the client
