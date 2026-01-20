@@ -1,7 +1,7 @@
 'use client';
 
 import { useAccount, useDisconnect } from 'wagmi';
-import { useWeb3Modal, useWeb3ModalState } from '@web3modal/wagmi/react';
+import { useAppKit, useAppKitState } from '@reown/appkit/react';
 
 export interface WalletState {
   address: string | undefined;
@@ -15,8 +15,8 @@ export interface WalletState {
 export function useWallet(): WalletState {
   const { address, isConnected, isConnecting: isAccountConnecting } = useAccount();
   const { disconnect, disconnectAsync } = useDisconnect();
-  const { open } = useWeb3Modal();
-  const { open: isModalOpen } = useWeb3ModalState();
+  const { open } = useAppKit();
+  const { open: isModalOpen } = useAppKitState();
 
   const handleConnect = () => {
     open();

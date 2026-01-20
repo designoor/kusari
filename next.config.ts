@@ -23,12 +23,20 @@ const nextConfig: NextConfig = {
         webassemblyModuleFilename: 'static/wasm/[modulehash].wasm',
       };
 
-      // Mock optional wallet connectors and dependencies that aren't installed
+      // Handle optional peer dependencies from @wagmi/connectors
+      // The @reown/appkit-adapter-wagmi package uses @wagmi/connectors which has
+      // optional peer dependencies for various wallet SDKs. These need to be
+      // aliased to false to prevent webpack from trying to resolve them.
       config.resolve = {
         ...config.resolve,
         alias: {
           ...config.resolve?.alias,
+          '@coinbase/wallet-sdk': false,
           '@gemini-wallet/core': false,
+          '@metamask/sdk': false,
+          '@safe-global/safe-apps-provider': false,
+          '@safe-global/safe-apps-sdk': false,
+          'porto': false,
           'porto/internal': false,
           'pino-pretty': false,
         },
