@@ -9,6 +9,10 @@ import {
   CheckIcon,
   XIcon,
   LoaderIcon,
+  MessageIcon,
+  ShieldIcon,
+  VerifiedIcon,
+  WalletIcon,
 } from './icons';
 import styles from './Icon.module.css';
 
@@ -21,7 +25,11 @@ export type IconName =
   | 'chevron-left'
   | 'check'
   | 'x'
-  | 'loader';
+  | 'loader'
+  | 'message'
+  | 'shield'
+  | 'verified'
+  | 'wallet';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -50,6 +58,10 @@ const ICON_MAP = {
   check: CheckIcon,
   x: XIcon,
   loader: LoaderIcon,
+  message: MessageIcon,
+  shield: ShieldIcon,
+  verified: VerifiedIcon,
+  wallet: WalletIcon,
 } as const;
 
 export const Icon: React.FC<IconProps> = ({

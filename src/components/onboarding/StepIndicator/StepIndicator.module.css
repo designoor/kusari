@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-border);
+  transition: background-color 0.2s ease;
+}
+
+.dot.completed {
+  background-color: var(--color-accent);
+}
+
+.dot.active {
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(91, 255, 140, 0.2);
+}
