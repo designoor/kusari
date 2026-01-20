@@ -1,5 +1,5 @@
-import { defaultWagmiConfig } from '@web3modal/wagmi';
-import { mainnet, sepolia } from 'wagmi/chains';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { mainnet, sepolia, type AppKitNetwork } from '@reown/appkit/networks';
 
 // Get WalletConnect project ID from environment
 export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
@@ -7,30 +7,28 @@ export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 if (!projectId) {
   console.error(
     'CRITICAL: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. ' +
-    'WalletConnect functionality will NOT work. ' +
-    'Get a project ID at https://cloud.walletconnect.com'
+      'WalletConnect functionality will NOT work. ' +
+      'Get a project ID at https://cloud.reown.com'
   );
 }
 
-// Configure chains
-export const chains = [mainnet, sepolia] as const;
+// Configure networks as a non-empty tuple (required by AppKit)
+export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet, sepolia];
 
 // Metadata for WalletConnect
-const metadata = {
+export const metadata = {
   name: 'Kusari',
   description: 'Web3 Messaging with XMTP',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-// Create wagmi config using Web3Modal's default config
-// Note: projectId is required for WalletConnect. If missing, we use an empty string
-// to satisfy the type system, but Web3Modal initialization will be skipped in WalletProvider.
-export const config = defaultWagmiConfig({
-  chains,
+// Create Wagmi adapter for Reown AppKit
+export const wagmiAdapter = new WagmiAdapter({
   projectId: projectId || '',
-  metadata,
-  enableCoinbase: true,
-  enableInjected: true,
-  enableWalletConnect: true,
+  networks,
+  ssr: true,
 });
+
+// Export wagmi config for use with WagmiProvider
+export const config = wagmiAdapter.wagmiConfig;
