@@ -1,28 +1,37 @@
-/**
- * Chat page placeholder
- * This is a temporary page to prevent 404 errors during Phase 2 testing.
- * Full chat implementation will be built in Phase 3.
- */
+'use client';
+
+import { ConversationList } from '@/components/chat/ConversationList';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Icon } from '@/components/ui/Icon';
+import { useAllowedConversations } from '@/hooks/useConversations';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import styles from './chat.module.css';
+
 export default function ChatPage() {
+  const isMobile = useIsMobile();
+  const { filteredPreviews, isLoading } = useAllowedConversations();
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '24px',
-        textAlign: 'center',
-        color: 'var(--color-content-primary)',
-      }}
-    >
-      <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>
-        Chat (Coming Soon)
-      </h1>
-      <p style={{ color: 'var(--color-content-secondary)' }}>
-        Onboarding complete! Chat interface will be implemented in Phase 3.
-      </p>
+    <div className={styles.container}>
+      <div className={styles.sidebar}>
+        <ConversationList
+          conversations={filteredPreviews}
+          isLoading={isLoading}
+          emptyStateTitle="No conversations yet"
+          emptyStateDescription="Start a new conversation to begin messaging"
+        />
+      </div>
+      {!isMobile && (
+        <div className={styles.main}>
+          <div className={styles.placeholder}>
+            <EmptyState
+              icon={<Icon name="chat" size="xl" />}
+              title="Select a conversation"
+              description="Choose a conversation from the list to start messaging"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
