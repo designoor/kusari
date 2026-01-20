@@ -170,3 +170,75 @@ export const LoaderIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
     <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
   </svg>
 );
+
+export const MessageIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <line x1="9" y1="10" x2="15" y2="10" />
+    <line x1="9" y1="14" x2="13" y2="14" />
+  </svg>
+);
+
+export const ShieldIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+export const VerifiedIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    <polyline points="9 11 11 13 15 9" />
+  </svg>
+);
+
+export const WalletIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M7 15h0M2 9.5h20" />
+  </svg>
+);
