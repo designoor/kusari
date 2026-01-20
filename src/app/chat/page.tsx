@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Icon } from '@/components/ui/Icon';
@@ -8,8 +10,13 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import styles from './chat.module.css';
 
 export default function ChatPage() {
+  const router = useRouter();
   const isMobile = useIsMobile();
   const { filteredPreviews, isLoading } = useAllowedConversations();
+
+  const handleNewConversation = useCallback(() => {
+    router.push('/contacts');
+  }, [router]);
 
   return (
     <div className={styles.container}>
@@ -18,7 +25,11 @@ export default function ChatPage() {
           conversations={filteredPreviews}
           isLoading={isLoading}
           emptyStateTitle="No conversations yet"
-          emptyStateDescription="Start a new conversation to begin messaging"
+          emptyStateDescription="Find contacts to start a new conversation"
+          emptyStateAction={{
+            label: 'Find contacts',
+            onClick: handleNewConversation,
+          }}
         />
       </div>
       {!isMobile && (

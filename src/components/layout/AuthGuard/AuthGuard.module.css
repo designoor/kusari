@@ -1,0 +1,20 @@
+.loadingContainer {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--color-bg-primary);
+}
+
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.loadingBody {
+  display: flex;
+  flex: 1;
+  gap: 1px;
+  overflow: hidden;
+}
