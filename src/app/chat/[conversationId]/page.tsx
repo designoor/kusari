@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
@@ -19,6 +19,7 @@ import styles from './conversation.module.css';
 
 export default function ConversationPage() {
   const params = useParams();
+  const router = useRouter();
   const conversationId = params.conversationId as string;
   const isMobile = useIsMobile();
   const { client, isInitialized } = useXmtpContext();
@@ -73,6 +74,10 @@ export default function ConversationPage() {
   const handleSendMessage = async (content: string) => {
     await sendMessage(content);
   };
+
+  const handleNewConversation = useCallback(() => {
+    router.push('/contacts');
+  }, [router]);
 
   // Render conversation panel content
   const renderConversationPanel = () => {
@@ -175,7 +180,11 @@ export default function ConversationPage() {
           isLoading={isLoadingConversations}
           activeConversationId={conversationId}
           emptyStateTitle="No conversations yet"
-          emptyStateDescription="Start a new conversation to begin messaging"
+          emptyStateDescription="Find contacts to start a new conversation"
+          emptyStateAction={{
+            label: 'Find contacts',
+            onClick: handleNewConversation,
+          }}
         />
       </div>
       <div className={styles.main}>{renderConversationPanel()}</div>

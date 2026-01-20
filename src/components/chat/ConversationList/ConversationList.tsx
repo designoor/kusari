@@ -15,6 +15,10 @@ export interface ConversationListProps {
   activeConversationId?: string | null;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
+  emptyStateAction?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
@@ -23,6 +27,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   activeConversationId,
   emptyStateTitle = 'No conversations',
   emptyStateDescription = 'Start a new conversation to begin messaging',
+  emptyStateAction,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -87,6 +92,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             icon={<Icon name="chat" size="xl" />}
             title={emptyStateTitle}
             description={emptyStateDescription}
+            action={emptyStateAction}
           />
         </div>
       </div>
