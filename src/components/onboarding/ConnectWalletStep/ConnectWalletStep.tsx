@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useWallet } from '@/hooks/useWallet';
+import { truncateAddress } from '@/lib';
 import styles from './ConnectWalletStep.module.css';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
@@ -27,10 +28,6 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
   const handleChangeWallet = async () => {
     await disconnectAsync();
     connect();
-  };
-
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   return (
@@ -68,7 +65,7 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
             </div>
             <div>
               <p className={styles.connectedLabel}>Connected</p>
-              <p className={styles.connectedAddress}>{formatAddress(address)}</p>
+              <p className={styles.connectedAddress}>{truncateAddress(address)}</p>
             </div>
           </div>
         ) : isConfigured ? (

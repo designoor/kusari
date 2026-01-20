@@ -1,4 +1,5 @@
 import React from 'react';
+import { getColorFromAddress, getInitialsFromAddress } from '@/lib';
 import styles from './Avatar.module.css';
 
 export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -8,37 +9,6 @@ export interface AvatarProps {
   address?: string;
   size?: AvatarSize;
   className?: string;
-}
-
-// Generate consistent color from address
-function getColorFromAddress(address: string): string {
-  if (!address) return '#5bff8c';
-
-  // Simple hash function
-  let hash = 0;
-  for (let i = 0; i < address.length; i++) {
-    hash = address.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash;
-  }
-
-  // Convert to hue (0-360)
-  const hue = Math.abs(hash % 360);
-
-  // Use good saturation and lightness for dark backgrounds
-  return `hsl(${hue}, 70%, 60%)`;
-}
-
-// Get initials from address (first 2 hex chars after 0x)
-function getInitialsFromAddress(address: string): string {
-  if (!address) return '??';
-
-  // Remove 0x prefix if present
-  const cleanAddress = address.toLowerCase().startsWith('0x')
-    ? address.slice(2)
-    : address;
-
-  // Take first 2 characters
-  return cleanAddress.slice(0, 2).toUpperCase();
 }
 
 export const Avatar: React.FC<AvatarProps> = ({
