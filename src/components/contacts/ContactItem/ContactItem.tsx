@@ -32,7 +32,7 @@ export interface ContactItemProps {
  * - Message requests list
  * - Denied contacts list
  */
-export const ContactItem: React.FC<ContactItemProps> = ({
+export const ContactItem: React.FC<ContactItemProps> = React.memo(({
   address,
   displayName,
   lastMessage,
@@ -107,4 +107,6 @@ export const ContactItem: React.FC<ContactItemProps> = ({
       {content}
     </Link>
   );
-};
+});
+
+ContactItem.displayName = 'ContactItem';

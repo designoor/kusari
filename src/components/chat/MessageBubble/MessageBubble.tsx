@@ -13,7 +13,7 @@ export interface MessageBubbleProps {
   isLast?: boolean;
 }
 
-function StatusIndicator({ status }: { status: MessageStatus }) {
+const StatusIndicator = React.memo(({ status }: { status: MessageStatus }) => {
   if (status === 'sending') {
     return (
       <span className={styles.status} aria-label="Sending">
@@ -36,9 +36,11 @@ function StatusIndicator({ status }: { status: MessageStatus }) {
       <Icon name="check" size="sm" />
     </span>
   );
-}
+});
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({
+StatusIndicator.displayName = 'StatusIndicator';
+
+export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   message,
   showTimestamp = false,
   isFirst = false,
@@ -68,4 +70,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       </div>
     </div>
   );
-};
+});
+
+MessageBubble.displayName = 'MessageBubble';

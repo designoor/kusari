@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { getColorFromAddress, getInitialsFromAddress } from '@/lib';
 import styles from './Avatar.module.css';
 
@@ -11,17 +11,19 @@ export interface AvatarProps {
   className?: string;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({
+export const Avatar: React.FC<AvatarProps> = React.memo(({
   src,
   address,
   size = 'md',
   className,
 }) => {
-  const [imageError, setImageError] = React.useState(false);
+  const [imageError, setImageError] = useState(false);
   const shouldShowImage = src && !imageError;
 
   const backgroundColor = address ? getColorFromAddress(address) : undefined;
   const initials = address ? getInitialsFromAddress(address) : '??';
+
+  const handleError = useCallback(() => setImageError(true), []);
 
   return (
     <div
@@ -33,11 +35,15 @@ export const Avatar: React.FC<AvatarProps> = ({
           src={src}
           alt=""
           className={styles.image}
-          onError={() => setImageError(true)}
+          loading="lazy"
+          decoding="async"
+          onError={handleError}
         />
       ) : (
         <span className={styles.initials}>{initials}</span>
       )}
     </div>
   );
-};
+});
+
+Avatar.displayName = 'Avatar';
