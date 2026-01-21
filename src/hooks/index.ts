@@ -9,3 +9,6 @@ export * from './useConversations';
 export * from './useMessages';
 export * from './useConsent';
 export * from './useNewRequestsCount';
+
+// Reputation Hooks
+export * from './useEthosScore';
