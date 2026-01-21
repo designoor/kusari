@@ -21,3 +21,9 @@
   margin-bottom: var(--nav-height-mobile);
   height: calc(100vh - var(--nav-height-mobile));
 }
+
+/* Fullscreen layout - no nav offset (chat detail on mobile) */
+.content.fullscreen {
+  margin: 0;
+  height: 100vh;
+}

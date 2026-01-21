@@ -6,8 +6,8 @@
 }
 
 .searchWrapper {
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  /* padding: var(--spacing-md); */
+  /* border-bottom: 1px solid var(--color-border); */
   flex-shrink: 0;
 }
 
@@ -31,7 +31,7 @@
 .list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-sm);
+  padding: 0;
 }
 
 .emptyContainer {

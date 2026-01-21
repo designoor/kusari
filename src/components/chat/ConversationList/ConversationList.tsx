@@ -106,7 +106,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     <div className={styles.container}>
       <div className={styles.searchWrapper}>
         <Input
-          variant="search"
+          size="md"
           placeholder="Search conversations..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
