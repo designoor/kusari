@@ -46,7 +46,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   isFirst = false,
   isLast = false,
 }) => {
-  const { content, isFromCurrentUser, sentAt, status } = message;
+  const { content, isFromCurrentUser, sentAt, status, type } = message;
+
+  // System messages (membership changes, etc.) are displayed differently
+  if (type === 'system') {
+    return (
+      <div className={styles.systemWrapper}>
+        <div className={styles.systemBubble}>
+          <p className={styles.systemContent}>{content}</p>
+          {showTimestamp && (
+            <span className={styles.systemTime}>{formatMessageTime(sentAt)}</span>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const bubbleClasses = [
     styles.bubble,

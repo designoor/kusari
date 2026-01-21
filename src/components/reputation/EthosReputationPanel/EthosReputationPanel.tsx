@@ -246,12 +246,13 @@ const ProfileContent: React.FC<{
       {showProfileLink && (
         <div className={styles.profileLink}>
           <Button
-            variant="ghost"
+            variant="secondary"
+            fullWidth
             size="sm"
             onClick={handleOpenProfile}
+            rightIcon={<ExternalLinkIcon size={14} />}
           >
-            <span>View on Ethos</span>
-            <ExternalLinkIcon size={14} />
+            View on Ethos
           </Button>
         </div>
       )}

@@ -6,22 +6,8 @@
 }
 
 .header {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--color-border);
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  color: var(--color-content-secondary);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
-  transition: color var(--transition-fast);
-}
-
-.backLink:hover {
-  color: var(--color-content-primary);
 }
 
 .content {

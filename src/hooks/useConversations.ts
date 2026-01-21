@@ -11,6 +11,7 @@ import {
 } from '@/services/xmtp/conversations';
 import { getLatestMessage } from '@/services/xmtp/messages';
 import { getInboxConsentState } from '@/services/xmtp/consent';
+import { getAddressForInboxId } from '@/services/xmtp/identity';
 import type { Conversation, Dm, ConversationPreview, ConversationFilter } from '@/types/conversation';
 
 /**
@@ -61,11 +62,17 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
 
       const conversationIsDm = isDm(conversation);
       let peerInboxId: string | undefined;
+      let peerAddress: string | undefined;
       let groupName: string | undefined;
 
       if (conversationIsDm) {
         // For DMs, get the peer inbox ID (async method)
         peerInboxId = await conversation.peerInboxId();
+        // Resolve inbox ID to Ethereum address for display
+        if (peerInboxId) {
+          const address = await getAddressForInboxId(client, peerInboxId);
+          peerAddress = address ?? undefined;
+        }
       } else {
         // For Groups, get the group name
         groupName = conversation.name ?? undefined;
@@ -83,16 +90,17 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
       // Get the latest message
       const latestMessage = await getLatestMessage(conversation);
 
+      // Only use text messages for preview (filter out system messages like group_updated)
+      const isTextMessage = latestMessage && typeof latestMessage.content === 'string';
+
       return {
         id: conversation.id,
         peerInboxId,
+        peerAddress,
         groupName,
-        lastMessage: latestMessage
+        lastMessage: isTextMessage
           ? {
-              content:
-                typeof latestMessage.content === 'string'
-                  ? latestMessage.content
-                  : '[Unsupported content]',
+              content: latestMessage.content as string,
               sentAt: latestMessage.sentAt,
               senderInboxId: latestMessage.senderInboxId,
             }

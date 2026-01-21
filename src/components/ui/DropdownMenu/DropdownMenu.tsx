@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Button, type ButtonVariant, type ButtonSize } from '@/components/ui/Button';
 import { MoreVerticalIcon } from '@/components/ui/Icon/icons';
 import styles from './DropdownMenu.module.css';
 
@@ -22,8 +23,12 @@ export interface DropdownMenuItem {
 export interface DropdownMenuProps {
   /** Menu items */
   items: DropdownMenuItem[];
-  /** Custom trigger element (defaults to MoreVerticalIcon) */
+  /** Custom trigger content (defaults to MoreVerticalIcon) */
   trigger?: React.ReactNode;
+  /** Button variant for the trigger */
+  variant?: ButtonVariant;
+  /** Button size for the trigger */
+  size?: ButtonSize;
   /** Accessible label for the trigger button */
   ariaLabel?: string;
   /** Additional CSS class */
@@ -32,10 +37,13 @@ export interface DropdownMenuProps {
 
 /**
  * DropdownMenu provides a simple dropdown menu triggered by a button.
+ * Uses the Button component for consistent styling.
  */
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   items,
   trigger,
+  variant = 'ghost',
+  size = 'sm',
   ariaLabel = 'More options',
   className,
 }) => {
@@ -85,16 +93,17 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   return (
     <div ref={containerRef} className={`${styles.container} ${className ?? ''}`}>
-      <button
-        type="button"
-        className={styles.trigger}
+      <Button
+        variant={variant}
+        size={size}
         onClick={handleToggle}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-haspopup="menu"
+        className={styles.trigger}
       >
-        {trigger ?? <MoreVerticalIcon size={20} />}
-      </button>
+        {trigger ?? <MoreVerticalIcon size={size === 'sm' ? 18 : size === 'md' ? 20 : 24} />}
+      </Button>
 
       {isOpen && (
         <div className={styles.menu} role="menu">

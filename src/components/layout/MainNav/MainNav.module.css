@@ -74,9 +74,11 @@
   text-decoration: none;
   color: var(--color-content-secondary);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
   position: relative;
   cursor: pointer;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .navItem:hover {
@@ -95,6 +97,7 @@
   gap: var(--spacing-xs);
   padding: var(--spacing-sm);
   width: 100%;
+  min-height: 56px;
 }
 
 /* Horizontal nav item */
@@ -102,6 +105,7 @@
   flex-direction: column;
   padding: var(--spacing-xs);
   min-width: 60px;
+  min-height: 48px;
 }
 
 /* Icon wrapper */

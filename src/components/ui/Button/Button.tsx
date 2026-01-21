@@ -33,6 +33,13 @@ const ButtonInner = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const isDisabled = disabled || loading;
 
+    // Check if children is empty (icon-only button)
+    const hasLabel = React.Children.count(children) > 0 &&
+      !(React.Children.count(children) === 1 && children === '');
+    const hasLeftIcon = Boolean(leftIcon) || loading;
+    const hasRightIcon = Boolean(rightIcon);
+    const isIconOnly = !hasLabel && (hasLeftIcon || hasRightIcon);
+
     return (
       <button
         ref={ref}
@@ -42,6 +49,9 @@ const ButtonInner = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ${styles[size]}
           ${fullWidth ? styles.fullWidth : ''}
           ${isDisabled ? styles.disabled : ''}
+          ${isIconOnly ? styles.iconOnly : ''}
+          ${!isIconOnly && hasLeftIcon ? styles.hasLeftIcon : ''}
+          ${!isIconOnly && hasRightIcon ? styles.hasRightIcon : ''}
           ${className ?? ''}
         `}
         disabled={isDisabled}
@@ -56,7 +66,7 @@ const ButtonInner = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {!loading && leftIcon && (
           <span className={styles.iconWrapper}>{leftIcon}</span>
         )}
-        <span className={styles.content}>{children}</span>
+        {hasLabel && <span className={styles.content}>{children}</span>}
         {!loading && rightIcon && (
           <span className={styles.iconWrapper}>{rightIcon}</span>
         )}

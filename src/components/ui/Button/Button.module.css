@@ -36,6 +36,45 @@
   font-size: var(--font-size-lg);
 }
 
+/* Icon padding adjustments - left icon reduces left padding */
+.button.sm.hasLeftIcon {
+  padding-left: var(--spacing-sm);
+}
+
+.button.md.hasLeftIcon {
+  padding-left: calc(var(--spacing-lg) / 2);
+}
+
+.button.lg.hasLeftIcon {
+  padding-left: var(--spacing-md);
+}
+
+/* Icon padding adjustments - right icon reduces right padding */
+.button.sm.hasRightIcon {
+  padding-right: var(--spacing-sm);
+}
+
+.button.md.hasRightIcon {
+  padding-right: calc(var(--spacing-lg) / 2);
+}
+
+.button.lg.hasRightIcon {
+  padding-right: var(--spacing-md);
+}
+
+/* Icon-only buttons - both sides reduced */
+.button.sm.iconOnly {
+  padding: 0 var(--spacing-sm);
+}
+
+.button.md.iconOnly {
+  padding: 0 calc(var(--spacing-lg) / 2);
+}
+
+.button.lg.iconOnly {
+  padding: 0 var(--spacing-md);
+}
+
 /* Variants */
 .button.primary {
   background-color: var(--color-accent);
@@ -55,17 +94,17 @@
 }
 
 .button.secondary {
-  background-color: transparent;
+  background-color: rgba(255, 255, 255, 0.1);
   color: var(--color-content-primary);
-  border: 2px solid var(--color-content-primary);
+  border: 2px solid transparent;
 }
 
 .button.secondary:hover:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .button.secondary:active:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
   transform: translateY(1px);
 }
 
@@ -76,12 +115,11 @@
 }
 
 .button.ghost:hover:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--color-accent);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .button.ghost:active:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   transform: translateY(1px);
 }
 

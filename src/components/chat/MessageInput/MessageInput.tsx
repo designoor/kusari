@@ -97,17 +97,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           aria-label="Message"
         />
       </div>
-      <Button
-        type="submit"
-        variant="primary"
-        size="md"
-        disabled={!canSend}
-        loading={loading}
-        aria-label="Send message"
-        className={styles.sendButton}
-      >
-        <Icon name="send" size="md" />
-      </Button>
+      {(message.trim().length > 0 || loading) && (
+        <Button
+          type="submit"
+          variant="primary"
+          size="md"
+          disabled={!canSend}
+          loading={loading}
+          aria-label="Send message"
+          className={styles.sendButton}
+        >
+          <Icon name="send" size="md" />
+        </Button>
+      )}
     </form>
   );
 };

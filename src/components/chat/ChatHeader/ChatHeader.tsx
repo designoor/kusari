@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Icon } from '@/components/ui/Icon';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { truncateAddress } from '@/lib';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import styles from './ChatHeader.module.css';
 
 export interface ChatHeaderProps {
   peerInboxId?: string;
+  /** Ethereum address for display (resolved from inbox ID) */
+  peerAddress?: string;
   groupName?: string;
   isDm?: boolean;
   showBackButton?: boolean;
@@ -21,6 +23,7 @@ export interface ChatHeaderProps {
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   peerInboxId,
+  peerAddress,
   groupName,
   isDm = true,
   showBackButton = false,
@@ -28,9 +31,18 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onBackClick,
   isLoading = false,
 }) => {
-  // Display name: group name or truncated inbox ID
-  const displayName = isDm
-    ? truncateAddress(peerInboxId ?? '', 6, 4)
+  // Use peerAddress for display, fall back to peerInboxId
+  const addressForDisplay = peerAddress ?? peerInboxId;
+
+  // Fetch Ethos profile for the peer address
+  const { data: ethosProfile } = useEthosScore(isDm ? addressForDisplay : undefined);
+
+  // Get Ethos username if available
+  const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
+
+  // Primary display: username (with @) if available, otherwise address; for groups use group name
+  const primaryName = isDm
+    ? (ethosUsername ? `@${ethosUsername}` : (addressForDisplay ?? 'Unknown'))
     : groupName ?? 'Unknown Group';
 
   return (
@@ -50,22 +62,20 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <Skeleton variant="circular" width={40} height={40} />
           <div className={styles.info}>
             <Skeleton variant="text" width={120} height={18} />
-            <Skeleton variant="text" width={200} height={14} className={styles.addressSkeleton} />
+            <Skeleton variant="text" width={80} height={14} className={styles.usernameSkeleton} />
           </div>
         </>
       ) : (
         <>
           <Avatar
-            address={peerInboxId}
+            address={addressForDisplay}
             size="md"
             className={styles.avatar}
           />
           <div className={styles.info}>
-            <h1 className={styles.name}>{displayName}</h1>
-            {peerInboxId && (
-              <p className={styles.address} title={peerInboxId}>
-                {peerInboxId}
-              </p>
+            <h1 className={styles.name}>{primaryName}</h1>
+            {isDm && addressForDisplay && (
+              <p className={styles.address} title={addressForDisplay}>{addressForDisplay}</p>
             )}
           </div>
         </>

@@ -1,9 +1,11 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { useWalletClient, useAccount } from 'wagmi';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
-import { createXmtpClient } from '@/services/xmtp';
+import { createXmtpClient, createXmtpSigner } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
+import { isOnboardingComplete } from '@/lib/onboarding/storage';
 
 const XmtpContext = createContext<XmtpContextValue | null>(null);
 
@@ -25,6 +27,10 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
   const [isInitializing, setIsInitializing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const clientRef = useRef<Client | null>(null);
+
+  // Wallet state for auto-initialization
+  const { data: walletClient } = useWalletClient();
+  const { address, isConnected } = useAccount();
 
   const initialize = useCallback(async (signer: EOASigner) => {
     // Prevent multiple simultaneous initialization attempts
@@ -64,6 +70,26 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
       setError(null);
     }
   }, [client]);
+
+  // Auto-initialize XMTP when returning after page refresh
+  // This handles the case where onboarding is complete (localStorage) and wallet is connected,
+  // but XMTP client was lost due to page refresh (React state reset)
+  useEffect(() => {
+    // Skip if already initialized or currently initializing
+    if (isInitialized || isInitializing) return;
+
+    // Skip if wallet not ready
+    if (!isConnected || !walletClient || !address) return;
+
+    // Skip if onboarding not complete
+    if (!isOnboardingComplete()) return;
+
+    // Auto-initialize
+    const signer = createXmtpSigner(walletClient, address);
+    initialize(signer).catch((err) => {
+      console.error('XMTP auto-initialization failed:', err);
+    });
+  }, [isConnected, walletClient, address, isInitialized, isInitializing, initialize]);
 
   // Keep ref in sync with client state
   useEffect(() => {

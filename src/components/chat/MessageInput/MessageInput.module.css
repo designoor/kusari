@@ -5,6 +5,7 @@
   padding: var(--spacing-md);
   background-color: var(--color-bg-primary);
   border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .inputWrapper {

@@ -10,7 +10,8 @@ export type { Dm, Group };
  */
 export interface ConversationPreview {
   id: string;
-  peerInboxId?: string; // Only for DMs
+  peerInboxId?: string; // Only for DMs (XMTP internal identifier)
+  peerAddress?: string; // Only for DMs (Ethereum address for display)
   groupName?: string; // Only for Groups
   lastMessage: {
     content: string;

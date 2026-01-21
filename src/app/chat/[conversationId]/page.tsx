@@ -13,6 +13,7 @@ import { useMessages } from '@/hooks/useMessages';
 import { useAllowedConversations } from '@/hooks/useConversations';
 import { useXmtpContext } from '@/providers/XmtpProvider';
 import { getConversationById, isDm } from '@/services/xmtp/conversations';
+import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import type { Conversation } from '@/types/conversation';
 import styles from './conversation.module.css';
@@ -29,6 +30,7 @@ export default function ConversationPage() {
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [peerInboxId, setPeerInboxId] = useState<string | undefined>();
+  const [peerAddress, setPeerAddress] = useState<string | undefined>();
   const [isLoadingConversation, setIsLoadingConversation] = useState(true);
   const [loadError, setLoadError] = useState<Error | null>(null);
 
@@ -55,6 +57,11 @@ export default function ConversationPage() {
         if (isDm(conv)) {
           const peerId = await conv.peerInboxId();
           setPeerInboxId(peerId);
+          // Resolve inbox ID to Ethereum address for display
+          if (peerId) {
+            const address = await getAddressForInboxId(client, peerId);
+            setPeerAddress(address ?? undefined);
+          }
         }
       } else {
         setConversation(null);
@@ -144,6 +151,7 @@ export default function ConversationPage() {
       <div className={styles.conversationPanel}>
         <ChatHeader
           peerInboxId={peerInboxId}
+          peerAddress={peerAddress}
           groupName={!conversationIsDm ? (conversation.name ?? undefined) : undefined}
           isDm={conversationIsDm}
           showBackButton={isMobile}

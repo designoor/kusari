@@ -6,6 +6,7 @@
   background-color: var(--color-bg-primary);
   border-bottom: 1px solid var(--color-border);
   min-height: var(--header-height);
+  flex-shrink: 0;
 }
 
 .backButton {
@@ -52,33 +53,16 @@
 
 .address {
   font-size: var(--font-size-sm);
-  color: var(--color-content-tertiary);
+  color: var(--color-content-secondary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: none;
 }
 
-/* Mobile: show back button and hide full address */
+/* Mobile: show back button */
 @media (max-width: 767px) {
   .backButton {
     display: flex;
-  }
-}
-
-/* Hide address skeleton on mobile */
-.addressSkeleton {
-  display: none;
-}
-
-/* Desktop: show full address on hover or when space allows */
-@media (min-width: 768px) {
-  .address {
-    display: block;
-  }
-
-  .addressSkeleton {
-    display: block;
   }
 }
