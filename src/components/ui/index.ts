@@ -6,6 +6,8 @@ export * from './Avatar';
 export * from './Badge';
 export * from './Skeleton';
 export * from './EmptyState';
+export * from './ErrorState';
 export * from './Modal';
 export * from './Logo';
 export * from './DropdownMenu';
+export * from './Toast';

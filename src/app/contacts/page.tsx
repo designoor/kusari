@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ConsentState } from '@xmtp/browser-sdk';
 import {
   ContactSearch,
   ContactSectionLink,
   ContactList,
 } from '@/components/contacts';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
 import { useConversations, useMessageRequests } from '@/hooks/useConversations';
 import styles from './contacts.module.css';
@@ -15,10 +16,14 @@ export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Get all conversations to filter by consent state
-  const { filteredPreviews: allPreviews, isLoading } = useConversations();
+  const { filteredPreviews: allPreviews, isLoading, error, refresh } = useConversations();
 
   // Get message requests count
   const { filteredPreviews: requestPreviews } = useMessageRequests();
+
+  const handleRetry = useCallback(() => {
+    void refresh();
+  }, [refresh]);
 
   // Filter for allowed contacts
   const allowedContacts = useMemo(
@@ -47,6 +52,21 @@ export default function ContactsPage() {
       contact.peerInboxId?.toLowerCase().includes(query)
     );
   }, [allowedContacts, searchQuery]);
+
+  // Error state
+  if (error && !isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorContainer}>
+          <ErrorState
+            title="Failed to load contacts"
+            error={error}
+            onRetry={handleRetry}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

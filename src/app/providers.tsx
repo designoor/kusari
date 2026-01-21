@@ -2,6 +2,7 @@
 
 import { WalletProvider } from '@/providers/WalletProvider';
 import { XmtpProvider } from '@/providers/XmtpProvider';
+import { ToastProvider } from '@/providers/ToastProvider';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -10,7 +11,9 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <WalletProvider>
-      <XmtpProvider>{children}</XmtpProvider>
+      <XmtpProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </XmtpProvider>
     </WalletProvider>
   );
 }
