@@ -1,0 +1,174 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+/* Size variants */
+.badge.sm {
+  padding: 2px 8px;
+  font-size: 10px;
+  height: 18px;
+}
+
+.badge.md {
+  padding: 4px 10px;
+  font-size: var(--font-size-sm);
+  height: 24px;
+}
+
+.badge.lg {
+  padding: 6px 14px;
+  font-size: var(--font-size-md);
+  height: 30px;
+}
+
+/* Display variant: compact has less padding */
+.badge.compact {
+  padding-left: 6px;
+}
+
+.badge.compact.sm {
+  padding-left: 4px;
+}
+
+/* Score only variant - minimal padding */
+.badge.score-only {
+  padding: 2px 6px;
+}
+
+.badge.score-only.md {
+  padding: 3px 8px;
+}
+
+.badge.score-only.lg {
+  padding: 4px 10px;
+}
+
+/* Individual level colors matching Ethos score gauge */
+
+/* Untrusted - Red */
+.badge.untrusted {
+  background-color: rgba(201, 74, 74, 0.15);
+  color: #C94A4A;
+}
+
+/* Questionable - Orange/Gold */
+.badge.questionable {
+  background-color: rgba(212, 168, 75, 0.15);
+  color: #D4A84B;
+}
+
+/* Neutral - Tan/Beige */
+.badge.neutral {
+  background-color: rgba(168, 159, 139, 0.15);
+  color: #A89F8B;
+}
+
+/* Known - Olive Green */
+.badge.known {
+  background-color: rgba(107, 123, 74, 0.15);
+  color: #6B7B4A;
+}
+
+/* Established - Light Blue */
+.badge.established {
+  background-color: rgba(91, 142, 201, 0.15);
+  color: #5B8EC9;
+}
+
+/* Reputable - Blue */
+.badge.reputable {
+  background-color: rgba(74, 123, 184, 0.15);
+  color: #4A7BB8;
+}
+
+/* Exemplary - Dark Blue */
+.badge.exemplary {
+  background-color: rgba(61, 90, 153, 0.15);
+  color: #3D5A99;
+}
+
+/* Distinguished - Purple */
+.badge.distinguished {
+  background-color: rgba(107, 91, 149, 0.15);
+  color: #6B5B95;
+}
+
+/* Revered - Violet */
+.badge.revered {
+  background-color: rgba(139, 107, 155, 0.15);
+  color: #8B6B9B;
+}
+
+/* Renowned - Magenta/Pink */
+.badge.renowned {
+  background-color: rgba(155, 77, 122, 0.15);
+  color: #9B4D7A;
+}
+
+/* Unverified badge */
+.badge.unverified {
+  background-color: rgba(107, 107, 107, 0.1);
+  color: var(--color-content-tertiary);
+  font-style: italic;
+}
+
+/* Indicator dot for compact variant */
+.indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+.badge.sm .indicator {
+  width: 5px;
+  height: 5px;
+}
+
+.badge.lg .indicator {
+  width: 8px;
+  height: 8px;
+}
+
+/* Level text */
+.level {
+  font-weight: var(--font-weight-semibold);
+  text-transform: capitalize;
+}
+
+/* Separator */
+.separator {
+  opacity: 0.5;
+}
+
+/* Score value */
+.score {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Clickable state */
+.badge.clickable {
+  cursor: pointer;
+}
+
+.badge.clickable:hover {
+  opacity: 0.85;
+}
+
+.badge.clickable:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.badge.clickable:active {
+  opacity: 0.7;
+}
