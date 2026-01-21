@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Avatar, Button } from '@/components/ui';
+import { Avatar, Button, PageHeader } from '@/components/ui';
 import { useWallet } from '@/hooks/useWallet';
 import { useToast } from '@/providers/ToastProvider';
 import { truncateAddress } from '@/lib';
@@ -51,9 +51,7 @@ export default function SettingsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Settings</h1>
-      </div>
+      <PageHeader title="Settings" size="lg" />
 
       <div className={styles.sections}>
         {/* Profile Section */}

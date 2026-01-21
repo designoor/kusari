@@ -5,9 +5,9 @@
 
 :root {
   /* Typography Scale */
-  --font-size-sm: 12px;
-  --font-size-md: 14px;
-  --font-size-lg: 16px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
   --font-size-xl: 20px;
 
   --font-weight-regular: 400;
@@ -94,4 +94,5 @@
   --nav-width-desktop: 72px;
   --nav-height-mobile: 64px;
   --header-height: 64px;
+  --header-height-lg: 72px;
 }

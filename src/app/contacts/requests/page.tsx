@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback } from 'react';
-import Link from 'next/link';
 import { ContactList } from '@/components/contacts';
-import { ChevronLeftIcon } from '@/components/ui/Icon/icons';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { useMessageRequests } from '@/hooks/useConversations';
 import styles from '../subpage.module.css';
 
@@ -16,16 +15,12 @@ export default function RequestsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Link href="/contacts" className={styles.backLink}>
-          <ChevronLeftIcon size={20} />
-          <span>Contacts</span>
-        </Link>
-        <h1 className={styles.title}>New Requests</h1>
-        <p className={styles.description}>
-          Review message requests before accepting. Check reputation to make informed decisions.
-        </p>
-      </div>
+      <PageHeader
+        title="New Requests"
+        subtitle="Review message requests before accepting. Check reputation to make informed decisions."
+        backButton={{ href: '/contacts' }}
+        size="lg"
+      />
 
       <div className={styles.content}>
         <ContactList

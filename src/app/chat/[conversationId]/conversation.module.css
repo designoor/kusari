@@ -30,6 +30,20 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  position: relative;
+}
+
+/* Messages area - container for MessageList that scrolls behind overlay header */
+.messagesArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Add top padding to MessageList content so it scrolls behind the header */
+.messagesArea > div {
+  padding-top: var(--header-height-lg);
 }
 
 /* Skeleton loading states */

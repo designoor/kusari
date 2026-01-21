@@ -7,7 +7,7 @@ import {
   ContactSectionLink,
   ContactList,
 } from '@/components/contacts';
-import { Button } from '@/components/ui/Button';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { Icon } from '@/components/ui/Icon';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
@@ -75,18 +75,17 @@ export default function ContactsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerTop}>
-          <h1 className={styles.title}>Contacts</h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={openModal}
-            leftIcon={<Icon name="plus" size="sm" />}
-          >
-            New Chat
-          </Button>
-        </div>
+      <PageHeader
+        title="Contacts"
+        actions={[{
+          label: 'New Chat',
+          onClick: openModal,
+          variant: 'ghost',
+          icon: <Icon name="plus" size="sm" />
+        }]}
+        size="lg"
+      />
+      <div className={styles.searchContainer}>
         <ContactSearch
           value={searchQuery}
           onChange={setSearchQuery}

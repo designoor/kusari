@@ -3,10 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import { ConversationItem } from '../ConversationItem';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ConversationList.module.css';
@@ -32,7 +30,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   emptyStateAction,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { openModal } = useNewChatModal();
 
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
@@ -107,17 +104,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Messages</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={openModal}
-          leftIcon={<Icon name="plus" size="sm" />}
-        >
-          New
-        </Button>
-      </div>
       <div className={styles.searchWrapper}>
         <Input
           variant="search"

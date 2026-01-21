@@ -6,6 +6,7 @@ export * from './Avatar';
 export * from './Badge';
 export * from './Skeleton';
 export * from './PageSkeleton';
+export * from './PageHeader';
 export * from './EmptyState';
 export * from './ErrorState';
 export * from './Modal';

@@ -4,12 +4,12 @@ import { useCallback, useMemo } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { ContactDetail } from '@/components/contacts';
-import { Button } from '@/components/ui/Button';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { ChevronLeftIcon, ContactsIcon } from '@/components/ui/Icon/icons';
+import { ContactsIcon } from '@/components/ui/Icon/icons';
 import { useConversations } from '@/hooks/useConversations';
-import { identifiersMatch } from '@/lib';
+import { identifiersMatch, truncateAddress } from '@/lib';
 import styles from './contact.module.css';
 
 export default function ContactDetailPage() {
@@ -47,16 +47,6 @@ export default function ContactDetailPage() {
     return '/contacts';
   };
 
-  const getBackLabel = () => {
-    if (consentState === ConsentState.Unknown) {
-      return 'Requests';
-    }
-    if (consentState === ConsentState.Denied) {
-      return 'Denied';
-    }
-    return 'Contacts';
-  };
-
   // Handle consent change - redirect appropriately
   const handleConsentChange = useCallback(
     (newState: ConsentState) => {
@@ -76,11 +66,11 @@ export default function ContactDetailPage() {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <div className={styles.backLink}>
-            <Skeleton variant="text" width={80} height={16} />
-          </div>
-        </div>
+        <PageHeader
+          title={truncateAddress(address)}
+          backButton={{ href: '/contacts' }}
+          isLoading
+        />
         <div className={styles.content}>
           <div className={styles.loadingSkeleton}>
             <Skeleton variant="circular" width={80} height={80} />
@@ -97,16 +87,10 @@ export default function ContactDetailPage() {
   if (!contactPreview?.peerInboxId) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <Button
-            variant="ghost"
-            size="sm"
-            leftIcon={<ChevronLeftIcon size={20} />}
-            onClick={() => router.push('/contacts')}
-          >
-            Contacts
-          </Button>
-        </div>
+        <PageHeader
+          title="Contact"
+          backButton={{ href: '/contacts' }}
+        />
         <div className={styles.content}>
           <EmptyState
             icon={<ContactsIcon size={48} />}
@@ -124,16 +108,10 @@ export default function ContactDetailPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Button
-          variant="ghost"
-          size="sm"
-          leftIcon={<ChevronLeftIcon size={20} />}
-          onClick={() => router.push(getBackLink())}
-        >
-          {getBackLabel()}
-        </Button>
-      </div>
+      <PageHeader
+        title={truncateAddress(address)}
+        backButton={{ href: getBackLink() }}
+      />
       <div className={styles.content}>
         <ContactDetail
           address={address}
