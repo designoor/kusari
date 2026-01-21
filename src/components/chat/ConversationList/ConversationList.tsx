@@ -3,8 +3,10 @@
 import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Icon } from '@/components/ui/Icon';
+import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import { ConversationItem } from '../ConversationItem';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ConversationList.module.css';
@@ -30,6 +32,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   emptyStateAction,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { openModal } = useNewChatModal();
 
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
@@ -46,19 +49,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     });
   }, [conversations, searchQuery]);
 
-  // Loading skeleton
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.searchWrapper}>
-          <Input
-            variant="search"
-            placeholder="Search conversations..."
-            disabled
-            fullWidth
-            leftElement={<Icon name="search" size="sm" />}
-          />
-        </div>
+  // Render content based on state
+  const renderContent = () => {
+    // Loading skeleton
+    if (isLoading) {
+      return (
         <div className={styles.list} role="list">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className={styles.skeletonItem}>
@@ -70,23 +65,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // Empty state
-  if (conversations.length === 0) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.searchWrapper}>
-          <Input
-            variant="search"
-            placeholder="Search conversations..."
-            disabled
-            fullWidth
-            leftElement={<Icon name="search" size="sm" />}
-          />
-        </div>
+    // Empty state
+    if (conversations.length === 0) {
+      return (
         <div className={styles.emptyContainer}>
           <EmptyState
             icon={<Icon name="chat" size="xl" />}
@@ -95,34 +79,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             action={emptyStateAction}
           />
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.searchWrapper}>
-        <Input
-          variant="search"
-          placeholder="Search conversations..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          fullWidth
-          leftElement={<Icon name="search" size="sm" />}
-          rightElement={
-            searchQuery && (
-              <button
-                type="button"
-                className={styles.clearButton}
-                onClick={() => setSearchQuery('')}
-                aria-label="Clear search"
-              >
-                <Icon name="x" size="sm" />
-              </button>
-            )
-          }
-        />
-      </div>
+    // Conversation list
+    return (
       <div className={styles.list} role="list">
         {filteredConversations.length > 0 ? (
           filteredConversations.map((conversation) => (
@@ -138,6 +99,49 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           </div>
         )}
       </div>
+    );
+  };
+
+  // Disable search when loading or empty
+  const isSearchDisabled = isLoading || conversations.length === 0;
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Messages</h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={openModal}
+          leftIcon={<Icon name="plus" size="sm" />}
+        >
+          New
+        </Button>
+      </div>
+      <div className={styles.searchWrapper}>
+        <Input
+          variant="search"
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          disabled={isSearchDisabled}
+          fullWidth
+          leftElement={<Icon name="search" size="sm" />}
+          rightElement={
+            searchQuery && !isSearchDisabled && (
+              <button
+                type="button"
+                className={styles.clearButton}
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+              >
+                <Icon name="x" size="sm" />
+              </button>
+            )
+          }
+        />
+      </div>
+      {renderContent()}
     </div>
   );
 };
