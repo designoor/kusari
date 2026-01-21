@@ -42,3 +42,11 @@
   letter-spacing: 0.5px;
   margin: 0;
 }
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: var(--spacing-xl);
+}

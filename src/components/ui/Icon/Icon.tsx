@@ -13,6 +13,9 @@ import {
   ShieldIcon,
   VerifiedIcon,
   WalletIcon,
+  AlertTriangleIcon,
+  InfoIcon,
+  RefreshIcon,
 } from './icons';
 import styles from './Icon.module.css';
 
@@ -29,7 +32,10 @@ export type IconName =
   | 'message'
   | 'shield'
   | 'verified'
-  | 'wallet';
+  | 'wallet'
+  | 'alertTriangle'
+  | 'info'
+  | 'refresh';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -62,6 +68,9 @@ const ICON_MAP = {
   shield: ShieldIcon,
   verified: VerifiedIcon,
   wallet: WalletIcon,
+  alertTriangle: AlertTriangleIcon,
+  info: InfoIcon,
+  refresh: RefreshIcon,
 } as const;
 
 export const Icon: React.FC<IconProps> = ({
