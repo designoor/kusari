@@ -147,3 +147,23 @@ export function isEnsName(value: string): boolean {
   // Excludes whitespace, dots (label separators), and control characters
   return /^(?:[^\s.\x00-\x1f\x7f-\x9f]+\.)+eth$/i.test(value);
 }
+
+/**
+ * Compare two identifiers (addresses, inbox IDs, or ENS names) for equality
+ * - For valid hex addresses: uses checksumless comparison
+ * - For other identifiers: case-insensitive string comparison
+ * @param a - First identifier
+ * @param b - Second identifier
+ * @returns True if identifiers match
+ */
+export function identifiersMatch(a: string, b: string): boolean {
+  if (!a || !b) return false;
+
+  // If both are valid hex addresses, use proper address comparison
+  if (isValidAddress(a) && isValidAddress(b)) {
+    return addressesEqual(a, b);
+  }
+
+  // Otherwise, fall back to case-insensitive string comparison
+  return a.toLowerCase() === b.toLowerCase();
+}

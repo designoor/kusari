@@ -1,0 +1,37 @@
+.container {
+  width: 100%;
+}
+
+.searchIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-content-tertiary);
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-content-tertiary);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.clearButton:hover {
+  color: var(--color-content-secondary);
+  background-color: var(--color-bg-secondary);
+}
+
+.clearButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.clearIcon {
+  width: 14px;
+  height: 14px;
+}
