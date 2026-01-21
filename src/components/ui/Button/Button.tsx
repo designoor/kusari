@@ -15,7 +15,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonInner = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       variant = 'primary',
@@ -65,4 +65,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
+ButtonInner.displayName = 'Button';
+
+export const Button = React.memo(ButtonInner);
 Button.displayName = 'Button';

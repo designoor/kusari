@@ -67,9 +67,18 @@
   }
 }
 
+/* Hide address skeleton on mobile */
+.addressSkeleton {
+  display: none;
+}
+
 /* Desktop: show full address on hover or when space allows */
 @media (min-width: 768px) {
   .address {
+    display: block;
+  }
+
+  .addressSkeleton {
     display: block;
   }
 }

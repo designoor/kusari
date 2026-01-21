@@ -9,6 +9,10 @@ import { formatMessageSeparator } from '@/lib';
 import type { MessageGroup } from '@/types/message';
 import styles from './MessageList.module.css';
 
+// TODO: For conversations with 500+ messages, consider implementing virtualization
+// using react-virtuoso (handles dynamic heights better than react-window)
+// See: https://virtuoso.dev/
+
 export interface MessageListProps {
   messageGroups: MessageGroup[];
   isLoading?: boolean;

@@ -85,13 +85,11 @@ export default function ConversationPage() {
     if (isLoadingConversation) {
       return (
         <div className={styles.conversationPanel}>
-          <div className={styles.headerSkeleton}>
-            <Skeleton variant="circular" width={40} height={40} />
-            <div className={styles.headerSkeletonContent}>
-              <Skeleton variant="text" width={120} height={16} />
-              <Skeleton variant="text" width={200} height={14} />
-            </div>
-          </div>
+          <ChatHeader
+            showBackButton={isMobile}
+            backHref="/chat"
+            isLoading
+          />
           <div className={styles.messagesSkeleton}>
             {Array.from({ length: 3 }).map((_, i) => (
               <div

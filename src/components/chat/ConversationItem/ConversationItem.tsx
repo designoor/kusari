@@ -13,7 +13,7 @@ export interface ConversationItemProps {
   isActive?: boolean;
 }
 
-export const ConversationItem: React.FC<ConversationItemProps> = ({
+export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   conversation,
   isActive = false,
 }) => {
@@ -73,4 +73,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
       {content}
     </Link>
   );
-};
+});
+
+ConversationItem.displayName = 'ConversationItem';

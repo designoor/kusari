@@ -73,7 +73,7 @@ const ICON_MAP = {
   refresh: RefreshIcon,
 } as const;
 
-export const Icon: React.FC<IconProps> = ({
+export const Icon: React.FC<IconProps> = React.memo(({
   name,
   size = 'md',
   className,
@@ -95,4 +95,6 @@ export const Icon: React.FC<IconProps> = ({
       role={ariaLabel ? 'img' : undefined}
     />
   );
-};
+});
+
+Icon.displayName = 'Icon';

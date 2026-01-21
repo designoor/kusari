@@ -13,7 +13,7 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   fullWidth?: boolean;
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const InputInner = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
       variant = 'default',
@@ -78,4 +78,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
+InputInner.displayName = 'Input';
+
+export const Input = React.memo(InputInner);
 Input.displayName = 'Input';

@@ -289,7 +289,7 @@ const ProfileContent: React.FC<{
  * />
  * ```
  */
-export const EthosReputationPanel: React.FC<EthosReputationPanelProps> = ({
+export const EthosReputationPanel: React.FC<EthosReputationPanelProps> = React.memo(({
   address,
   showUserInfo = true,
   showVouches = true,
@@ -325,4 +325,6 @@ export const EthosReputationPanel: React.FC<EthosReputationPanelProps> = ({
       />
     </div>
   );
-};
+});
+
+EthosReputationPanel.displayName = 'EthosReputationPanel';

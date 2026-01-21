@@ -42,7 +42,7 @@ export interface ContactDetailProps {
  * - Message preview (for requests)
  * - Action buttons
  */
-export const ContactDetail: React.FC<ContactDetailProps> = ({
+export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   address,
   displayName,
   consentState,
@@ -157,4 +157,6 @@ export const ContactDetail: React.FC<ContactDetailProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ContactDetail.displayName = 'ContactDetail';
