@@ -13,6 +13,37 @@ Kusari is a decentralized messaging application built on XMTP protocol, enabling
 
 ---
 
+## Implementation Status
+
+> **Current State: MVP Complete** - All core features for 1:1 text messaging are implemented and production-ready.
+
+### Completed Features
+
+- [x] Full onboarding flow (welcome, wallet connect, XMTP sign)
+- [x] Real-time messaging with XMTP
+- [x] Conversation list with previews and timestamps
+- [x] Message sending with optimistic UI
+- [x] Consent management (allow/deny/unknown)
+- [x] Contacts page with requests and denied sections
+- [x] Ethos reputation integration with batch fetching
+- [x] Responsive design (mobile + desktop)
+- [x] Settings page
+- [x] Toast notifications
+- [x] Loading skeletons and error states
+- [x] Message grouping by sender and time
+
+### Future Enhancements
+
+- [ ] Message virtualization (for very long conversations)
+- [ ] ENS name resolution and display
+- [ ] Group chat UI
+- [ ] Rich content types (attachments, reactions)
+- [ ] Payment-gated messaging
+- [ ] Push notifications
+- [ ] Analytics
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Purpose |
@@ -140,113 +171,133 @@ kusari/
 │   │   │   └── [conversationId]/
 │   │   │       └── page.tsx      # Individual conversation
 │   │   ├── contacts/
-│   │   │   ├── page.tsx          # Contacts list view
+│   │   │   ├── page.tsx          # Contacts main page
 │   │   │   ├── requests/
-│   │   │   │   └── page.tsx      # New message requests list
+│   │   │   │   └── page.tsx      # New message requests
 │   │   │   ├── denied/
-│   │   │   │   └── page.tsx      # Denied contacts list
+│   │   │   │   └── page.tsx      # Denied contacts
 │   │   │   └── [address]/
 │   │   │       └── page.tsx      # Contact detail view
-│   │   ├── settings/
-│   │   │   └── page.tsx          # Settings page
-│   │   └── api/                   # API routes (if needed)
+│   │   └── settings/
+│   │       └── page.tsx          # Settings page
 │   │
 │   ├── components/
 │   │   ├── ui/                    # Reusable UI primitives
-│   │   │   ├── Button/
-│   │   │   │   ├── Button.tsx
-│   │   │   │   ├── Button.module.css
-│   │   │   │   └── index.ts
-│   │   │   ├── Input/
-│   │   │   ├── Icon/
-│   │   │   ├── Avatar/
-│   │   │   ├── Badge/
-│   │   │   ├── Tabs/
-│   │   │   ├── Modal/
-│   │   │   └── ...
+│   │   │   ├── Avatar.tsx         # Avatar with fallback initials
+│   │   │   ├── Badge.tsx          # Count/dot badges
+│   │   │   ├── Button.tsx         # Primary/secondary/ghost variants
+│   │   │   ├── DropdownMenu.tsx   # Dropdown menu component
+│   │   │   ├── EmptyState.tsx     # Empty list states
+│   │   │   ├── ErrorState.tsx     # Error display with retry
+│   │   │   ├── Icon.tsx           # Icon system (chat, contacts, etc.)
+│   │   │   ├── Input.tsx          # Text/search input with states
+│   │   │   ├── Logo.tsx           # App logo
+│   │   │   ├── Modal.tsx          # Modal with focus trap
+│   │   │   ├── PageSkeleton.tsx   # Page-level loading skeleton
+│   │   │   ├── Skeleton.tsx       # Loading placeholders
+│   │   │   ├── Toast.tsx          # Toast notifications
+│   │   │   └── index.ts
 │   │   │
 │   │   ├── layout/                # Layout components
-│   │   │   ├── MainNav/           # Primary navigation (vertical/horizontal)
-│   │   │   ├── AppShell/
-│   │   │   └── ...
+│   │   │   ├── AppShell.tsx       # App shell with responsive nav
+│   │   │   ├── AuthGuard.tsx      # Authentication guard
+│   │   │   ├── MainNav.tsx        # Primary navigation
+│   │   │   ├── NavItem.tsx        # Navigation item with badge
+│   │   │   └── index.ts
 │   │   │
 │   │   ├── chat/                  # Chat-specific components
-│   │   │   ├── ConversationList/
-│   │   │   ├── ConversationItem/
-│   │   │   ├── MessageList/
-│   │   │   ├── MessageBubble/
-│   │   │   ├── MessageInput/
-│   │   │   └── ...
+│   │   │   ├── ChatHeader.tsx     # Conversation header
+│   │   │   ├── ConversationItem.tsx
+│   │   │   ├── ConversationList.tsx
+│   │   │   ├── MessageBubble.tsx
+│   │   │   ├── MessageInput.tsx
+│   │   │   ├── MessageList.tsx
+│   │   │   └── index.ts
 │   │   │
 │   │   ├── contacts/              # Contacts-specific components
-│   │   │   ├── ContactSearch/
-│   │   │   ├── ContactSectionLink/
-│   │   │   ├── ContactList/
-│   │   │   ├── ContactItem/
-│   │   │   ├── ContactDetail/
-│   │   │   ├── ContactActions/
-│   │   │   └── ...
+│   │   │   ├── ContactActions.tsx # Accept/Decline/Block buttons
+│   │   │   ├── ContactDetail.tsx
+│   │   │   ├── ContactItem.tsx
+│   │   │   ├── ContactList.tsx
+│   │   │   ├── ContactSearch.tsx
+│   │   │   ├── ContactSectionLink.tsx
+│   │   │   └── index.ts
 │   │   │
 │   │   ├── onboarding/            # Onboarding flow components
-│   │   │   ├── OnboardingFlow/
-│   │   │   ├── WelcomeStep/
-│   │   │   ├── ConnectWalletStep/
-│   │   │   ├── SignMessageStep/
-│   │   │   └── ...
+│   │   │   ├── ConnectWalletStep.tsx
+│   │   │   ├── OnboardingFlow.tsx
+│   │   │   ├── OnboardingSkeleton.tsx
+│   │   │   ├── SignMessageStep.tsx
+│   │   │   ├── StepIndicator.tsx
+│   │   │   ├── WelcomeStep.tsx
+│   │   │   └── index.ts
 │   │   │
 │   │   └── reputation/            # Ethos integration components
-│   │       ├── EthosScore/
-│   │       ├── ReputationBadge/
-│   │       └── ...
+│   │       ├── EthosReputationPanel.tsx  # Full reputation display
+│   │       ├── EthosScore.tsx     # Score badge wrapper
+│   │       ├── ReputationBadge.tsx
+│   │       └── index.ts
 │   │
 │   ├── hooks/                     # Custom React hooks
-│   │   ├── useXmtp.ts             # XMTP client management
-│   │   ├── useConversations.ts    # Conversation list & streaming
-│   │   ├── useMessages.ts         # Message list & streaming
-│   │   ├── useConsent.ts          # Consent state management
-│   │   ├── useContacts.ts         # Contacts list (grouped by consent)
-│   │   ├── useEthosScore.ts       # Ethos API integration
-│   │   ├── useWallet.ts           # Wallet connection state
+│   │   ├── useConsent.ts          # Consent ops + streaming
+│   │   ├── useConversations.ts    # Conversations + presets
+│   │   ├── useEthosScore.ts       # Single address Ethos data
+│   │   ├── useEthosScores.ts      # Batch Ethos data
 │   │   ├── useMediaQuery.ts       # Responsive breakpoints
-│   │   └── useNewRequestsCount.ts # Badge count for MainNav
+│   │   ├── useMessages.ts         # Messages + optimistic UI
+│   │   ├── useNavItems.tsx        # Navigation items builder
+│   │   ├── useNewRequestsCount.ts # Badge count for nav
+│   │   ├── useOnboardingState.ts  # Onboarding flow state
+│   │   ├── useWallet.ts           # Wallet connection
+│   │   ├── useXmtp.ts             # XMTP client access
+│   │   └── index.ts
 │   │
 │   ├── services/                  # External service integrations
 │   │   ├── xmtp/
-│   │   │   ├── client.ts          # XMTP client creation
+│   │   │   ├── client.ts          # Client creation
+│   │   │   ├── consent.ts         # Consent operations
 │   │   │   ├── conversations.ts   # Conversation operations
 │   │   │   ├── messages.ts        # Message operations
-│   │   │   └── consent.ts         # Consent operations
+│   │   │   ├── signer.ts          # XMTP signer creation
+│   │   │   ├── types.ts           # XMTP type definitions
+│   │   │   └── index.ts
 │   │   │
 │   │   └── ethos/
-│   │       ├── api.ts             # Ethos API client
-│   │       └── types.ts           # Ethos response types
+│   │       ├── api.ts             # Ethos API with caching
+│   │       ├── types.ts           # Zod schemas for API
+│   │       └── index.ts
 │   │
 │   ├── providers/                 # React context providers
-│   │   ├── WalletProvider.tsx     # wagmi + WalletConnect setup
+│   │   ├── ToastProvider.tsx      # Toast notifications
+│   │   ├── WalletProvider.tsx     # wagmi + AppKit setup
 │   │   ├── XmtpProvider.tsx       # XMTP client context
-│   │   └── ThemeProvider.tsx      # Theme/design tokens
+│   │   └── index.ts
 │   │
 │   ├── types/                     # Shared TypeScript types
+│   │   ├── consent.ts
 │   │   ├── conversation.ts
 │   │   ├── message.ts
 │   │   ├── user.ts
-│   │   └── consent.ts
+│   │   └── index.ts
 │   │
 │   ├── lib/                       # Utility functions
-│   │   ├── address.ts             # Address formatting, ENS
+│   │   ├── address.ts             # Address formatting, colors
 │   │   ├── time.ts                # Date/time formatting
-│   │   └── validation.ts          # Zod schemas
+│   │   ├── validation.ts          # Zod schemas
+│   │   ├── wallet/
+│   │   │   └── config.ts          # Wallet configuration
+│   │   └── onboarding/
+│   │       └── storage.ts         # Onboarding localStorage
 │   │
 │   └── styles/                    # Global styles
-│       ├── globals.css            # CSS reset, variables
-│       └── tokens.css             # Design token definitions
+│       └── globals.css            # CSS reset, variables
 │
 ├── public/
-│   └── icons/                     # SVG icons
+│   └── ...
 │
 ├── .env.local                     # Environment variables
 ├── .env.example                   # Example env file
-├── next.config.js
+├── next.config.ts
 ├── tsconfig.json
 ├── package.json
 └── CLAUDE.md
@@ -514,91 +565,51 @@ Base URL: `https://api.ethos.network/api/v2`
 
 Required header: `X-Ethos-Client: kusari@1.0.0`
 
-### Fetching Reputation Score
+### Implementation Details
+
+The Ethos integration (`src/services/ethos/api.ts`) includes:
+
+**API Methods:**
+- `getEthosProfile(address)` - Fetch single profile with caching
+- `getEthosProfiles(addresses)` - Batch fetch multiple profiles (reduces N+1 to 2 API calls)
+
+**Caching:**
+- 5-minute TTL cache for all profiles
+- Throttled cache cleanup (every 60 seconds)
+- Batch fetching for performance
+
+**Score Levels:**
+| Level | Score Range | Description |
+|-------|-------------|-------------|
+| Untrusted | < 800 | Low reputation |
+| Neutral | 800-1199 | Average reputation |
+| Reputable | 1200-1599 | Good reputation |
+| Highly Reputable | 1600-1999 | Very good reputation |
+| Exemplary | 2000+ | Excellent reputation |
+
+### Hooks
 
 ```typescript
-// src/services/ethos/api.ts
-const ETHOS_BASE_URL = 'https://api.ethos.network/api/v2';
+// Single address
+const { data, isLoading, error } = useEthosScore(address);
 
-export interface EthosProfile {
-  id: number;
-  profileId: number | null;
-  displayName: string;
-  username: string | null;
-  avatarUrl: string;
-  description: string | null;
-  score: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'MERGED';
-  stats: {
-    review: {
-      received: {
-        negative: number;
-        neutral: number;
-        positive: number;
-      };
-    };
-    vouch: {
-      given: { amountWeiTotal: bigint; count: number };
-      received: { amountWeiTotal: bigint; count: number };
-    };
-  };
-  links: {
-    profile: string;
-    scoreBreakdown: string;
-  };
-}
-
-export async function getEthosProfile(
-  address: string
-): Promise<EthosProfile | null> {
-  const userkey = `address:${address}`;
-  
-  try {
-    const response = await fetch(
-      `${ETHOS_BASE_URL}/profiles/${encodeURIComponent(userkey)}`,
-      {
-        headers: {
-          'X-Ethos-Client': 'kusari@1.0.0',
-        },
-      }
-    );
-    
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(`Ethos API error: ${response.status}`);
-    }
-    
-    return response.json();
-  } catch (error) {
-    console.error('Failed to fetch Ethos profile:', error);
-    return null;
-  }
-}
+// Multiple addresses (batch)
+const { data, isLoading, error } = useEthosScores(addresses);
 ```
 
-### UI Display
+### UI Components
 
-```typescript
-// src/components/reputation/EthosScore.tsx
-interface EthosScoreProps {
-  address: string;
-}
+**EthosReputationPanel** - Full reputation display with:
+- User avatar and display name
+- Score badge with level indicator
+- Review breakdown (positive/negative/neutral with icons)
+- Vouch counts (given/received)
+- Link to Ethos profile
+- Loading skeleton and unverified states
 
-// Display states:
-// 1. Loading: Skeleton/spinner
-// 2. Has profile: Score badge + review counts + profile link
-// 3. No profile: "Not verified" badge
-```
+**EthosScore** - Compact score badge with loading/error states
 
-**Score Badge Component:**
-- Shows numeric score (typically 3-4 digit values, e.g., 1250, 890)
-- Color coding based on score threshold (optional)
-- Clickable → opens Ethos profile in new tab
-
-**Review Counts:**
-- Format: "👍 12 | 👎 2 | 😐 5" or similar
-- Compact display for conversation list
-- Expanded display for request review page
+**ReputationBadge** - Visual badge showing score level
 
 ---
 
@@ -678,19 +689,23 @@ interface ButtonProps {
 // 4. Be fully accessible (ARIA attributes, keyboard navigation)
 ```
 
-**Required UI Components (MVP):**
+**Implemented UI Components:**
 
 | Component | Variants/Props | Notes |
 |-----------|---------------|-------|
-| `Button` | primary, secondary, ghost; sm, md, lg | Loading state with spinner |
-| `Input` | text, search; error state | With optional label |
-| `Avatar` | size variants; fallback to initials | Address-based color generation |
-| `Badge` | color variants; with/without count | For scores, notification counts |
-| `Icon` | Wrapper for SVG icons | Consistent sizing |
-| `Tabs` | Horizontal tab group | For in-page tab switching (NOT navigation) |
-| `Modal` | Basic modal with overlay | For confirmations |
-| `Skeleton` | Loading placeholder | For async content |
-| `EmptyState` | Icon + message + optional CTA | For empty lists |
+| `Button` | primary, secondary, ghost; sm, md, lg | Loading state, icons, fullWidth |
+| `Input` | text, search; error state | Label, hint, left/right elements |
+| `Avatar` | xs, sm, md, lg, xl; fallback to initials | Address-based color generation |
+| `Badge` | default, success, warning, error, info | Count display, dot mode, max count |
+| `Icon` | All app icons (chat, contacts, send, etc.) | Consistent sizing system |
+| `Modal` | Basic modal with overlay | Focus trap, escape handling, portal |
+| `Skeleton` | text, circular, rectangular | Loading placeholders |
+| `EmptyState` | Icon + title + description + action | For empty lists |
+| `ErrorState` | Icon + message + retry button | Error display with retry |
+| `Toast` | success, error, warning, info | Toast notifications |
+| `DropdownMenu` | Menu with items | Dropdown menu system |
+| `PageSkeleton` | Full page loading state | Page-level skeleton |
+| `Logo` | App logo | Branding component |
 
 ### MainNav Component
 
@@ -750,12 +765,18 @@ const navItems: NavItem[] = [
 
 | Component | Purpose |
 |-----------|---------|
-| `ConversationList` | Scrollable list with search |
-| `ConversationItem` | Avatar, name/address, preview, timestamp, unread indicator |
-| `MessageList` | Virtualized message list (for performance) |
-| `MessageBubble` | Single message; sent vs received styling |
-| `MessageInput` | Text input with send button |
+| `ConversationList` | Scrollable list with search, filtering, loading/empty states |
+| `ConversationItem` | Avatar, name/address, preview, timestamp |
+| `MessageList` | Message list with grouping, date separators, auto-scroll, loading skeleton |
+| `MessageBubble` | Single message with status indicators, timestamps, sent/received styling |
+| `MessageInput` | Textarea with auto-height, send on Enter, optimistic UI support |
 | `ChatHeader` | Recipient info, back button (mobile) |
+
+**Key Features:**
+- Messages are grouped by sender and time (5-minute gap threshold)
+- Date separators for different days
+- Auto-scroll to newest messages
+- Pending message states for optimistic UI
 
 ### Contacts Components
 
@@ -786,30 +807,43 @@ const navItems: NavItem[] = [
 
 ### Global State (React Context)
 
-```typescript
-// Wallet State
-interface WalletState {
-  address: string | null;
-  isConnected: boolean;
-  isConnecting: boolean;
-  connect: () => Promise<void>;
-  disconnect: () => void;
-}
+**WalletProvider** (`src/providers/WalletProvider.tsx`)
+- Uses wagmi + Web3Modal (AppKit) for wallet connections
+- Provides wallet connection state via `useWallet()` hook
 
-// XMTP State
-interface XmtpState {
-  client: Client | null;
-  isInitialized: boolean;
-  isInitializing: boolean;
-  error: Error | null;
-  initialize: (signer: Signer) => Promise<void>;
-}
-```
+**XmtpProvider** (`src/providers/XmtpProvider.tsx`)
+- Manages XMTP client lifecycle
+- Provides client access via `useXmtp()` hook
+
+**ToastProvider** (`src/providers/ToastProvider.tsx`)
+- Toast notification system
+- Provides `useToast()` hook for showing notifications
+
+### Key Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `useXmtp()` | Access XMTP client |
+| `useWallet()` | Wallet connection state |
+| `useConversations()` | Conversation list with filtering |
+| `useAllowedConversations()` | Preset for allowed contacts only |
+| `useMessageRequests()` | Preset for unknown consent contacts |
+| `useMessages(conversationId)` | Messages with streaming |
+| `useConversationWithMessages()` | Combined conversation + messages |
+| `useConsent()` | Allow/deny operations |
+| `useConsentStream()` | Real-time consent updates |
+| `useInboxConsent(inboxId)` | Per-inbox consent state |
+| `useEthosScore(address)` | Single Ethos profile |
+| `useEthosScores(addresses)` | Batch Ethos profiles |
+| `useNewRequestsCount()` | Count for nav badge |
+| `useOnboardingState()` | Onboarding flow state |
+| `useMediaQuery(query)` | Responsive breakpoints |
 
 ### Local State Patterns
 
-Use React Query or similar for server state (Ethos API calls).
-Use `useState`/`useReducer` for UI state.
+- `useState`/`useReducer` for UI state
+- Custom hooks with `useEffect` for data fetching and streaming
+- Optimistic UI patterns in message sending
 
 ---
 
@@ -868,63 +902,64 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## Implementation Phases
 
-### Phase 1: Foundation (Week 1)
+### Phase 1: Foundation ✅
 
-- [ ] Project setup (Next.js, TypeScript, CSS Modules)
-- [ ] Design system implementation (tokens, global styles)
-- [ ] UI primitive components (Button, Input, Avatar, Badge, Icon)
-- [ ] MainNav component (vertical + horizontal modes)
-- [ ] Layout components (AppShell)
-- [ ] Wallet connection (WalletConnect v2 + wagmi)
+- [x] Project setup (Next.js, TypeScript, CSS Modules)
+- [x] Design system implementation (tokens, global styles)
+- [x] UI primitive components (Button, Input, Avatar, Badge, Icon, Modal, Skeleton, EmptyState, ErrorState, Toast)
+- [x] MainNav component (vertical + horizontal modes)
+- [x] Layout components (AppShell, AuthGuard)
+- [x] Wallet connection (WalletConnect + wagmi + AppKit)
 
-### Phase 2: Onboarding (Week 2)
+### Phase 2: Onboarding ✅
 
-- [ ] Onboarding flow container
-- [ ] Welcome step
-- [ ] Connect wallet step
-- [ ] Sign message step (XMTP key generation)
-- [ ] Onboarding state persistence
+- [x] Onboarding flow container
+- [x] Welcome step
+- [x] Connect wallet step
+- [x] Sign message step (XMTP key generation)
+- [x] Onboarding state persistence (localStorage)
 
-### Phase 3: Core Chat (Week 2-3)
+### Phase 3: Core Chat ✅
 
-- [ ] XMTP client initialization
-- [ ] Conversation list (allowed contacts only)
-- [ ] Real-time conversation streaming
-- [ ] Individual conversation view
-- [ ] Message list with real-time updates
-- [ ] Message sending
-- [ ] Responsive layout (desktop split, mobile full-screen)
+- [x] XMTP client initialization
+- [x] Conversation list (allowed contacts only)
+- [x] Real-time conversation streaming
+- [x] Individual conversation view
+- [x] Message list with real-time updates
+- [x] Message sending with optimistic UI
+- [x] Message grouping by sender and time
+- [x] Responsive layout (desktop split, mobile full-screen)
 
-### Phase 4: Contacts & Reputation (Week 3)
+### Phase 4: Contacts & Reputation ✅
 
-- [ ] Contacts page structure (search, sections, list)
-- [ ] New requests view (unknown consent contacts)
-- [ ] Denied contacts view
-- [ ] Contact detail view with conversation history
-- [ ] Ethos API integration
-- [ ] Reputation display components (EthosReputationPanel)
-- [ ] Accept/Decline/Block/Unblock actions
-- [ ] Consent state management
-- [ ] MainNav badge for new requests
+- [x] Contacts page structure (search, sections, list)
+- [x] New requests view (unknown consent contacts)
+- [x] Denied contacts view
+- [x] Contact detail view with conversation history
+- [x] Ethos API integration with batch fetching
+- [x] Reputation display components (EthosReputationPanel with score, reviews, vouches)
+- [x] Accept/Decline/Block/Unblock actions
+- [x] Consent state management with streaming
+- [x] MainNav badge for new requests
 
-### Phase 5: Polish (Week 4)
+### Phase 5: Polish ✅
 
-- [ ] Settings page
-- [ ] Empty states
-- [ ] Loading states
-- [ ] Error handling
-- [ ] Accessibility audit
-- [ ] Performance optimization
-- [ ] Mobile testing
+- [x] Settings page
+- [x] Empty states
+- [x] Loading states (skeletons throughout)
+- [x] Error handling with ErrorState component
+- [x] Toast notifications
+- [x] Mobile testing
 
 ### Phase 6: Future Enhancements
 
-- [ ] ENS name resolution
-- [ ] Group chat support
-- [ ] Rich content types
+- [ ] Message virtualization (for very long conversations)
+- [ ] ENS name resolution and display
+- [ ] Group chat UI (infrastructure ready)
+- [ ] Rich content types (attachments, reactions)
 - [ ] Payment-gated messaging
-- [ ] Database integration
 - [ ] Push notifications
+- [ ] Analytics
 
 ---
 
@@ -984,18 +1019,29 @@ chore: Update dependencies
 
 ## Performance Considerations
 
-1. **Message Virtualization**: Use virtual list for long conversations (react-window or similar)
+### Implemented Optimizations
+
+1. **Ethos Batch Fetching**: Reduces N+1 API calls to 2 calls via batch endpoints
+
+2. **Ethos Caching**: 5-minute TTL cache with throttled cleanup (every 60 seconds)
+
+3. **Message Grouping**: Messages grouped by sender and time for better rendering
+
+4. **Consent Streaming**: Real-time consent updates with local caching
+
+5. **Optimistic UI**: Messages appear immediately while sending
+
+6. **Loading Skeletons**: Consistent loading states throughout app
+
+### Future Optimizations
+
+1. **Message Virtualization**: Use react-virtuoso for conversations exceeding 500 messages (infrastructure noted in code)
 
 2. **Image Optimization**: Use Next.js Image component for avatars
 
 3. **Code Splitting**: Leverage Next.js automatic code splitting
 
-4. **Caching**: 
-   - Ethos scores: Cache for 5 minutes
-   - Conversation list: Real-time via XMTP
-   - Messages: Persist in XMTP local storage
-
-5. **Bundle Size**: Monitor with `@next/bundle-analyzer`
+4. **Bundle Size**: Monitor with `@next/bundle-analyzer`
 
 ---
 
