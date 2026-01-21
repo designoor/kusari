@@ -10,5 +10,8 @@ export * from './useMessages';
 export * from './useConsent';
 export * from './useNewRequestsCount';
 
+// Navigation Hooks
+export * from './useNavItems';
+
 // Reputation Hooks
 export * from './useEthosScore';

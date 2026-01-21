@@ -6,7 +6,7 @@ import { AuthGuard } from '@/components/layout/AuthGuard';
 import { Logo } from '@/components/ui/Logo';
 import { useNavItems } from '@/hooks';
 
-function ChatLayoutContent({ children }: { children: React.ReactNode }) {
+function ContactsLayoutContent({ children }: { children: React.ReactNode }) {
   const navItems = useNavItems();
 
   return (
@@ -16,14 +16,14 @@ function ChatLayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function ChatLayout({
+export default function ContactsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <AuthGuard>
-      <ChatLayoutContent>{children}</ChatLayoutContent>
+      <ContactsLayoutContent>{children}</ContactsLayoutContent>
     </AuthGuard>
   );
 }

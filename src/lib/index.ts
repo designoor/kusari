@@ -9,6 +9,7 @@ export {
   getInitialsFromAddress,
   getDisplayName,
   isEnsName,
+  identifiersMatch,
 } from './address';
 
 // Time utilities

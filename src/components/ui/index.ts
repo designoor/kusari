@@ -7,3 +7,5 @@ export * from './Badge';
 export * from './Skeleton';
 export * from './EmptyState';
 export * from './Modal';
+export * from './Logo';
+export * from './DropdownMenu';
