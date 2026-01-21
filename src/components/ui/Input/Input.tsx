@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './Input.module.css';
 
-export type InputVariant = 'default' | 'search';
+export type InputSize = 'sm' | 'md' | 'lg';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  variant?: InputVariant;
+  size?: InputSize;
   label?: string;
   error?: string;
   hint?: string;
@@ -16,7 +16,7 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
 const InputInner = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
-      variant = 'default',
+      size = 'md',
       label,
       error,
       hint,
@@ -44,7 +44,7 @@ const InputInner = React.forwardRef<HTMLInputElement, InputProps>(
         <div
           className={`
             ${styles.inputContainer}
-            ${styles[variant]}
+            ${styles[size]}
             ${error ? styles.hasError : ''}
             ${disabled ? styles.disabled : ''}
             ${leftElement ? styles.hasLeftElement : ''}

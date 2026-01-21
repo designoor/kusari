@@ -50,7 +50,7 @@ export const ContactSearch: React.FC<ContactSearchProps> = ({
   return (
     <div className={`${styles.container} ${className ?? ''}`}>
       <Input
-        variant="search"
+        size="md"
         placeholder={placeholder}
         value={value}
         onChange={handleChange}

@@ -13,20 +13,20 @@
 /* Size variants */
 .badge.sm {
   padding: 2px 8px;
-  font-size: 10px;
-  height: 18px;
+  font-size: var(--font-size-sm);
+  height: 22px;
 }
 
 .badge.md {
   padding: 4px 10px;
   font-size: var(--font-size-sm);
-  height: 24px;
+  height: 28px;
 }
 
 .badge.lg {
   padding: 6px 14px;
   font-size: var(--font-size-md);
-  height: 30px;
+  height: 34px;
 }
 
 /* Display variant: compact has less padding */

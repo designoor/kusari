@@ -2,6 +2,7 @@
   display: inline-flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+  padding: 0;
 }
 
 .wrapper.fullWidth {
@@ -18,58 +19,71 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  transition: all var(--transition-fast);
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  transition: border-color var(--transition-fast);
   position: relative;
 }
 
-/* Variants */
-.inputContainer.default {
-  border-radius: var(--radius-md);
-  padding: 0 var(--spacing-md);
-  height: 40px;
+/* Sizes - matching Button spec (height accounts for 1px bottom border) */
+.inputContainer.sm {
+  height: 31px;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
 }
 
-.inputContainer.search {
-  border-radius: var(--radius-lg);
+.inputContainer.md {
+  height: 39px;
   padding: 0 var(--spacing-lg);
-  height: 40px;
+  font-size: var(--font-size-md);
+}
+
+.inputContainer.lg {
+  height: 47px;
+  padding: 0 var(--spacing-lg);
+  font-size: var(--font-size-lg);
 }
 
 /* Element padding adjustments - left element reduces left padding */
-.inputContainer.default.hasLeftElement {
-  padding-left: calc(var(--spacing-md) / 2);
+.inputContainer.sm.hasLeftElement {
+  padding-left: var(--spacing-sm);
 }
 
-.inputContainer.search.hasLeftElement {
+.inputContainer.md.hasLeftElement {
   padding-left: calc(var(--spacing-lg) / 2);
 }
 
-/* Element padding adjustments - right element reduces right padding */
-.inputContainer.default.hasRightElement {
-  padding-right: calc(var(--spacing-md) / 2);
+.inputContainer.lg.hasLeftElement {
+  padding-left: var(--spacing-md);
 }
 
-.inputContainer.search.hasRightElement {
+/* Element padding adjustments - right element reduces right padding */
+.inputContainer.sm.hasRightElement {
+  padding-right: var(--spacing-sm);
+}
+
+.inputContainer.md.hasRightElement {
   padding-right: calc(var(--spacing-lg) / 2);
+}
+
+.inputContainer.lg.hasRightElement {
+  padding-right: var(--spacing-md);
 }
 
 /* States */
 .inputContainer:focus-within:not(.hasError):not(.disabled) {
-  border-color: var(--color-accent);
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+  border-bottom-color: var(--color-accent);
 }
 
 .inputContainer.hasError {
-  border-color: var(--color-error);
+  border-bottom-color: var(--color-error);
 }
 
 .inputContainer.disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background-color: var(--color-bg-tertiary);
 }
 
 /* Input element */
@@ -78,7 +92,7 @@
   background: transparent;
   border: none;
   color: var(--color-content-primary);
-  font-size: var(--font-size-md);
+  font-size: inherit;
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-base);
   outline: none;

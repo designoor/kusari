@@ -39,7 +39,10 @@ export interface PageHeaderProps {
   avatar?: PageHeaderAvatar;
   badge?: React.ReactNode;
   backButton?: PageHeaderBackButton;
+  /** Array of button actions */
   actions?: PageHeaderAction[];
+  /** Custom actions element (alternative to actions array, e.g., for dropdown menus) */
+  actionsElement?: React.ReactNode;
   size?: PageHeaderSize;
   /** Overlay mode: positions header absolutely over content for blur effect */
   overlay?: boolean;
@@ -109,6 +112,7 @@ const PageHeaderInner: React.FC<PageHeaderProps> = ({
   badge,
   backButton,
   actions,
+  actionsElement,
   size = 'md',
   overlay = false,
   isLoading = false,
@@ -121,7 +125,7 @@ const PageHeaderInner: React.FC<PageHeaderProps> = ({
         hasAvatar={!!avatar}
         hasSubtitle={!!subtitle}
         hasBadge={!!badge}
-        hasActions={!!actions?.length}
+        hasActions={!!actions?.length || !!actionsElement}
         size={size}
         overlay={overlay}
         className={className}
@@ -176,9 +180,10 @@ const PageHeaderInner: React.FC<PageHeaderProps> = ({
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
       </div>
 
-      {actions && actions.length > 0 && (
+      {(actions && actions.length > 0) || actionsElement ? (
         <div className={styles.actions}>
-          {actions.map((action, index) => (
+          {actionsElement}
+          {actions?.map((action, index) => (
             <Button
               key={index}
               variant={action.variant ?? 'ghost'}
@@ -192,7 +197,7 @@ const PageHeaderInner: React.FC<PageHeaderProps> = ({
             </Button>
           ))}
         </div>
-      )}
+      ) : null}
     </header>
   );
 };

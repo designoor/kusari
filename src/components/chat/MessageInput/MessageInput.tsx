@@ -101,7 +101,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <Button
           type="submit"
           variant="primary"
-          size="md"
+          size="lg"
           disabled={!canSend}
           loading={loading}
           aria-label="Send message"

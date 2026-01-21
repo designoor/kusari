@@ -20,7 +20,7 @@
 .main {
   flex: 1;
   height: 100%;
-  overflow: hidden;
+  min-height: 0;
 }
 
 /* Conversation panel (contains header, messages, input) */
@@ -33,12 +33,13 @@
   position: relative;
 }
 
-/* Messages area - container for MessageList that scrolls behind overlay header */
+/* Messages area - scrollable container for MessageList */
 .messagesArea {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* Add top padding to MessageList content so it scrolls behind the header */

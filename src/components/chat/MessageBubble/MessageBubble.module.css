@@ -22,17 +22,17 @@
 
 /* Sent messages (from current user) */
 .bubble.sent {
-  background-color: var(--color-accent);
-  color: var(--color-bg-primary);
+  background-color: var(--color-border);
+  color: var(--color-content-primary);
   border-bottom-right-radius: var(--radius-sm);
 }
 
 .bubble.sent .time {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--color-content-tertiary);
 }
 
 .bubble.sent .status {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--color-content-tertiary);
 }
 
 .bubble.sent .status.failed {
