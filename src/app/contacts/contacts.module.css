@@ -3,27 +3,10 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
-  padding: var(--spacing-lg);
 }
 
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.headerTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-content-primary);
-  margin: 0;
+.searchContainer {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
 }
 
 .sections {
@@ -31,6 +14,7 @@
   flex-direction: column;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xl);
+  padding: 0 var(--spacing-lg);
 }
 
 .contactsSection {
@@ -38,6 +22,7 @@
   flex-direction: column;
   gap: var(--spacing-md);
   flex: 1;
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
 }
 
 .sectionTitle {
@@ -54,5 +39,5 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg) var(--spacing-xl);
 }

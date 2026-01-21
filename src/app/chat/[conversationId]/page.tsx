@@ -1,20 +1,24 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ConversationList } from '@/components/chat/ConversationList';
-import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Icon } from '@/components/ui/Icon';
+import { EthosScore } from '@/components/reputation/EthosScore';
 import { useMessages } from '@/hooks/useMessages';
 import { useAllowedConversations } from '@/hooks/useConversations';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import { useXmtpContext } from '@/providers/XmtpProvider';
 import { getConversationById, isDm } from '@/services/xmtp/conversations';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useNewChatModal } from '@/providers/NewChatModalProvider';
+import { truncateAddress } from '@/lib';
 import type { Conversation } from '@/types/conversation';
 import styles from './conversation.module.css';
 
@@ -27,6 +31,7 @@ export default function ConversationPage() {
 
   // Get conversation list for desktop sidebar
   const { filteredPreviews, isLoading: isLoadingConversations } = useAllowedConversations();
+  const { openModal } = useNewChatModal();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [peerInboxId, setPeerInboxId] = useState<string | undefined>();
@@ -40,6 +45,28 @@ export default function ConversationPage() {
     sendMessage,
     isSending,
   } = useMessages(conversationId);
+
+  // Fetch Ethos profile for DMs
+  const addressForEthos = peerAddress ?? peerInboxId;
+  const { data: ethosProfile } = useEthosScore(addressForEthos);
+
+  // Compute primary name for display
+  const primaryName = useMemo(() => {
+    if (conversation && !isDm(conversation)) {
+      return conversation.name ?? 'Group Chat';
+    }
+    const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
+    if (ethosUsername) {
+      return ethosUsername;
+    }
+    if (peerAddress) {
+      return truncateAddress(peerAddress);
+    }
+    if (peerInboxId) {
+      return truncateAddress(peerInboxId);
+    }
+    return 'Unknown';
+  }, [conversation, ethosProfile, peerAddress, peerInboxId]);
 
   // Load conversation metadata
   const loadConversation = useCallback(async () => {
@@ -92,9 +119,10 @@ export default function ConversationPage() {
     if (isLoadingConversation) {
       return (
         <div className={styles.conversationPanel}>
-          <ChatHeader
-            showBackButton={isMobile}
-            backHref="/chat"
+          <PageHeader
+            title="Loading..."
+            backButton={isMobile ? { href: '/chat', mobileOnly: true } : undefined}
+            size="lg"
             isLoading
           />
           <div className={styles.messagesSkeleton}>
@@ -149,20 +177,23 @@ export default function ConversationPage() {
 
     return (
       <div className={styles.conversationPanel}>
-        <ChatHeader
-          peerInboxId={peerInboxId}
-          peerAddress={peerAddress}
-          groupName={!conversationIsDm ? (conversation.name ?? undefined) : undefined}
-          isDm={conversationIsDm}
-          showBackButton={isMobile}
-          backHref="/chat"
+        <PageHeader
+          title={primaryName}
+          subtitle={conversationIsDm && peerAddress ? peerAddress : undefined}
+          avatar={conversationIsDm ? { address: peerAddress ?? peerInboxId } : undefined}
+          badge={conversationIsDm && peerAddress ? <EthosScore address={peerAddress} size="sm" variant="compact" /> : undefined}
+          backButton={isMobile ? { href: '/chat', mobileOnly: true } : undefined}
+          size="lg"
+          overlay
         />
-        <MessageList
-          messageGroups={messageGroups}
-          isLoading={isLoadingMessages}
-          emptyStateTitle="No messages yet"
-          emptyStateDescription="Send a message to start the conversation"
-        />
+        <div className={styles.messagesArea}>
+          <MessageList
+            messageGroups={messageGroups}
+            isLoading={isLoadingMessages}
+            emptyStateTitle="No messages yet"
+            emptyStateDescription="Send a message to start the conversation"
+          />
+        </div>
         <MessageInput
           onSend={handleSendMessage}
           loading={isSending}
@@ -181,6 +212,16 @@ export default function ConversationPage() {
   return (
     <div className={styles.container}>
       <div className={styles.sidebar}>
+        <PageHeader
+          title="Messages"
+          size="lg"
+          actions={[{
+            label: 'New',
+            onClick: openModal,
+            variant: 'ghost',
+            icon: <Icon name="plus" size="sm" />
+          }]}
+        />
         <ConversationList
           conversations={filteredPreviews}
           isLoading={isLoadingConversations}

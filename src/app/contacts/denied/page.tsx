@@ -1,10 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { ContactList } from '@/components/contacts';
-import { ChevronLeftIcon } from '@/components/ui/Icon/icons';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { useConversations } from '@/hooks/useConversations';
 import styles from '../subpage.module.css';
 
@@ -22,16 +21,12 @@ export default function DeniedPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Link href="/contacts" className={styles.backLink}>
-          <ChevronLeftIcon size={20} />
-          <span>Contacts</span>
-        </Link>
-        <h1 className={styles.title}>Denied Contacts</h1>
-        <p className={styles.description}>
-          Blocked contacts cannot send you messages. You can unblock them from their profile.
-        </p>
-      </div>
+      <PageHeader
+        title="Denied Contacts"
+        subtitle="Blocked contacts cannot send you messages. You can unblock them from their profile."
+        backButton={{ href: '/contacts' }}
+        size="lg"
+      />
 
       <div className={styles.content}>
         <ContactList
