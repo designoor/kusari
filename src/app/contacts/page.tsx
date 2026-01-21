@@ -7,13 +7,17 @@ import {
   ContactSectionLink,
   ContactList,
 } from '@/components/contacts';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
 import { useConversations, useMessageRequests } from '@/hooks/useConversations';
+import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import styles from './contacts.module.css';
 
 export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const { openModal } = useNewChatModal();
 
   // Get all conversations to filter by consent state
   const { filteredPreviews: allPreviews, isLoading, error, refresh } = useConversations();
@@ -71,7 +75,17 @@ export default function ContactsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Contacts</h1>
+        <div className={styles.headerTop}>
+          <h1 className={styles.title}>Contacts</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={openModal}
+            leftIcon={<Icon name="plus" size="sm" />}
+          >
+            New Chat
+          </Button>
+        </div>
         <ContactSearch
           value={searchQuery}
           onChange={setSearchQuery}
