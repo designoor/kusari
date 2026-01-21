@@ -101,7 +101,7 @@ export const ContactActions: React.FC<ContactActionsProps> = ({
             Accept
           </Button>
           <Button
-            variant="secondary"
+            variant="ghost"
             size={size}
             fullWidth={fullWidth}
             leftIcon={<XIcon size={16} />}
@@ -123,7 +123,7 @@ export const ContactActions: React.FC<ContactActionsProps> = ({
       <div className={`${styles.wrapper} ${className ?? ''}`}>
         <div className={`${styles.container} ${styles[layout]}`}>
           <Button
-            variant="secondary"
+            variant="ghost"
             size={size}
             fullWidth={fullWidth}
             leftIcon={<BanIcon size={16} />}

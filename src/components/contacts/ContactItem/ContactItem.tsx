@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { EthosScore } from '@/components/reputation/EthosScore';
-import { truncateAddress, formatRelativeTime } from '@/lib';
+import { formatRelativeTime } from '@/lib';
 import styles from './ContactItem.module.css';
 
 export interface ContactItemProps {
@@ -41,8 +41,9 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
   isActive = false,
   onClick,
 }) => {
-  // Display name: use provided name or truncate address
-  const name = displayName ?? truncateAddress(address, 6, 4);
+  // Display name: use provided name or full address
+  // CSS will handle truncation with ellipsis if too long
+  const name = displayName ?? address;
 
   /** Opens Ethos profile in a new tab */
   const handleProfileClick = useCallback((url: string) => {

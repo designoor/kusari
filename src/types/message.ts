@@ -3,6 +3,11 @@ import type { DecodedMessage } from '@xmtp/browser-sdk';
 export type { DecodedMessage };
 
 /**
+ * Message type for distinguishing user messages from system messages
+ */
+export type MessageType = 'text' | 'system';
+
+/**
  * Message display state for UI
  */
 export interface MessageDisplay {
@@ -12,6 +17,8 @@ export interface MessageDisplay {
   sentAt: Date;
   isFromCurrentUser: boolean;
   status: MessageStatus;
+  /** Type of message - 'text' for user messages, 'system' for membership changes etc. */
+  type: MessageType;
 }
 
 /**

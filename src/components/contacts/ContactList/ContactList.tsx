@@ -79,7 +79,7 @@ export const ContactList: React.FC<ContactListProps> = ({
       {validContacts.map((contact) => (
         <ContactItem
           key={contact.id}
-          address={contact.peerInboxId}
+          address={contact.peerAddress ?? contact.peerInboxId}
           lastMessage={contact.lastMessage?.content}
           timestamp={contact.lastMessage?.sentAt}
           conversationId={contact.id}

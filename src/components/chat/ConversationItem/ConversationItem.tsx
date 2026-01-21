@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { truncateAddress, formatRelativeTime } from '@/lib';
+import { formatRelativeTime } from '@/lib';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ConversationItem.module.css';
 
@@ -20,15 +20,18 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   const {
     id,
     peerInboxId,
+    peerAddress,
     groupName,
     lastMessage,
     unreadCount,
     isDm,
   } = conversation;
 
-  // Display name: group name or truncated peer address
+  // Display name: group name or full peer Ethereum address
+  // CSS will handle truncation with ellipsis if too long
+  // Fall back to inbox ID if address is not available
   const displayName = isDm
-    ? truncateAddress(peerInboxId ?? '', 6, 4)
+    ? (peerAddress ?? peerInboxId ?? 'Unknown')
     : groupName ?? 'Unknown Group';
 
   // Message preview text
@@ -42,7 +45,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   const content = (
     <>
       <Avatar
-        address={peerInboxId}
+        address={peerAddress ?? peerInboxId}
         size="md"
         className={styles.avatar}
       />

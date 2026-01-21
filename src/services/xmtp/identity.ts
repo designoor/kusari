@@ -5,6 +5,90 @@ import { isValidAddress } from '@/lib/address';
 import { findOrCreateDm } from './conversations';
 
 /**
+ * Get the primary Ethereum address for an inbox ID
+ *
+ * Resolves an XMTP inbox ID to its primary Ethereum address by fetching
+ * the inbox state from the network.
+ *
+ * @param client XMTP client instance
+ * @param inboxId The XMTP inbox ID to resolve
+ * @returns The primary Ethereum address for the inbox, or null if not found
+ */
+export async function getAddressForInboxId(
+  client: Client,
+  inboxId: string
+): Promise<string | null> {
+  try {
+    const states = await client.preferences.getInboxStates([inboxId]);
+    const state = states[0];
+
+    if (!state) {
+      return null;
+    }
+
+    // Find the first Ethereum identifier
+    const ethIdentifier = state.accountIdentifiers.find(
+      (id: Identifier) => id.identifierKind === IdentifierKind.Ethereum
+    );
+
+    return ethIdentifier?.identifier ?? null;
+  } catch (error) {
+    console.error('Failed to get address for inbox ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Get Ethereum addresses for multiple inbox IDs
+ *
+ * Batch resolves XMTP inbox IDs to their primary Ethereum addresses.
+ * More efficient than calling getAddressForInboxId for each inbox.
+ *
+ * @param client XMTP client instance
+ * @param inboxIds Array of XMTP inbox IDs to resolve
+ * @returns Map of inbox ID to Ethereum address (null if not found)
+ */
+export async function getAddressesForInboxIds(
+  client: Client,
+  inboxIds: string[]
+): Promise<Map<string, string | null>> {
+  const result = new Map<string, string | null>();
+
+  if (inboxIds.length === 0) {
+    return result;
+  }
+
+  try {
+    const states = await client.preferences.getInboxStates(inboxIds);
+
+    for (const state of states) {
+      // Find the first Ethereum identifier
+      const ethIdentifier = state.accountIdentifiers.find(
+        (id: Identifier) => id.identifierKind === IdentifierKind.Ethereum
+      );
+
+      result.set(state.inboxId, ethIdentifier?.identifier ?? null);
+    }
+
+    // Fill in any missing inbox IDs with null
+    for (const inboxId of inboxIds) {
+      if (!result.has(inboxId)) {
+        result.set(inboxId, null);
+      }
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Failed to get addresses for inbox IDs:', error);
+    // Return null for all inbox IDs on error
+    for (const inboxId of inboxIds) {
+      result.set(inboxId, null);
+    }
+    return result;
+  }
+}
+
+/**
  * Check if an Ethereum address can receive XMTP messages
  *
  * Uses the XMTP SDK's canMessage method to verify that an address

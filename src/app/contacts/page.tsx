@@ -47,12 +47,13 @@ export default function ContactsPage() {
     [allPreviews]
   );
 
-  // Apply search filter (address only)
+  // Apply search filter (by wallet address or inbox ID)
   const filteredContacts = useMemo(() => {
     if (!searchQuery) return allowedContacts;
 
     const query = searchQuery.toLowerCase();
     return allowedContacts.filter((contact) =>
+      contact.peerAddress?.toLowerCase().includes(query) ||
       contact.peerInboxId?.toLowerCase().includes(query)
     );
   }, [allowedContacts, searchQuery]);

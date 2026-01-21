@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { useWallet } from '@/hooks/useWallet';
+import { useXmtpContext } from '@/providers/XmtpProvider';
 import { Skeleton } from '@/components/ui/Skeleton';
 import styles from './AuthGuard.module.css';
 
@@ -36,6 +37,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
   const { isLoading, isComplete, reset } = useOnboardingState();
   const { isConnected } = useWallet();
+  const { isInitialized: isXmtpInitialized } = useXmtpContext();
   const wasConnectedRef = useRef<boolean | null>(null);
 
   // Track wallet disconnection and reset onboarding state
@@ -65,8 +67,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [isLoading, isComplete, isConnected, router]);
 
-  // Show loading state while checking or if conditions not met
-  if (isLoading || !isComplete || !isConnected) {
+  // Show loading state while checking or if conditions not met (including XMTP initialization)
+  if (isLoading || !isComplete || !isConnected || !isXmtpInitialized) {
     return <LoadingSkeleton />;
   }
 

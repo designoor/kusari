@@ -92,9 +92,44 @@
   justify-content: center;
 }
 
+/* System messages (membership changes, etc.) */
+.systemWrapper {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding: var(--spacing-sm) 0;
+}
+
+.systemBubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-full);
+  max-width: 80%;
+}
+
+.systemContent {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-content-secondary);
+  text-align: center;
+}
+
+.systemTime {
+  font-size: 10px;
+  color: var(--color-content-tertiary);
+}
+
 /* Mobile adjustments */
 @media (max-width: 767px) {
   .bubble {
     max-width: 85%;
+  }
+
+  .systemBubble {
+    max-width: 90%;
   }
 }

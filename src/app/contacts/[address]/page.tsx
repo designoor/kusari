@@ -2,9 +2,9 @@
 
 import { useCallback, useMemo } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { ContactDetail } from '@/components/contacts';
+import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ChevronLeftIcon, ContactsIcon } from '@/components/ui/Icon/icons';
@@ -23,10 +23,12 @@ export default function ContactDetailPage() {
 
   // Find the contact/conversation preview for this address
   // Uses identifiersMatch to handle hex addresses (case-insensitive) and other identifier formats
+  // Matches by either peerAddress (Ethereum address) or peerInboxId (XMTP inbox ID)
   const contactPreview = useMemo(() => {
     return allPreviews.find(
       (preview) =>
-        preview.peerInboxId != null && identifiersMatch(preview.peerInboxId, address)
+        (preview.peerAddress != null && identifiersMatch(preview.peerAddress, address)) ||
+        (preview.peerInboxId != null && identifiersMatch(preview.peerInboxId, address))
     );
   }, [allPreviews, address]);
 
@@ -93,10 +95,14 @@ export default function ContactDetailPage() {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <Link href="/contacts" className={styles.backLink}>
-            <ChevronLeftIcon size={20} />
-            <span>Contacts</span>
-          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<ChevronLeftIcon size={20} />}
+            onClick={() => router.push('/contacts')}
+          >
+            Contacts
+          </Button>
         </div>
         <div className={styles.content}>
           <EmptyState
@@ -116,10 +122,14 @@ export default function ContactDetailPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Link href={getBackLink()} className={styles.backLink}>
-          <ChevronLeftIcon size={20} />
-          <span>{getBackLabel()}</span>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          leftIcon={<ChevronLeftIcon size={20} />}
+          onClick={() => router.push(getBackLink())}
+        >
+          {getBackLabel()}
+        </Button>
       </div>
       <div className={styles.content}>
         <ContactDetail

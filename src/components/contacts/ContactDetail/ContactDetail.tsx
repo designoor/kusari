@@ -9,7 +9,7 @@ import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMen
 import { EthosReputationPanel } from '@/components/reputation/EthosReputationPanel';
 import { ContactActions } from '../ContactActions';
 import { useConsent } from '@/hooks/useConsent';
-import { truncateAddress } from '@/lib';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import { ChatIcon, BanIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactDetail.module.css';
 
@@ -55,7 +55,15 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   const router = useRouter();
   const { denyContact } = useConsent();
   const [isBlocking, setIsBlocking] = useState(false);
-  const name = displayName ?? truncateAddress(address, 6, 4);
+
+  // Fetch Ethos profile for the address
+  const { data: ethosProfile } = useEthosScore(address);
+
+  // Get Ethos username if available
+  const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
+
+  // Primary display: username (with @) if available, otherwise address
+  const primaryName = displayName ?? (ethosUsername ? `@${ethosUsername}` : address);
 
   const handleOpenChat = useCallback(() => {
     if (conversationId) {
@@ -96,14 +104,14 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
       <div className={styles.header}>
         <Avatar address={address} size="xl" />
         <div className={styles.headerInfo}>
-          <h2 className={styles.name}>{name}</h2>
-          <p className={styles.address}>{truncateAddress(address, 8, 6)}</p>
+          <h2 className={styles.name}>{primaryName}</h2>
+          <p className={styles.address} title={address}>{address}</p>
         </div>
       </div>
 
       {/* Reputation Panel */}
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Reputation</h3>
+        {/* <h3 className={styles.sectionTitle}>Reputation</h3> */}
         <EthosReputationPanel
           address={address}
           showUserInfo={false}
@@ -139,7 +147,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
                 Open Chat
               </Button>
             )}
-            <DropdownMenu items={moreMenuItems} ariaLabel="Contact options" />
+            <DropdownMenu variant="secondary" items={moreMenuItems} ariaLabel="Contact options" size="lg" />
           </div>
         )}
 

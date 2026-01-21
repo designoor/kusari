@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   turbopack: {},
 
   // Required for XMTP browser SDK WASM support
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       // Handle WASM files
       config.experiments = {
@@ -36,11 +36,23 @@ const nextConfig: NextConfig = {
           '@metamask/sdk': false,
           '@safe-global/safe-apps-provider': false,
           '@safe-global/safe-apps-sdk': false,
-          'porto': false,
-          'porto/internal': false,
           'pino-pretty': false,
         },
+        fallback: {
+          ...config.resolve?.fallback,
+          'porto': false,
+          'porto/internal': false,
+        },
       };
+
+      // Replace the porto module with an empty module to suppress warnings
+      config.plugins = [
+        ...config.plugins,
+        new webpack.NormalModuleReplacementPlugin(
+          /^porto(\/.*)?$/,
+          require.resolve('path').replace('path', 'next/dist/compiled/path-browserify')
+        ),
+      ];
     }
 
     return config;

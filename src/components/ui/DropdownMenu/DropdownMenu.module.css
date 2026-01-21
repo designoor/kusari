@@ -3,27 +3,9 @@
   display: inline-block;
 }
 
+/* Minimal override for icon-only trigger button */
 .trigger {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: var(--spacing-sm);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  color: var(--color-content-secondary);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
-}
-
-.trigger:hover {
-  color: var(--color-content-primary);
-  background-color: var(--color-bg-secondary);
-}
-
-.trigger:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
 }
 
 .menu {
