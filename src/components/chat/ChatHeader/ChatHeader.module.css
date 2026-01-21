@@ -41,6 +41,13 @@
   gap: 2px;
 }
 
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
 .name {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);

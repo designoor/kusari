@@ -10,12 +10,14 @@ import { EthosReputationPanel } from '@/components/reputation/EthosReputationPan
 import { ContactActions } from '../ContactActions';
 import { useConsent } from '@/hooks/useConsent';
 import { useEthosScore } from '@/hooks/useEthosScore';
-import { ChatIcon, BanIcon } from '@/components/ui/Icon/icons';
+import { ChatIcon, BanIcon, InboxIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactDetail.module.css';
 
 export interface ContactDetailProps {
-  /** Peer inbox ID / address */
+  /** Ethereum address for display and Ethos lookup */
   address: string;
+  /** XMTP inbox ID for consent operations */
+  peerInboxId: string;
   /** Optional display name or ENS name */
   displayName?: string;
   /** Current consent state */
@@ -44,6 +46,7 @@ export interface ContactDetailProps {
  */
 export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   address,
+  peerInboxId,
   displayName,
   consentState,
   conversationId,
@@ -53,8 +56,9 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   className,
 }) => {
   const router = useRouter();
-  const { denyContact } = useConsent();
+  const { denyContact, resetContact } = useConsent();
   const [isBlocking, setIsBlocking] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Fetch Ethos profile for the address
   const { data: ethosProfile } = useEthosScore(address);
@@ -71,38 +75,60 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
     }
   }, [conversationId, router]);
 
+  // Use peerInboxId for consent operations (XMTP requires inbox ID, not Ethereum address)
+  const inboxIdForConsent = peerInboxId;
+
   const handleBlock = useCallback(async () => {
     setIsBlocking(true);
     try {
-      await denyContact(address);
+      await denyContact(inboxIdForConsent);
       onConsentChange?.(ConsentState.Denied);
     } catch (err) {
       console.error('Failed to block contact:', err);
     } finally {
       setIsBlocking(false);
     }
-  }, [address, denyContact, onConsentChange]);
+  }, [inboxIdForConsent, denyContact, onConsentChange]);
+
+  const handleMoveToRequests = useCallback(async () => {
+    setIsResetting(true);
+    try {
+      await resetContact(inboxIdForConsent);
+      onConsentChange?.(ConsentState.Unknown);
+    } catch (err) {
+      console.error('Failed to move contact to requests:', err);
+    } finally {
+      setIsResetting(false);
+    }
+  }, [inboxIdForConsent, resetContact, onConsentChange]);
 
   // Menu items for allowed contacts
   const moreMenuItems: DropdownMenuItem[] = useMemo(
     () => [
+      {
+        id: 'move-to-requests',
+        label: isResetting ? 'Moving...' : 'Move to Requests',
+        icon: <InboxIcon size={16} />,
+        onClick: handleMoveToRequests,
+        disabled: isResetting || isBlocking,
+      },
       {
         id: 'block',
         label: isBlocking ? 'Blocking...' : 'Block Contact',
         icon: <BanIcon size={16} />,
         onClick: handleBlock,
         danger: true,
-        disabled: isBlocking,
+        disabled: isBlocking || isResetting,
       },
     ],
-    [handleBlock, isBlocking]
+    [handleBlock, handleMoveToRequests, isBlocking, isResetting]
   );
 
   return (
     <div className={`${styles.container} ${className ?? ''}`}>
       {/* Contact Header */}
       <div className={styles.header}>
-        <Avatar address={address} size="xl" />
+        <Avatar src={ethosProfile?.avatarUrl} address={address} size="xl" />
         <div className={styles.headerInfo}>
           <h2 className={styles.name}>{primaryName}</h2>
           <p className={styles.address} title={address}>{address}</p>
@@ -111,7 +137,6 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
 
       {/* Reputation Panel */}
       <div className={styles.section}>
-        {/* <h3 className={styles.sectionTitle}>Reputation</h3> */}
         <EthosReputationPanel
           address={address}
           showUserInfo={false}
@@ -154,7 +179,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
         {/* Unknown/Denied contacts: show ContactActions */}
         {consentState !== ConsentState.Allowed && (
           <ContactActions
-            inboxId={address}
+            inboxId={inboxIdForConsent}
             consentState={consentState}
             onConsentChange={onConsentChange}
             layout="horizontal"

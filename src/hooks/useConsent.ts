@@ -7,6 +7,7 @@ import { useXmtpContext } from '@/providers/XmtpProvider';
 import {
   allowInboxes,
   denyInboxes,
+  setInboxConsent,
   getInboxConsentState,
   streamConsent,
   syncPreferences,
@@ -21,6 +22,7 @@ interface UseConsentState {
 interface UseConsentReturn extends UseConsentState {
   allowContact: (inboxId: string) => Promise<void>;
   denyContact: (inboxId: string) => Promise<void>;
+  resetContact: (inboxId: string) => Promise<void>;
   getConsentState: (inboxId: string) => Promise<ConsentState>;
   allowContacts: (inboxIds: string[]) => Promise<void>;
   denyContacts: (inboxIds: string[]) => Promise<void>;
@@ -78,6 +80,29 @@ export function useConsent(): UseConsentReturn {
         setState((prev) => ({ ...prev, isLoading: false }));
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to deny contact');
+        setState((prev) => ({ ...prev, isLoading: false, error }));
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  /**
+   * Reset a single contact to unknown state (move to requests)
+   */
+  const resetContact = useCallback(
+    async (inboxId: string) => {
+      if (!client) {
+        throw new Error('XMTP client not initialized');
+      }
+
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        await setInboxConsent(client, [inboxId], ConsentState.Unknown);
+        setState((prev) => ({ ...prev, isLoading: false }));
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to reset contact');
         setState((prev) => ({ ...prev, isLoading: false, error }));
         throw error;
       }
@@ -168,6 +193,7 @@ export function useConsent(): UseConsentReturn {
     ...state,
     allowContact,
     denyContact,
+    resetContact,
     getConsentState,
     allowContacts,
     denyContacts,

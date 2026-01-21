@@ -5,6 +5,7 @@ import { useEthosScore } from '@/hooks/useEthosScore';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { ThumbsUpIcon, ThumbsDownIcon, ExternalLinkIcon } from '@/components/ui/Icon/icons';
 import { ReputationBadge } from '../ReputationBadge';
 import type { EthosProfile } from '@/services/ethos';
 import styles from './EthosReputationPanel.module.css';
@@ -23,75 +24,6 @@ export interface EthosReputationPanelProps {
   /** Additional CSS class */
   className?: string;
 }
-
-/**
- * Icon components for review stats
- */
-const ThumbsUpIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    width={size}
-    height={size}
-  >
-    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-  </svg>
-);
-
-const ThumbsDownIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    width={size}
-    height={size}
-  >
-    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
-  </svg>
-);
-
-const MinusIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    width={size}
-    height={size}
-  >
-    <line x1="5" y1="12" x2="19" y2="12" />
-  </svg>
-);
-
-const ExternalLinkIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    width={size}
-    height={size}
-  >
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-    <polyline points="15 3 21 3 21 9" />
-    <line x1="10" y1="14" x2="21" y2="3" />
-  </svg>
-);
 
 /**
  * Loading skeleton for the panel
@@ -120,7 +52,6 @@ const PanelSkeleton: React.FC<{
       <div className={styles.section}>
         <Skeleton variant="text" width={60} height={14} />
         <div className={styles.statsRow}>
-          <Skeleton variant="rectangular" width={50} height={20} />
           <Skeleton variant="rectangular" width={50} height={20} />
           <Skeleton variant="rectangular" width={50} height={20} />
         </div>
@@ -164,7 +95,7 @@ const ProfileContent: React.FC<{
   showVouches: boolean;
   showProfileLink: boolean;
 }> = ({ profile, address, showUserInfo, showReviews, showVouches, showProfileLink }) => {
-  const totalReviews = profile.reviews.positive + profile.reviews.negative + profile.reviews.neutral;
+  const totalReviews = profile.reviews.positive + profile.reviews.negative;
   const totalVouches = profile.vouches.given + profile.vouches.received;
 
   const handleOpenProfile = () => {
@@ -193,13 +124,18 @@ const ProfileContent: React.FC<{
           </div>
         </div>
       ) : (
-        <div className={styles.scoreOnly}>
-          <ReputationBadge
-            score={profile.score}
-            level={profile.level}
-            size="lg"
-            variant="full"
-          />
+        <div className={styles.section}>
+          <span className={styles.sectionLabel}>
+            Reputation
+          </span>
+          <div className={styles.statsRow}>
+            <ReputationBadge
+              score={profile.score}
+              level={profile.level}
+              size="lg"
+              variant="full"
+            />
+          </div>
         </div>
       )}
 
@@ -216,10 +152,6 @@ const ProfileContent: React.FC<{
             <div className={`${styles.stat} ${styles.negative}`}>
               <ThumbsDownIcon size={14} />
               <span>{profile.reviews.negative}</span>
-            </div>
-            <div className={`${styles.stat} ${styles.neutral}`}>
-              <MinusIcon size={14} />
-              <span>{profile.reviews.neutral}</span>
             </div>
           </div>
         </div>

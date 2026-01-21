@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { EthosScoreLevel } from '@/services/ethos';
+import { EthosIcon } from '@/components/ui/Icon/icons';
 import styles from './ReputationBadge.module.css';
 
 export type ReputationBadgeSize = 'sm' | 'md' | 'lg';
@@ -96,14 +97,34 @@ export const ReputationBadge: React.FC<ReputationBadgeProps> = ({
       }
     : undefined;
 
+  const getIconSize = () => {
+    switch (size) {
+      case 'sm':
+        return 10;
+      case 'lg':
+        return 16;
+      default:
+        return 12;
+    }
+  };
+
   const badgeContent = () => {
+    const icon = <EthosIcon size={getIconSize()} className={styles.icon} />;
+
     switch (variant) {
       case 'score-only':
-        return <span className={styles.score}>{score.toLocaleString()}</span>;
+        return (
+          <>
+            {icon}
+            <span className={styles.separator}>·</span>
+            <span className={styles.score}>{score.toLocaleString()}</span>
+          </>
+        );
       case 'compact':
         return (
           <>
-            <span className={styles.indicator} />
+            {icon}
+            <span className={styles.separator}>·</span>
             <span className={styles.score}>{score.toLocaleString()}</span>
           </>
         );
@@ -111,6 +132,8 @@ export const ReputationBadge: React.FC<ReputationBadgeProps> = ({
       default:
         return (
           <>
+            {icon}
+            <span className={styles.separator}>·</span>
             <span className={styles.level}>{displayName}</span>
             <span className={styles.separator}>·</span>
             <span className={styles.score}>{score.toLocaleString()}</span>
