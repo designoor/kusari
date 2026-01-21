@@ -47,6 +47,8 @@ const InputInner = React.forwardRef<HTMLInputElement, InputProps>(
             ${styles[variant]}
             ${error ? styles.hasError : ''}
             ${disabled ? styles.disabled : ''}
+            ${leftElement ? styles.hasLeftElement : ''}
+            ${rightElement ? styles.hasRightElement : ''}
           `}
         >
           {leftElement && <div className={styles.leftElement}>{leftElement}</div>}

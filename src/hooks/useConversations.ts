@@ -12,6 +12,8 @@ import {
 import { getLatestMessage } from '@/services/xmtp/messages';
 import { getInboxConsentState } from '@/services/xmtp/consent';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
+import { useConsentStream } from './useConsent';
+import type { ConsentUpdate } from '@/types/consent';
 import type { Conversation, Dm, ConversationPreview, ConversationFilter } from '@/types/conversation';
 
 /**
@@ -50,6 +52,36 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
     isLoading: false,
     error: null,
   });
+
+  // Handle consent updates from centralized consent stream
+  const handleConsentUpdate = useCallback((updates: ConsentUpdate[]) => {
+    setState((prev) => {
+      let hasChanges = false;
+      const updatedPreviews = prev.previews.map((preview) => {
+        // Find if there's a consent update for this preview's peer inbox
+        const consentUpdate = updates.find(
+          (update) => update.inboxId === preview.peerInboxId
+        );
+
+        if (consentUpdate && consentUpdate.state !== preview.consentState) {
+          hasChanges = true;
+          return { ...preview, consentState: consentUpdate.state };
+        }
+
+        return preview;
+      });
+
+      // Only update state if there were actual changes
+      if (hasChanges) {
+        return { ...prev, previews: updatedPreviews };
+      }
+
+      return prev;
+    });
+  }, []);
+
+  // Subscribe to consent stream for real-time updates
+  useConsentStream(handleConsentUpdate);
 
   /**
    * Build a conversation preview from a conversation

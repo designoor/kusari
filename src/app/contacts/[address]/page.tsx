@@ -64,6 +64,9 @@ export default function ContactDetailPage() {
         router.push(`/chat/${conversationId}`);
       } else if (newState === ConsentState.Denied) {
         router.push('/contacts');
+      } else if (newState === ConsentState.Unknown) {
+        // Redirect back to contacts (not requests) after moving to requests
+        router.push('/contacts');
       }
     },
     [router, conversationId]
@@ -90,8 +93,8 @@ export default function ContactDetailPage() {
     );
   }
 
-  // Not found - no conversation with this address
-  if (!contactPreview && !conversationIdFromQuery) {
+  // Not found - no conversation with this address, or missing required peerInboxId for DMs
+  if (!contactPreview?.peerInboxId) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -134,6 +137,7 @@ export default function ContactDetailPage() {
       <div className={styles.content}>
         <ContactDetail
           address={address}
+          peerInboxId={contactPreview.peerInboxId}
           consentState={consentState}
           conversationId={conversationId}
           lastMessage={lastMessage}

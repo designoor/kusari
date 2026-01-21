@@ -408,3 +408,73 @@ export const PlusIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
+
+export const EthosIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 200 200"
+    fill="currentColor"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M99.6 99.8C99.6 106.641 99.1755 113.382 98.3513 120H0V160H88.0302C82.2198 174.487 74.3748 187.938 64.8486 200H200V160H88.0302C93.0939 147.375 96.6123 133.964 98.3513 120H200V80H98.4006C96.6973 66.0398 93.216 52.6287 88.19 40H200V0H65.1635C74.635 12.0705 82.4277 25.5211 88.19 40H0V80H98.4006C99.1924 86.4892 99.6 93.097 99.6 99.8Z"
+    />
+  </svg>
+);
+
+export const ThumbsUpIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+  </svg>
+);
+
+export const ThumbsDownIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
+  </svg>
+);
+
+export const ExternalLinkIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);

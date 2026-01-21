@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Icon } from '@/components/ui/Icon';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { EthosScore } from '@/components/reputation/EthosScore';
 import { useEthosScore } from '@/hooks/useEthosScore';
 import styles from './ChatHeader.module.css';
 
@@ -73,7 +74,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             className={styles.avatar}
           />
           <div className={styles.info}>
-            <h1 className={styles.name}>{primaryName}</h1>
+            <div className={styles.nameRow}>
+              <h1 className={styles.name}>{primaryName}</h1>
+              {isDm && addressForDisplay && (
+                <EthosScore address={addressForDisplay} size="sm" variant="compact" />
+              )}
+            </div>
             {isDm && addressForDisplay && (
               <p className={styles.address} title={addressForDisplay}>{addressForDisplay}</p>
             )}

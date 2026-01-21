@@ -155,6 +155,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Ethos icon */
+.icon {
+  flex-shrink: 0;
+}
+
 /* Clickable state */
 .badge.clickable {
   cursor: pointer;
