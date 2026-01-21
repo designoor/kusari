@@ -1,0 +1,152 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+/* User info section */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.displayName {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-content-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Score only section (when user info is hidden) */
+.scoreOnly {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-sm) 0;
+}
+
+/* Stats sections */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.sectionLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Review stats row */
+.statsRow {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.stat.positive {
+  color: var(--color-success);
+  background-color: rgba(91, 255, 140, 0.1);
+}
+
+.stat.negative {
+  color: var(--color-error);
+  background-color: rgba(255, 91, 91, 0.1);
+}
+
+.stat.neutral {
+  color: var(--color-content-secondary);
+  background-color: rgba(161, 161, 161, 0.1);
+}
+
+/* Vouch stats */
+.vouchStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  min-width: 70px;
+}
+
+.vouchLabel {
+  font-size: 10px;
+  color: var(--color-content-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vouchValue {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-content-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Profile link section */
+.profileLink {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.profileLink button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-content-secondary);
+}
+
+.profileLink button:hover {
+  color: var(--color-accent);
+}
+
+/* Unverified panel */
+.panel.unverified {
+  background-color: rgba(107, 107, 107, 0.05);
+  border-color: var(--color-border-light);
+}
+
+.unverifiedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  text-align: center;
+}
+
+.unverifiedText {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-tertiary);
+  line-height: var(--line-height-base);
+  max-width: 280px;
+}
