@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
+import { useWallet } from '@/hooks/useWallet';
 import { Skeleton } from '@/components/ui/Skeleton';
 import styles from './AuthGuard.module.css';
 
@@ -25,29 +26,47 @@ const LoadingSkeleton = () => (
 /**
  * AuthGuard component that protects routes requiring authentication.
  *
- * Checks if the user has completed onboarding (wallet connected + XMTP enabled).
- * If not, redirects to the landing page to complete onboarding.
+ * Checks if the user has completed onboarding (wallet connected + XMTP enabled)
+ * AND verifies that the wallet is currently connected.
+ * If either condition fails, redirects to the landing page.
  *
  * Shows a loading skeleton while checking authentication state.
- *
- * Note: This guard only checks localStorage for onboarding completion status.
- * It does not verify that the wallet or XMTP client are currently connected.
- * Child components (e.g., chat pages) are responsible for handling disconnected
- * state via their own hooks (useXmtpContext, useWallet, etc.).
  */
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
-  const { isLoading, isComplete } = useOnboardingState();
+  const { isLoading, isComplete, reset } = useOnboardingState();
+  const { isConnected } = useWallet();
+  const wasConnectedRef = useRef<boolean | null>(null);
 
+  // Track wallet disconnection and reset onboarding state
+  // Note: This effect only handles state cleanup. The redirect is handled by the effect below.
   useEffect(() => {
-    // Only redirect after loading is complete and we know user hasn't finished onboarding
-    if (!isLoading && !isComplete) {
+    // Skip during initial loading
+    if (isLoading) return;
+
+    // Initialize the ref on first render after loading
+    if (wasConnectedRef.current === null) {
+      wasConnectedRef.current = isConnected;
+      return;
+    }
+
+    // Detect disconnection: was connected, now disconnected
+    if (wasConnectedRef.current && !isConnected) {
+      reset(); // Clear onboarding state so user must re-onboard
+    }
+
+    wasConnectedRef.current = isConnected;
+  }, [isConnected, isLoading, reset]);
+
+  // Redirect if onboarding not complete or wallet not connected
+  useEffect(() => {
+    if (!isLoading && (!isComplete || !isConnected)) {
       router.replace('/');
     }
-  }, [isLoading, isComplete, router]);
+  }, [isLoading, isComplete, isConnected, router]);
 
-  // Show loading state while checking or redirecting
-  if (isLoading || !isComplete) {
+  // Show loading state while checking or if conditions not met
+  if (isLoading || !isComplete || !isConnected) {
     return <LoadingSkeleton />;
   }
 
