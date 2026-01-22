@@ -149,6 +149,7 @@ export async function fetchEthosUser(address: string): Promise<EthosUserResponse
 /**
  * Fetch user data for multiple addresses
  * Endpoint: POST /users/by/address
+ * Returns a Map keyed by lowercase address
  */
 export async function fetchEthosUsers(
   addresses: string[]
@@ -177,7 +178,19 @@ export async function fetchEthosUsers(
       console.error('Invalid Ethos users batch response:', parsed.error);
       return new Map();
     }
-    return new Map(Object.entries(parsed.data));
+
+    // Convert array response to Map keyed by address (using userkeys field)
+    const result = new Map<string, EthosUserResponse>();
+    for (const user of parsed.data) {
+      for (const userkey of user.userkeys) {
+        // userkeys are in format "profileId.address", extract the address part
+        const address = userkey.includes('.') ? userkey.split('.')[1] : userkey;
+        if (address) {
+          result.set(address.toLowerCase(), user);
+        }
+      }
+    }
+    return result;
   } catch (error) {
     console.error('Failed to fetch Ethos users:', error);
     return new Map();

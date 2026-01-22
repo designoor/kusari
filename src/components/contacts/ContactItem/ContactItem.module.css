@@ -3,9 +3,10 @@
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
+  min-height: 72px;
   background-color: transparent;
   border: none;
-  border-radius: var(--radius-md);
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
   transition: background-color var(--transition-fast);
   text-decoration: none;
@@ -57,25 +58,11 @@
   min-width: 0;
 }
 
-.secondary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-}
-
-.message {
+.address {
   font-size: var(--font-size-sm);
   color: var(--color-content-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-  min-width: 0;
 }
 
-.time {
-  font-size: var(--font-size-sm);
-  color: var(--color-content-tertiary);
-  flex-shrink: 0;
-}

@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ContactItem } from '../ContactItem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useEthosScores } from '@/hooks';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ContactList.module.css';
 
@@ -39,6 +40,16 @@ export const ContactList: React.FC<ContactListProps> = ({
   activeAddress,
   className,
 }) => {
+  // Extract addresses for batch Ethos profile fetching
+  const addressesForEthos = useMemo(() => {
+    return contacts
+      .map((contact) => contact.peerAddress ?? contact.peerInboxId)
+      .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
+  }, [contacts]);
+
+  // Batch fetch Ethos profiles for all contacts
+  const { profiles: ethosProfiles } = useEthosScores(addressesForEthos);
+
   // Loading state - show skeletons
   if (isLoading) {
     return (
@@ -76,16 +87,20 @@ export const ContactList: React.FC<ContactListProps> = ({
 
   return (
     <div className={`${styles.list} ${className ?? ''}`} role="list">
-      {validContacts.map((contact) => (
-        <ContactItem
-          key={contact.id}
-          address={contact.peerAddress ?? contact.peerInboxId}
-          lastMessage={contact.lastMessage?.content}
-          timestamp={contact.lastMessage?.sentAt}
-          conversationId={contact.id}
-          isActive={contact.peerInboxId === activeAddress}
-        />
-      ))}
+      {validContacts.map((contact) => {
+        const address = contact.peerAddress ?? contact.peerInboxId;
+        const ethosProfile = ethosProfiles.get(address.toLowerCase());
+
+        return (
+          <ContactItem
+            key={contact.id}
+            address={address}
+            conversationId={contact.id}
+            isActive={contact.peerInboxId === activeAddress}
+            ethosProfile={ethosProfile}
+          />
+        );
+      })}
     </div>
   );
 };

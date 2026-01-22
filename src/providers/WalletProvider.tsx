@@ -25,12 +25,15 @@ if (projectId) {
     metadata,
     themeMode: 'dark',
     themeVariables: {
-      '--w3m-accent': '#5BFF8C',
-      '--w3m-color-mix': '#000000',
-      '--w3m-color-mix-strength': 40,
+      '--apkt-accent': '#5BFF8C',
+      '--apkt-color-mix': '#000000',
+      '--apkt-color-mix-strength': 20,
+      '--apkt-border-radius-master': '0px',
     },
     features: {
       analytics: false,
+      email: false,
+      socials: [],
     },
   });
 }
