@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { FeatureItem } from '../FeatureItem';
 import { useXmtp } from '@/hooks/useXmtp';
 import { useWallet } from '@/hooks/useWallet';
 import styles from './SignMessageStep.module.css';
@@ -67,25 +68,18 @@ export const SignMessageStep: React.FC<SignMessageStepProps> = ({
             </div>
           </div>
         ) : (
-          <div className={styles.infoBox}>
-            <div className={styles.infoItem}>
-              <Icon name="shield" size="md" />
-              <div>
-                <p className={styles.infoTitle}>End-to-End Encrypted</p>
-                <p className={styles.infoDescription}>
-                  Your messages are encrypted and only you and your recipients can read them
-                </p>
-              </div>
-            </div>
-            <div className={styles.infoItem}>
-              <Icon name="wallet" size="md" />
-              <div>
-                <p className={styles.infoTitle}>One-Time Setup</p>
-                <p className={styles.infoDescription}>
-                  You only need to sign once to create your messaging identity
-                </p>
-              </div>
-            </div>
+          <div className={styles.features}>
+            <FeatureItem
+              icon="shield"
+              title="End-to-End Encrypted"
+              description="Your messages are encrypted and only you and your recipients can read them"
+            />
+            <FeatureItem
+              icon="wallet"
+              title="One-Time Setup"
+              description="You only need to sign once to create your messaging identity"
+              color="#00D4FF"
+            />
           </div>
         )}
 

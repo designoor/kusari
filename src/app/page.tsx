@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { OnboardingFlow, OnboardingSkeleton } from '@/components/onboarding';
+import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 
 /**
@@ -29,8 +30,13 @@ export default function Home() {
     }
   }, [isLoading, isComplete, router]);
 
-  // Show loading skeleton while checking state or redirecting
-  if (isLoading || isComplete) {
+  // Show app skeleton when redirecting (seamless transition to /chat)
+  if (isComplete) {
+    return <AppShellSkeleton />;
+  }
+
+  // Show onboarding skeleton while checking localStorage state
+  if (isLoading) {
     return <OnboardingSkeleton />;
   }
 
