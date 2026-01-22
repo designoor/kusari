@@ -63,3 +63,7 @@
   text-overflow: ellipsis;
 }
 
+.chevron {
+  flex-shrink: 0;
+  color: var(--color-content-tertiary);
+}

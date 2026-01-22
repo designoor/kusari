@@ -3,6 +3,7 @@
 import React, { useCallback } from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
+import { Icon } from '@/components/ui/Icon';
 import { EthosScore } from '@/components/reputation/EthosScore';
 import type { EthosProfile } from '@/services/ethos';
 import styles from './ContactItem.module.css';
@@ -63,6 +64,7 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
         </div>
         {ethosName && <span className={styles.address}>{address}</span>}
       </div>
+      <Icon name="chevron-right" size="sm" className={styles.chevron} />
     </>
   );
 

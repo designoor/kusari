@@ -6,11 +6,12 @@ import { ConsentState } from '@xmtp/browser-sdk';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 import { EthosReputationPanel } from '@/components/reputation/EthosReputationPanel';
 import { ContactActions } from '../ContactActions';
 import { useConsent } from '@/hooks/useConsent';
 import { useEthosScore } from '@/hooks/useEthosScore';
-import { ChatIcon, BanIcon, InboxIcon } from '@/components/ui/Icon/icons';
+import { ChatIcon, BanIcon, InboxIcon, AlertTriangleIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactDetail.module.css';
 
 export interface ContactDetailProps {
@@ -152,6 +153,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
 
       {/* Reputation Panel */}
       <div className={styles.section}>
+        <SectionTitle>Reputation</SectionTitle>
         <EthosReputationPanel
           address={address}
           showUserInfo={false}
@@ -164,9 +166,22 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
       {/* Message Preview (for requests) */}
       {consentState === ConsentState.Unknown && lastMessage && (
         <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Message Preview</h3>
+          <SectionTitle>Message Preview</SectionTitle>
           <div className={styles.messagePreview}>
             <p className={styles.messageContent}>{lastMessage.content}</p>
+          </div>
+        </div>
+      )}
+
+      {/* System Message (warning for low/no reputation) */}
+      {consentState === ConsentState.Unknown && acceptVariant === 'danger' && (
+        <div className={styles.section}>
+          <SectionTitle>System Message</SectionTitle>
+          <div className={styles.systemMessage}>
+            <AlertTriangleIcon size={20} className={styles.systemMessageIcon} />
+            <p className={styles.systemMessageContent}>
+              This account has no verified reputation or a very low trust score. Exercise caution before accepting this connection request.
+            </p>
           </div>
         </div>
       )}

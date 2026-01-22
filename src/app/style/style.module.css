@@ -1,0 +1,147 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+  padding: var(--spacing-lg);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.subsection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.subsectionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-content-secondary);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Typography styles */
+.textXl {
+  font-size: var(--font-size-xl);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.textLg {
+  font-size: var(--font-size-lg);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.textMd {
+  font-size: var(--font-size-md);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.textSm {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.weightRegular {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.weightMedium {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.weightSemibold {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.weightBold {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.textPrimary {
+  color: var(--color-content-primary);
+  margin: 0;
+}
+
+.textSecondary {
+  color: var(--color-content-secondary);
+  margin: 0;
+}
+
+.textTertiary {
+  color: var(--color-content-tertiary);
+  margin: 0;
+}
+
+.textError {
+  color: var(--color-error);
+  margin: 0;
+}
+
+.textSuccess {
+  color: var(--color-success);
+  margin: 0;
+}
+
+.textWarning {
+  color: var(--color-warning);
+  margin: 0;
+}
+
+/* Toggle items */
+.toggleItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.toggleLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-secondary);
+  min-width: 80px;
+}
+
+/* Header demo */
+.headerDemo {
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-sm);
+}

@@ -104,11 +104,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           size="lg"
           disabled={!canSend}
           loading={loading}
+          leftIcon={<Icon name="arrow-up-right" size="md" />}
           aria-label="Send message"
           className={styles.sendButton}
-        >
-          <Icon name="send" size="md" />
-        </Button>
+        />
       )}
     </form>
   );

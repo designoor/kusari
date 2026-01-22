@@ -67,7 +67,7 @@ export default function ContactDetailPage() {
     return (
       <div className={styles.container}>
         <PageHeader
-          title="Profile"
+          title="Connection Request"
           backButton={{ href: '/contacts' }}
           size="lg"
           isLoading
@@ -89,7 +89,7 @@ export default function ContactDetailPage() {
     return (
       <div className={styles.container}>
         <PageHeader
-          title="Profile"
+          title="Connection Request"
           backButton={{ href: '/contacts' }}
           size="lg"
         />
@@ -111,7 +111,7 @@ export default function ContactDetailPage() {
   return (
     <div className={styles.container}>
       <PageHeader
-        title="Profile"
+        title="Connection Request"
         backButton={{ href: getBackLink() }}
         size="lg"
       />

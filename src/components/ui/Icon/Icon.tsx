@@ -6,6 +6,7 @@ import {
   SendIcon,
   SearchIcon,
   ChevronLeftIcon,
+  ChevronRightIcon,
   CheckIcon,
   XIcon,
   LoaderIcon,
@@ -21,6 +22,7 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
   MinusIcon,
+  ArrowUpRightIcon,
 } from './icons';
 import styles from './Icon.module.css';
 
@@ -31,6 +33,7 @@ export type IconName =
   | 'send'
   | 'search'
   | 'chevron-left'
+  | 'chevron-right'
   | 'check'
   | 'x'
   | 'loader'
@@ -45,7 +48,8 @@ export type IconName =
   | 'copy'
   | 'thumbsUp'
   | 'thumbsDown'
-  | 'minus';
+  | 'minus'
+  | 'arrow-up-right';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -71,6 +75,7 @@ const ICON_MAP = {
   send: SendIcon,
   search: SearchIcon,
   'chevron-left': ChevronLeftIcon,
+  'chevron-right': ChevronRightIcon,
   check: CheckIcon,
   x: XIcon,
   loader: LoaderIcon,
@@ -86,6 +91,7 @@ const ICON_MAP = {
   thumbsUp: ThumbsUpIcon,
   thumbsDown: ThumbsDownIcon,
   minus: MinusIcon,
+  'arrow-up-right': ArrowUpRightIcon,
 } as const;
 
 export const Icon: React.FC<IconProps> = React.memo(({

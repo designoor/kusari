@@ -53,64 +53,64 @@
 
 /* Individual level colors matching Ethos score gauge */
 
-/* Untrusted - Red */
+/* Untrusted (0-799) - Red with brighter labels */
 .badge.untrusted {
-  background-color: rgba(201, 74, 74, 0.15);
-  color: #C94A4A;
+  background-color: rgba(224, 86, 86, 0.15);
+  color: #E05656;
 }
 
-/* Questionable - Orange/Gold */
+/* Questionable (800-1199) - Orange/Gold */
 .badge.questionable {
   background-color: rgba(212, 168, 75, 0.15);
   color: #D4A84B;
 }
 
-/* Neutral - Tan/Beige */
+/* Neutral (1200-1399) - Tan/Beige with brighter labels */
 .badge.neutral {
-  background-color: rgba(168, 159, 139, 0.15);
-  color: #A89F8B;
+  background-color: rgba(196, 186, 171, 0.15);
+  color: #C4BAAB;
 }
 
-/* Known - Olive Green */
+/* Known (1400-1599) - Light gray with blue tint */
 .badge.known {
-  background-color: rgba(107, 123, 74, 0.15);
-  color: #6B7B4A;
+  background-color: rgba(143, 163, 184, 0.15);
+  color: #8FA3B8;
 }
 
-/* Established - Light Blue */
+/* Established (1600-1799) - Light Blue with brighter labels */
 .badge.established {
-  background-color: rgba(91, 142, 201, 0.15);
-  color: #5B8EC9;
+  background-color: rgba(123, 168, 221, 0.15);
+  color: #7BA8DD;
 }
 
-/* Reputable - Blue */
+/* Reputable (1800-1999) - Blue with brighter labels */
 .badge.reputable {
-  background-color: rgba(74, 123, 184, 0.15);
-  color: #4A7BB8;
+  background-color: rgba(107, 150, 209, 0.15);
+  color: #6B96D1;
 }
 
-/* Exemplary - Dark Blue */
+/* Exemplary (2000-2199) - Desaturated green */
 .badge.exemplary {
-  background-color: rgba(61, 90, 153, 0.15);
-  color: #3D5A99;
+  background-color: rgba(138, 174, 152, 0.15);
+  color: #8AAE98;
 }
 
-/* Distinguished - Purple */
+/* Distinguished (2200-2399) - Rich green */
 .badge.distinguished {
-  background-color: rgba(107, 91, 149, 0.15);
-  color: #6B5B95;
+  background-color: rgba(92, 184, 120, 0.15);
+  color: #5CB878;
 }
 
-/* Revered - Violet */
+/* Revered (2400-2599) - Violet with brighter labels */
 .badge.revered {
-  background-color: rgba(139, 107, 155, 0.15);
-  color: #8B6B9B;
+  background-color: rgba(186, 155, 204, 0.15);
+  color: #BA9BCC;
 }
 
-/* Renowned - Magenta/Pink */
+/* Renowned (2600-2800) - Magenta/Pink with brighter labels */
 .badge.renowned {
-  background-color: rgba(155, 77, 122, 0.15);
-  color: #9B4D7A;
+  background-color: rgba(204, 126, 170, 0.15);
+  color: #CC7EAA;
 }
 
 /* Unverified badge */
