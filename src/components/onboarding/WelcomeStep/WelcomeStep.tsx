@@ -23,7 +23,7 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
         <h1 className={styles.title}>Welcome to Kusari</h1>
 
         <p className={styles.description}>
-          Your decentralized messaging app built on XMTP protocol. Connect with Web3 identities securely and privately.
+          Your decentralized messaging app. Connect with Web3 identities securely and privately.
         </p>
 
         <div className={styles.features}>
@@ -34,7 +34,7 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
           />
           <FeatureItem
             icon="verified"
-            title="Trust-Based"
+            title="Ethos Trust-Based System"
             description="Review sender reputation before accepting conversations"
             color="#F5A623"
           />

@@ -5,24 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { useWallet } from '@/hooks/useWallet';
 import { useXmtpContext } from '@/providers/XmtpProvider';
-import { Skeleton } from '@/components/ui/Skeleton';
-import styles from './AuthGuard.module.css';
+import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
-
-const LoadingSkeleton = () => (
-  <div className={styles.loadingContainer}>
-    <div className={styles.loadingContent}>
-      <Skeleton variant="rectangular" width="100%" height={56} />
-      <div className={styles.loadingBody}>
-        <Skeleton variant="rectangular" width={320} height="100%" />
-        <Skeleton variant="rectangular" width="100%" height="100%" />
-      </div>
-    </div>
-  </div>
-);
 
 /**
  * AuthGuard component that protects routes requiring authentication.
@@ -69,7 +56,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Show loading state while checking or if conditions not met (including XMTP initialization)
   if (isLoading || !isComplete || !isConnected || !isXmtpInitialized) {
-    return <LoadingSkeleton />;
+    return <AppShellSkeleton />;
   }
 
   return <>{children}</>;

@@ -78,43 +78,13 @@
   margin: 0;
 }
 
-.infoBox {
+.features {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
   margin-top: var(--spacing-lg);
   width: 100%;
   max-width: 480px;
-}
-
-.infoItem {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  border-radius: 0;
-  background-color: var(--color-bg-tertiary);
-  text-align: left;
-}
-
-.infoItem > :first-child {
-  flex-shrink: 0;
-  color: var(--color-accent);
-  margin-top: 2px;
-}
-
-.infoTitle {
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--color-content-primary);
-  margin: 0 0 var(--spacing-xs) 0;
-}
-
-.infoDescription {
-  font-size: var(--font-size-sm);
-  color: var(--color-content-secondary);
-  line-height: 1.5;
-  margin: 0;
 }
 
 .errorBox {

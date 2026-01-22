@@ -40,7 +40,7 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
         <h1 className={styles.title}>Connect Your Wallet</h1>
 
         <p className={styles.description}>
-          Connect your Ethereum wallet to get started with Kusari. We support browser wallets and mobile wallets via WalletConnect.
+          Connect your Ethereum wallet to get started with Kusari.
         </p>
 
         {!isConfigured && (
@@ -73,13 +73,13 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
             <FeatureItem
               icon="shield"
               title="Secure Connection"
-              description="Connect safely via WalletConnect v2"
+              description="Connect safely via WalletConnect"
               color="#A855F7"
             />
             <FeatureItem
               icon="wallet"
               title="Multi-Wallet Support"
-              description="Works with MetaMask, Rainbow, and more"
+              description="Works with MetaMask, Rainbow, and all the popular wallets"
               color="#F97316"
             />
           </div>
