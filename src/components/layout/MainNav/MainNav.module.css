@@ -62,8 +62,13 @@
 .mainNav.horizontal .navList {
   flex-direction: row;
   width: 100%;
-  justify-content: space-around;
   align-items: center;
+  padding: 0 var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.mainNav.horizontal .navList li {
+  flex: 1;
 }
 
 /* Nav item */
@@ -104,7 +109,7 @@
 .navItem.horizontal {
   flex-direction: column;
   padding: var(--spacing-xs);
-  min-width: 60px;
+  flex: 1;
   min-height: 48px;
 }
 

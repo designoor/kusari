@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ContactsIcon } from '@/components/ui/Icon/icons';
 import { useConversations } from '@/hooks/useConversations';
-import { identifiersMatch, truncateAddress } from '@/lib';
+import { identifiersMatch } from '@/lib';
 import styles from './contact.module.css';
 
 export default function ContactDetailPage() {
@@ -67,7 +67,7 @@ export default function ContactDetailPage() {
     return (
       <div className={styles.container}>
         <PageHeader
-          title={truncateAddress(address)}
+          title="Profile"
           backButton={{ href: '/contacts' }}
           isLoading
         />
@@ -88,7 +88,7 @@ export default function ContactDetailPage() {
     return (
       <div className={styles.container}>
         <PageHeader
-          title="Contact"
+          title="Profile"
           backButton={{ href: '/contacts' }}
         />
         <div className={styles.content}>
@@ -109,7 +109,7 @@ export default function ContactDetailPage() {
   return (
     <div className={styles.container}>
       <PageHeader
-        title={truncateAddress(address)}
+        title="Profile"
         backButton={{ href: getBackLink() }}
       />
       <div className={styles.content}>

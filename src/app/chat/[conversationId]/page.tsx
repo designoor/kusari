@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { MessageList } from '@/components/chat/MessageList';
@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Icon } from '@/components/ui/Icon';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { EthosScore } from '@/components/reputation/EthosScore';
-import { BanIcon, InboxIcon } from '@/components/ui/Icon/icons';
+import { BanIcon, InboxIcon, ContactsIcon } from '@/components/ui/Icon/icons';
 import { useMessages } from '@/hooks/useMessages';
 import { useAllowedConversations } from '@/hooks/useConversations';
 import { useEthosScore } from '@/hooks/useEthosScore';
@@ -54,7 +54,7 @@ export default function ConversationPage() {
   // Consent management
   const { consentState, deny: denyContact } = useInboxConsent(peerInboxId ?? null);
   const { resetContact } = useConsent();
-  const { showToast } = useToast();
+  const toast = useToast();
   const [isConsentActionLoading, setIsConsentActionLoading] = useState(false);
 
   // Fetch Ethos profile for DMs
@@ -130,32 +130,44 @@ export default function ConversationPage() {
     setIsConsentActionLoading(true);
     try {
       await denyContact();
-      showToast('Contact blocked', 'success');
+      toast.success('Contact blocked');
       router.push('/chat');
     } catch {
-      showToast('Failed to block contact', 'error');
+      toast.error('Failed to block contact');
     } finally {
       setIsConsentActionLoading(false);
     }
-  }, [peerInboxId, denyContact, showToast, router]);
+  }, [peerInboxId, denyContact, toast, router]);
 
   const handleMoveToRequests = useCallback(async () => {
     if (!peerInboxId) return;
     setIsConsentActionLoading(true);
     try {
       await resetContact(peerInboxId);
-      showToast('Moved to requests', 'success');
+      toast.success('Moved to requests');
       router.push('/chat');
     } catch {
-      showToast('Failed to move to requests', 'error');
+      toast.error('Failed to move to requests');
     } finally {
       setIsConsentActionLoading(false);
     }
-  }, [peerInboxId, resetContact, showToast, router]);
+  }, [peerInboxId, resetContact, toast, router]);
+
+  const handleViewProfile = useCallback(() => {
+    const address = peerAddress ?? peerInboxId;
+    if (!address) return;
+    router.push(`/contacts/${encodeURIComponent(address)}?conversation=${conversationId}`);
+  }, [peerAddress, peerInboxId, conversationId, router]);
 
   // Build dropdown menu items for contact actions (only for allowed contacts in DMs)
   const contactMenuItems: DropdownMenuItem[] = useMemo(
     () => [
+      {
+        id: 'profile',
+        label: 'Profile',
+        icon: <ContactsIcon size={16} />,
+        onClick: handleViewProfile,
+      },
       {
         id: 'move-to-requests',
         label: isConsentActionLoading ? 'Moving...' : 'Move to Requests',
@@ -172,7 +184,7 @@ export default function ConversationPage() {
         disabled: isConsentActionLoading,
       },
     ],
-    [handleBlockContact, handleMoveToRequests, isConsentActionLoading]
+    [handleBlockContact, handleMoveToRequests, handleViewProfile, isConsentActionLoading]
   );
 
   // Show dropdown only for allowed DM contacts
@@ -245,7 +257,7 @@ export default function ConversationPage() {
         <PageHeader
           title={primaryName}
           subtitle={conversationIsDm && peerAddress ? peerAddress : undefined}
-          avatar={conversationIsDm ? { address: peerAddress ?? peerInboxId } : undefined}
+          avatar={conversationIsDm ? { address: peerAddress ?? peerInboxId, src: ethosProfile?.avatarUrl } : undefined}
           badge={conversationIsDm && peerAddress ? <EthosScore address={peerAddress} size="sm" variant="compact" /> : undefined}
           backButton={isMobile ? { href: '/chat', mobileOnly: true } : undefined}
           actionsElement={showContactMenu ? <DropdownMenu items={contactMenuItems} ariaLabel="Contact options" /> : undefined}

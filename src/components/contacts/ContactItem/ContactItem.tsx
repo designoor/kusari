@@ -4,7 +4,8 @@ import React, { useCallback } from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { EthosScore } from '@/components/reputation/EthosScore';
-import { formatRelativeTime } from '@/lib';
+import { useEthosScore } from '@/hooks';
+import type { EthosProfile } from '@/services/ethos';
 import styles from './ContactItem.module.css';
 
 export interface ContactItemProps {
@@ -12,16 +13,14 @@ export interface ContactItemProps {
   address: string;
   /** Optional display name or ENS name */
   displayName?: string;
-  /** Optional last message preview */
-  lastMessage?: string;
-  /** Optional timestamp */
-  timestamp?: Date;
   /** Optional conversation ID for navigation */
   conversationId?: string;
   /** Whether this item is currently active/selected */
   isActive?: boolean;
   /** Click handler - if provided, overrides default navigation */
   onClick?: () => void;
+  /** Pre-fetched Ethos profile (for batch optimization) */
+  ethosProfile?: EthosProfile | null;
 }
 
 /**
@@ -35,30 +34,29 @@ export interface ContactItemProps {
 export const ContactItem: React.FC<ContactItemProps> = React.memo(({
   address,
   displayName,
-  lastMessage,
-  timestamp,
   conversationId,
   isActive = false,
   onClick,
+  ethosProfile: externalEthosProfile,
 }) => {
-  // Display name: use provided name or full address
-  // CSS will handle truncation with ellipsis if too long
-  const name = displayName ?? address;
+  // Fetch Ethos profile only if not provided externally (fallback for standalone usage)
+  const { data: fetchedEthosProfile } = useEthosScore(externalEthosProfile ? null : address);
+  const ethosProfile = externalEthosProfile ?? fetchedEthosProfile;
+
+  // Use Ethos username if available, otherwise fall back to displayName
+  const ethosName = ethosProfile?.username ?? displayName;
 
   /** Opens Ethos profile in a new tab */
   const handleProfileClick = useCallback((url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
-  // Time display
-  const timeDisplay = timestamp ? formatRelativeTime(timestamp) : '';
-
   const content = (
     <>
-      <Avatar address={address} size="md" className={styles.avatar} />
+      <Avatar address={address} src={ethosProfile?.avatarUrl} size="md" className={styles.avatar} />
       <div className={styles.content}>
         <div className={styles.header}>
-          <span className={styles.name}>{name}</span>
+          <span className={styles.name}>{ethosName ?? address}</span>
           <EthosScore
             address={address}
             size="sm"
@@ -66,16 +64,7 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
             onProfileClick={handleProfileClick}
           />
         </div>
-        {(lastMessage || timeDisplay) && (
-          <div className={styles.secondary}>
-            {lastMessage && (
-              <span className={styles.message}>{lastMessage}</span>
-            )}
-            {timeDisplay && (
-              <span className={styles.time}>{timeDisplay}</span>
-            )}
-          </div>
-        )}
+        {ethosName && <span className={styles.address}>{address}</span>}
       </div>
     </>
   );

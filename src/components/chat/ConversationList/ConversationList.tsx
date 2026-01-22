@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConversationItem } from '../ConversationItem';
+import { useEthosScores } from '@/hooks';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ConversationList.module.css';
 
@@ -30,6 +31,17 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   emptyStateAction,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Extract addresses for batch Ethos profile fetching (only for DMs with valid addresses)
+  const addressesForEthos = useMemo(() => {
+    return conversations
+      .filter((conv) => conv.isDm)
+      .map((conv) => conv.peerAddress ?? conv.peerInboxId)
+      .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
+  }, [conversations]);
+
+  // Batch fetch Ethos profiles for all DM conversations
+  const { profiles: ethosProfiles } = useEthosScores(addressesForEthos);
 
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
@@ -83,13 +95,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     return (
       <div className={styles.list} role="list">
         {filteredConversations.length > 0 ? (
-          filteredConversations.map((conversation) => (
-            <ConversationItem
-              key={conversation.id}
-              conversation={conversation}
-              isActive={conversation.id === activeConversationId}
-            />
-          ))
+          filteredConversations.map((conversation) => {
+            // Get pre-fetched Ethos profile for this conversation (if DM)
+            const address = conversation.isDm
+              ? (conversation.peerAddress ?? conversation.peerInboxId)?.toLowerCase()
+              : undefined;
+            const ethosProfile = address ? ethosProfiles.get(address) : undefined;
+
+            return (
+              <ConversationItem
+                key={conversation.id}
+                conversation={conversation}
+                isActive={conversation.id === activeConversationId}
+                ethosProfile={ethosProfile}
+              />
+            );
+          })
         ) : (
           <div className={styles.noResults}>
             <p>No conversations match &ldquo;{searchQuery}&rdquo;</p>

@@ -13,3 +13,4 @@ export * from './Modal';
 export * from './Logo';
 export * from './DropdownMenu';
 export * from './Toast';
+export * from './SectionTitle';

@@ -10,6 +10,7 @@ import {
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Icon } from '@/components/ui/Icon';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
 import { useConversations, useMessageRequests } from '@/hooks/useConversations';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
@@ -114,7 +115,7 @@ export default function ContactsPage() {
       </div>
 
       <div className={styles.contactsSection}>
-        <h2 className={styles.sectionTitle}>Accepted Contacts</h2>
+        <SectionTitle>Accepted Contacts</SectionTitle>
         <ContactList
           contacts={filteredContacts}
           isLoading={isLoading}

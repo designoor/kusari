@@ -125,9 +125,9 @@ export type EthosScoresBatchResponse = z.infer<typeof ethosScoresBatchResponseSc
 
 /**
  * Batch users response schema from POST /users/by/address endpoint
- * Returns a record mapping addresses to user responses
+ * Returns an array of user responses
  */
-export const ethosUsersBatchResponseSchema = z.record(z.string(), ethosUserResponseSchema);
+export const ethosUsersBatchResponseSchema = z.array(ethosUserResponseSchema);
 
 export type EthosUsersBatchResponse = z.infer<typeof ethosUsersBatchResponseSchema>;
 
