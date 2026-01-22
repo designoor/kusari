@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { FeatureItem } from '../FeatureItem';
 import styles from './WelcomeStep.module.css';
 
 export interface WelcomeStepProps {
@@ -26,35 +27,23 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
         </p>
 
         <div className={styles.features}>
-          <div className={styles.feature}>
-            <Icon name="shield" size="md" />
-            <div>
-              <h3 className={styles.featureTitle}>Privacy-First</h3>
-              <p className={styles.featureDescription}>
-                End-to-end encrypted messages via XMTP
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.feature}>
-            <Icon name="verified" size="md" />
-            <div>
-              <h3 className={styles.featureTitle}>Trust-Based</h3>
-              <p className={styles.featureDescription}>
-                Review sender reputation before accepting conversations
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.feature}>
-            <Icon name="wallet" size="md" />
-            <div>
-              <h3 className={styles.featureTitle}>Web3 Native</h3>
-              <p className={styles.featureDescription}>
-                Wallet-based identity, no email or password required
-              </p>
-            </div>
-          </div>
+          <FeatureItem
+            icon="shield"
+            title="Privacy-First"
+            description="End-to-end encrypted messages via XMTP"
+          />
+          <FeatureItem
+            icon="verified"
+            title="Trust-Based"
+            description="Review sender reputation before accepting conversations"
+            color="#F5A623"
+          />
+          <FeatureItem
+            icon="wallet"
+            title="Web3 Native"
+            description="Wallet-based identity, no email or password required"
+            color="#00D4FF"
+          />
         </div>
       </div>
 
