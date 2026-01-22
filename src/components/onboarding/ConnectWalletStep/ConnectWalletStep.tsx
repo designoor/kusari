@@ -3,8 +3,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { FeatureItem } from '../FeatureItem';
 import { useWallet } from '@/hooks/useWallet';
-import { truncateAddress } from '@/lib';
 import styles from './ConnectWalletStep.module.css';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
@@ -65,19 +65,23 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
             </div>
             <div>
               <p className={styles.connectedLabel}>Connected</p>
-              <p className={styles.connectedAddress}>{truncateAddress(address)}</p>
+              <p className={styles.connectedAddress}>{address}</p>
             </div>
           </div>
         ) : isConfigured ? (
-          <div className={styles.walletInfo}>
-            <div className={styles.infoItem}>
-              <Icon name="shield" size="md" />
-              <span>Secure connection via WalletConnect v2</span>
-            </div>
-            <div className={styles.infoItem}>
-              <Icon name="wallet" size="md" />
-              <span>Supports MetaMask, Rainbow, and more</span>
-            </div>
+          <div className={styles.features}>
+            <FeatureItem
+              icon="shield"
+              title="Secure Connection"
+              description="Connect safely via WalletConnect v2"
+              color="#A855F7"
+            />
+            <FeatureItem
+              icon="wallet"
+              title="Multi-Wallet Support"
+              description="Works with MetaMask, Rainbow, and more"
+              color="#F97316"
+            />
           </div>
         ) : null}
       </div>
