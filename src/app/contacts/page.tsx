@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
-import { useConversations, useMessageRequests } from '@/hooks/useConversations';
+import { useCoordinatedConversations, useCoordinatedMessageRequests } from '@/hooks/useCoordinatedConversations';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import styles from './contacts.module.css';
 
@@ -20,11 +20,11 @@ export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { openModal } = useNewChatModal();
 
-  // Get all conversations to filter by consent state
-  const { filteredPreviews: allPreviews, isLoading, error, refresh } = useConversations();
+  // Get all conversations with coordinated Ethos loading
+  const { previews: allPreviews, ethosProfiles, isLoading, error, refresh } = useCoordinatedConversations();
 
-  // Get message requests count
-  const { filteredPreviews: requestPreviews } = useMessageRequests();
+  // Get message requests count (uses same underlying data but filtered)
+  const { previews: requestPreviews } = useCoordinatedMessageRequests();
 
   const handleRetry = useCallback(() => {
     void refresh();
@@ -118,6 +118,7 @@ export default function ContactsPage() {
         <SectionTitle>Accepted Contacts</SectionTitle>
         <ContactList
           contacts={filteredContacts}
+          ethosProfiles={ethosProfiles}
           isLoading={isLoading}
           emptyTitle="No contacts yet"
           emptyDescription="Accept message requests to add contacts"

@@ -180,13 +180,15 @@ export async function fetchEthosUsers(
     }
 
     // Convert array response to Map keyed by address (using userkeys field)
+    // userkeys can be in various formats: "profileId.eth:0xabc...", "eth:0xabc...", "0xabc..."
+    // We extract the Ethereum address using a regex to handle all formats
     const result = new Map<string, EthosUserResponse>();
     for (const user of parsed.data) {
       for (const userkey of user.userkeys) {
-        // userkeys are in format "profileId.address", extract the address part
-        const address = userkey.includes('.') ? userkey.split('.')[1] : userkey;
-        if (address) {
-          result.set(address.toLowerCase(), user);
+        // Extract Ethereum address (0x followed by 40 hex chars) from anywhere in the userkey
+        const match = userkey.match(/0x[a-fA-F0-9]{40}/i);
+        if (match) {
+          result.set(match[0].toLowerCase(), user);
         }
       }
     }
@@ -382,7 +384,12 @@ export async function fetchEthosScores(
       console.error('Invalid Ethos scores batch response:', parsed.error);
       return new Map();
     }
-    return new Map(Object.entries(parsed.data));
+    // Normalize keys to lowercase for consistent lookups
+    const result = new Map<string, EthosScoreResponse>();
+    for (const [key, value] of Object.entries(parsed.data)) {
+      result.set(key.toLowerCase(), value);
+    }
+    return result;
   } catch (error) {
     console.error('Failed to fetch Ethos scores:', error);
     return new Map();

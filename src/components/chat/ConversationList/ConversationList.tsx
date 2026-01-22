@@ -6,12 +6,14 @@ import { Icon } from '@/components/ui/Icon';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConversationItem } from '../ConversationItem';
-import { useEthosScores } from '@/hooks';
 import type { ConversationPreview } from '@/types/conversation';
+import type { EthosProfile } from '@/services/ethos';
 import styles from './ConversationList.module.css';
 
 export interface ConversationListProps {
   conversations: ConversationPreview[];
+  /** Pre-fetched Ethos profiles (keyed by lowercase address) */
+  ethosProfiles?: Map<string, EthosProfile>;
   isLoading?: boolean;
   activeConversationId?: string | null;
   emptyStateTitle?: string;
@@ -24,6 +26,7 @@ export interface ConversationListProps {
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
+  ethosProfiles = new Map(),
   isLoading = false,
   activeConversationId,
   emptyStateTitle = 'No conversations',
@@ -31,17 +34,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   emptyStateAction,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Extract addresses for batch Ethos profile fetching (only for DMs with valid addresses)
-  const addressesForEthos = useMemo(() => {
-    return conversations
-      .filter((conv) => conv.isDm)
-      .map((conv) => conv.peerAddress ?? conv.peerInboxId)
-      .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
-  }, [conversations]);
-
-  // Batch fetch Ethos profiles for all DM conversations
-  const { profiles: ethosProfiles } = useEthosScores(addressesForEthos);
 
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {

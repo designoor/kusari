@@ -3,11 +3,11 @@
 import { useCallback } from 'react';
 import { ContactList } from '@/components/contacts';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { useMessageRequests } from '@/hooks/useConversations';
+import { useCoordinatedMessageRequests } from '@/hooks/useCoordinatedConversations';
 import styles from '../subpage.module.css';
 
 export default function RequestsPage() {
-  const { filteredPreviews: requests, isLoading, refresh } = useMessageRequests();
+  const { previews: requests, ethosProfiles, isLoading, refresh } = useCoordinatedMessageRequests();
 
   const handleRefresh = useCallback(() => {
     void refresh();
@@ -25,6 +25,7 @@ export default function RequestsPage() {
       <div className={styles.content}>
         <ContactList
           contacts={requests}
+          ethosProfiles={ethosProfiles}
           isLoading={isLoading}
           emptyTitle="No pending requests"
           emptyDescription="When someone messages you for the first time, their request will appear here"

@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ContactItem } from '../ContactItem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useEthosScores } from '@/hooks';
 import type { ConversationPreview } from '@/types/conversation';
+import type { EthosProfile } from '@/services/ethos';
 import styles from './ContactList.module.css';
 
 export interface ContactListProps {
   /** Contacts to display */
   contacts: ConversationPreview[];
+  /** Pre-fetched Ethos profiles (keyed by lowercase address) */
+  ethosProfiles?: Map<string, EthosProfile>;
   /** Whether data is loading */
   isLoading?: boolean;
   /** Title for empty state */
@@ -33,6 +35,7 @@ export interface ContactListProps {
  */
 export const ContactList: React.FC<ContactListProps> = ({
   contacts,
+  ethosProfiles = new Map(),
   isLoading = false,
   emptyTitle = 'No contacts',
   emptyDescription,
@@ -40,15 +43,6 @@ export const ContactList: React.FC<ContactListProps> = ({
   activeAddress,
   className,
 }) => {
-  // Extract addresses for batch Ethos profile fetching
-  const addressesForEthos = useMemo(() => {
-    return contacts
-      .map((contact) => contact.peerAddress ?? contact.peerInboxId)
-      .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
-  }, [contacts]);
-
-  // Batch fetch Ethos profiles for all contacts
-  const { profiles: ethosProfiles } = useEthosScores(addressesForEthos);
 
   // Loading state - show skeletons
   if (isLoading) {

@@ -6,14 +6,14 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Icon } from '@/components/ui/Icon';
-import { useAllowedConversations } from '@/hooks/useConversations';
+import { useCoordinatedAllowedConversations } from '@/hooks/useCoordinatedConversations';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import styles from './chat.module.css';
 
 export default function ChatPage() {
   const isMobile = useIsMobile();
-  const { filteredPreviews, isLoading, error, refresh } = useAllowedConversations();
+  const { previews, ethosProfiles, isLoading, error, refresh } = useCoordinatedAllowedConversations();
   const { openModal } = useNewChatModal();
 
   const handleRetry = useCallback(() => {
@@ -59,7 +59,8 @@ export default function ChatPage() {
           }]}
         />
         <ConversationList
-          conversations={filteredPreviews}
+          conversations={previews}
+          ethosProfiles={ethosProfiles}
           isLoading={isLoading}
           emptyStateTitle="No conversations yet"
           emptyStateDescription="Find contacts to start a new conversation"

@@ -6,6 +6,7 @@ export * from './useXmtp';
 
 // Chat Hooks
 export * from './useConversations';
+export * from './useCoordinatedConversations';
 export * from './useMessages';
 export * from './useConsent';
 export * from './useNewRequestsCount';
