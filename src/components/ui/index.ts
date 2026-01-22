@@ -14,3 +14,4 @@ export * from './Logo';
 export * from './DropdownMenu';
 export * from './Toast';
 export * from './SectionTitle';
+export * from './Toggle';

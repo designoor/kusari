@@ -61,3 +61,9 @@ export {
   safeParse,
   validate,
 } from './validation';
+
+// Preferences utilities
+export {
+  getHideMessagePreviews,
+  setHideMessagePreviews,
+} from './preferences';

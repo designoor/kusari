@@ -19,15 +19,6 @@
   gap: var(--spacing-md);
 }
 
-.sectionTitle {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-content-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
 .sectionContent {
   display: flex;
   flex-direction: column;
@@ -71,20 +62,36 @@
   font-family: monospace;
 }
 
-.copyButton {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-accent);
-  cursor: pointer;
-  text-decoration: underline dotted;
-  text-underline-offset: 2px;
-  transition: color var(--transition-fast);
+.profileActions {
+  display: flex;
+  gap: var(--spacing-sm);
 }
 
-.copyButton:hover {
-  color: var(--color-accent-hover);
+/* General Section - Setting Row */
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.settingLabel {
+  font-size: var(--font-size-md);
+  color: var(--color-content-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.settingDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-secondary);
+  line-height: var(--line-height-base);
 }
 
 /* Messaging Section - Coming Soon */
@@ -114,7 +121,7 @@
   line-height: var(--line-height-base);
 }
 
-/* About Section */
+/* Tech Stack Section */
 .aboutCard {
   display: flex;
   flex-direction: column;
@@ -142,10 +149,16 @@
   color: var(--color-content-primary);
 }
 
-.aboutLinks {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+.aboutLink {
+  font-size: var(--font-size-md);
+  color: var(--color-content-primary);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  transition: color var(--transition-fast);
+}
+
+.aboutLink:hover {
+  color: var(--color-accent);
 }
 
 .errorContainer {
@@ -162,7 +175,11 @@
     align-items: flex-start;
   }
 
-  .profileCard > button {
+  .profileActions {
     width: 100%;
+  }
+
+  .profileActions > button:last-child {
+    flex: 1;
   }
 }

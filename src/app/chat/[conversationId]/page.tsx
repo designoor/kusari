@@ -120,10 +120,6 @@ export default function ConversationPage() {
     await sendMessage(content);
   };
 
-  const handleNewConversation = useCallback(() => {
-    router.push('/contacts');
-  }, [router]);
-
   // Contact actions handlers
   const handleBlockContact = useCallback(async () => {
     if (!peerInboxId) return;
@@ -308,7 +304,7 @@ export default function ConversationPage() {
           emptyStateDescription="Find contacts to start a new conversation"
           emptyStateAction={{
             label: 'Find contacts',
-            onClick: handleNewConversation,
+            onClick: openModal,
           }}
         />
       </div>
