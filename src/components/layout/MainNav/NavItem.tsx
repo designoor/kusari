@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Badge } from '@/components/ui';
+import { NewBadge } from '@/components/ui';
 import styles from './MainNav.module.css';
 
 export interface NavItemData {
@@ -28,7 +28,7 @@ export const NavItem: React.FC<NavItemProps> = ({ item, isActive, orientation })
         {item.icon}
         {item.badge !== undefined && item.badge > 0 && (
           <span className={styles.badge}>
-            <Badge count={item.badge} size="sm" variant="error" />
+            <NewBadge count={item.badge} size="sm" />
           </span>
         )}
       </span>

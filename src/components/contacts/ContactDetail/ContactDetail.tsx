@@ -66,8 +66,8 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   // Get Ethos username if available
   const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
 
-  // Primary display: username (with @) if available, otherwise address
-  const primaryName = displayName ?? (ethosUsername ? `@${ethosUsername}` : address);
+  // Primary display: username if available, otherwise address
+  const primaryName = displayName ?? (ethosUsername ?? address);
 
   // Calculate accept button variant based on Ethos score
   const acceptVariant: ButtonVariant = useMemo(() => {
