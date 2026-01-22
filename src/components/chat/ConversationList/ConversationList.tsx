@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConversationItem } from '../ConversationItem';
-import { useEthosScores } from '@/hooks';
+import { useEthosContext } from '@/hooks';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ConversationList.module.css';
 
@@ -32,18 +32,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Extract addresses for batch Ethos profile fetching (only for DMs with valid addresses)
-  const addressesForEthos = useMemo(() => {
-    return conversations
-      .filter((conv) => conv.isDm)
-      .map((conv) => conv.peerAddress ?? conv.peerInboxId)
-      .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
-  }, [conversations]);
+  // Get Ethos profiles from global context (pre-fetched for allowed contacts)
+  const { profiles: ethosProfiles } = useEthosContext();
 
-  // Batch fetch Ethos profiles for all DM conversations
-  const { profiles: ethosProfiles } = useEthosScores(addressesForEthos);
-
-  // Filter conversations based on search query
+  // Filter conversations based on search query (includes Ethos usernames)
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) {
       return conversations;
@@ -52,11 +44,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     const query = searchQuery.toLowerCase();
     return conversations.filter((conv) => {
       const matchesInboxId = conv.peerInboxId?.toLowerCase().includes(query);
+      const matchesAddress = conv.peerAddress?.toLowerCase().includes(query);
       const matchesGroupName = conv.groupName?.toLowerCase().includes(query);
       const matchesContent = conv.lastMessage?.content.toLowerCase().includes(query);
-      return matchesInboxId || matchesGroupName || matchesContent;
+
+      // Also match Ethos username/displayName
+      const address = conv.isDm
+        ? (conv.peerAddress ?? conv.peerInboxId)?.toLowerCase()
+        : undefined;
+      const ethosProfile = address ? ethosProfiles.get(address) : undefined;
+      const matchesEthosName =
+        ethosProfile?.username?.toLowerCase().includes(query) ||
+        ethosProfile?.displayName?.toLowerCase().includes(query);
+
+      return matchesInboxId || matchesAddress || matchesGroupName || matchesContent || matchesEthosName;
     });
-  }, [conversations, searchQuery]);
+  }, [conversations, searchQuery, ethosProfiles]);
 
   // Render content based on state
   const renderContent = () => {

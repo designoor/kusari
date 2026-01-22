@@ -2,6 +2,7 @@
 
 import { WalletProvider } from '@/providers/WalletProvider';
 import { XmtpProvider } from '@/providers/XmtpProvider';
+import { EthosProvider } from '@/providers/EthosProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { NewChatModalProvider } from '@/providers/NewChatModalProvider';
 import { NewChatModal } from '@/components/chat/NewChatModal';
@@ -14,12 +15,14 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <WalletProvider>
       <XmtpProvider>
-        <ToastProvider>
-          <NewChatModalProvider>
-            {children}
-            <NewChatModal />
-          </NewChatModalProvider>
-        </ToastProvider>
+        <EthosProvider>
+          <ToastProvider>
+            <NewChatModalProvider>
+              {children}
+              <NewChatModal />
+            </NewChatModalProvider>
+          </ToastProvider>
+        </EthosProvider>
       </XmtpProvider>
     </WalletProvider>
   );

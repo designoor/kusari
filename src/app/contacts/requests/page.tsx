@@ -31,6 +31,7 @@ export default function RequestsPage() {
             label: 'Refresh',
             onClick: handleRefresh,
           }}
+          useContextProfiles={false}
         />
       </div>
     </div>

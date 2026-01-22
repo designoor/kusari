@@ -33,6 +33,7 @@ export default function DeniedPage() {
           isLoading={isLoading}
           emptyTitle="No blocked contacts"
           emptyDescription="When you block someone, they will appear here"
+          useContextProfiles={false}
         />
       </div>
     </div>

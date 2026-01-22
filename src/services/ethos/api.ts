@@ -152,7 +152,8 @@ export async function fetchEthosUser(address: string): Promise<EthosUserResponse
  * Returns a Map keyed by lowercase address
  */
 export async function fetchEthosUsers(
-  addresses: string[]
+  addresses: string[],
+  signal?: AbortSignal
 ): Promise<Map<string, EthosUserResponse>> {
   if (addresses.length === 0) {
     return new Map();
@@ -166,6 +167,7 @@ export async function fetchEthosUsers(
         'X-Ethos-Client': ETHOS_CLIENT_HEADER,
       },
       body: JSON.stringify({ addresses }),
+      signal,
     });
 
     if (!response.ok) {
@@ -299,10 +301,12 @@ function buildProfile(
  * Results are cached for 5 minutes
  *
  * @param addresses - Array of Ethereum addresses to fetch profiles for
+ * @param signal - Optional AbortSignal for cancellation
  * @returns Map of lowercase address to profile (null entries omitted)
  */
 export async function fetchEthosProfiles(
-  addresses: string[]
+  addresses: string[],
+  signal?: AbortSignal
 ): Promise<Map<string, EthosProfile>> {
   if (addresses.length === 0) {
     return new Map();
@@ -331,8 +335,8 @@ export async function fetchEthosProfiles(
 
   // Fetch scores and users in batch (2 API calls instead of N+1)
   const [scoresMap, usersMap] = await Promise.all([
-    fetchEthosScores(uncachedAddresses),
-    fetchEthosUsers(uncachedAddresses),
+    fetchEthosScores(uncachedAddresses, signal),
+    fetchEthosUsers(uncachedAddresses, signal),
   ]);
 
   // Build profiles from combined data
@@ -356,7 +360,8 @@ export async function fetchEthosProfiles(
  * Endpoint: POST /score/addresses
  */
 export async function fetchEthosScores(
-  addresses: string[]
+  addresses: string[],
+  signal?: AbortSignal
 ): Promise<Map<string, EthosScoreResponse>> {
   if (addresses.length === 0) {
     return new Map();
@@ -370,6 +375,7 @@ export async function fetchEthosScores(
         'X-Ethos-Client': ETHOS_CLIENT_HEADER,
       },
       body: JSON.stringify({ addresses }),
+      signal,
     });
 
     if (!response.ok) {
