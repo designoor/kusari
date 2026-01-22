@@ -124,8 +124,10 @@ export function useEthosScores(addresses: string[]): {
   errors: Map<string, Error>;
 } {
   const [profiles, setProfiles] = useState<Map<string, EthosProfile>>(new Map());
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [errors, setErrors] = useState<Map<string, Error>>(new Map());
+  // Track which addressesKey the current profiles correspond to
+  const [loadedKey, setLoadedKey] = useState<string>('');
 
   // Create a stable key from addresses for comparison and dependency tracking
   // Sort to ensure consistent ordering regardless of input order
@@ -142,14 +144,16 @@ export function useEthosScores(addresses: string[]): {
 
     if (addresses.length === 0) {
       setProfiles(new Map());
-      setIsLoading(false);
+      setIsFetching(false);
       setErrors(new Map());
+      setLoadedKey('');
       return;
     }
 
-    const fetchAll = async () => {
-      setIsLoading(true);
+    // Set fetching immediately (synchronously) to avoid render gap
+    setIsFetching(true);
 
+    const fetchAll = async () => {
       try {
         // Use optimized batch fetch (reduces API calls from 2N to N+1)
         const profilesMap = await fetchEthosProfiles(addresses);
@@ -158,7 +162,8 @@ export function useEthosScores(addresses: string[]): {
         if (currentKeyRef.current === addressesKey) {
           setProfiles(profilesMap);
           setErrors(new Map());
-          setIsLoading(false);
+          setIsFetching(false);
+          setLoadedKey(addressesKey);
         }
       } catch (err) {
         // Only update state if addresses haven't changed
@@ -171,7 +176,8 @@ export function useEthosScores(addresses: string[]): {
           }
           setErrors(newErrors);
           setProfiles(new Map());
-          setIsLoading(false);
+          setIsFetching(false);
+          setLoadedKey(addressesKey); // Still mark as loaded (with errors)
         }
       }
     };
@@ -179,6 +185,10 @@ export function useEthosScores(addresses: string[]): {
     void fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- addressesKey captures content changes; addresses ref not needed
   }, [addressesKey]);
+
+  // Derived loading state: loading if we're actively fetching OR if addressesKey doesn't match loadedKey
+  // This handles the render gap where effect hasn't run yet
+  const isLoading = isFetching || (addresses.length > 0 && addressesKey !== loadedKey);
 
   return { profiles, isLoading, errors };
 }

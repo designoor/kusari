@@ -8,11 +8,14 @@ import {
   type ReputationBadgeSize,
   type ReputationBadgeVariant,
 } from '../ReputationBadge';
+import type { EthosProfile } from '@/services/ethos';
 import styles from './EthosScore.module.css';
 
 export interface EthosScoreProps {
-  /** Ethereum address to fetch score for */
-  address: string | null | undefined;
+  /** Ethereum address to fetch score for (ignored if profile is provided) */
+  address?: string | null | undefined;
+  /** Pre-fetched Ethos profile - if provided, skips API call */
+  profile?: EthosProfile | null;
   /** Size variant */
   size?: ReputationBadgeSize;
   /** Display variant */
@@ -53,6 +56,7 @@ export interface EthosScoreProps {
  */
 export const EthosScore: React.FC<EthosScoreProps> = ({
   address,
+  profile: externalProfile,
   size = 'md',
   variant = 'full',
   showLoading = true,
@@ -60,10 +64,15 @@ export const EthosScore: React.FC<EthosScoreProps> = ({
   className,
   onProfileClick,
 }) => {
-  const { data, isLoading, error } = useEthosScore(address);
+  // Only fetch if no profile provided and we have an address
+  const shouldFetch = !externalProfile && address;
+  const { data: fetchedData, isLoading, error } = useEthosScore(shouldFetch ? address : null);
 
-  // Loading state
-  if (isLoading && showLoading) {
+  // Use external profile if provided, otherwise use fetched data
+  const data = externalProfile ?? fetchedData;
+
+  // Loading state - only show if we're actually fetching (no external profile)
+  if (isLoading && showLoading && !externalProfile) {
     return (
       <span className={`${styles.loading} ${className ?? ''}`}>
         <Skeleton
@@ -76,8 +85,8 @@ export const EthosScore: React.FC<EthosScoreProps> = ({
     );
   }
 
-  // Error state - show as unverified
-  if (error && showErrorAsUnverified) {
+  // Error state - show as unverified (only if we were fetching)
+  if (error && showErrorAsUnverified && !externalProfile) {
     return (
       <ReputationBadge
         verified={false}
