@@ -17,6 +17,7 @@ import {
   InfoIcon,
   RefreshIcon,
   PlusIcon,
+  CopyIcon,
 } from './icons';
 import styles from './Icon.module.css';
 
@@ -37,7 +38,8 @@ export type IconName =
   | 'alertTriangle'
   | 'info'
   | 'refresh'
-  | 'plus';
+  | 'plus'
+  | 'copy';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -74,6 +76,7 @@ const ICON_MAP = {
   info: InfoIcon,
   refresh: RefreshIcon,
   plus: PlusIcon,
+  copy: CopyIcon,
 } as const;
 
 export const Icon: React.FC<IconProps> = React.memo(({

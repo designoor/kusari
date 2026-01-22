@@ -16,3 +16,6 @@ export * from './useNavItems';
 
 // Reputation Hooks
 export * from './useEthosScore';
+
+// Preferences Hooks
+export * from './usePreferences';

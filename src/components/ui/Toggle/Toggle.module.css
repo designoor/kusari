@@ -1,0 +1,93 @@
+.toggle {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-border);
+  border-radius: 9999px;
+  transition: background-color var(--transition-fast);
+}
+
+.thumb {
+  background-color: var(--color-content-primary);
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+/* Size: md (default) */
+.md .track {
+  width: 44px;
+  height: 24px;
+  padding: 2px;
+}
+
+.md .thumb {
+  width: 20px;
+  height: 20px;
+}
+
+.md .input:checked + .track .thumb {
+  transform: translateX(20px);
+}
+
+/* Size: sm */
+.sm .track {
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+}
+
+.sm .thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.sm .input:checked + .track .thumb {
+  transform: translateX(16px);
+}
+
+/* Checked state */
+.input:checked + .track {
+  background-color: var(--color-accent);
+}
+
+.input:checked + .track .thumb {
+  background-color: var(--color-bg-primary);
+}
+
+/* Focus state */
+.input:focus-visible + .track {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Hover state (when not disabled) */
+.toggle:not(.disabled):hover .track {
+  background-color: var(--color-content-tertiary);
+}
+
+.toggle:not(.disabled) .input:checked:hover + .track {
+  background-color: var(--color-accent-hover);
+}

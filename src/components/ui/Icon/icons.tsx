@@ -478,3 +478,21 @@ export const ExternalLinkIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }
     <line x1="10" y1="14" x2="21" y2="3" />
   </svg>
 );
+
+export const CopyIcon: React.FC<IconSvgProps> = ({ size = 24, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+    {...props}
+  >
+    <rect x="9" y="9" width="12" height="12" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);

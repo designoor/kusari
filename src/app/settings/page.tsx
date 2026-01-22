@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Avatar, Button, PageHeader } from '@/components/ui';
+import { Avatar, Button, Icon, PageHeader, SectionTitle, Toggle } from '@/components/ui';
 import { useWallet } from '@/hooks/useWallet';
+import { usePreferences } from '@/hooks/usePreferences';
 import { useToast } from '@/providers/ToastProvider';
 import { truncateAddress } from '@/lib';
 import styles from './settings.module.css';
@@ -15,17 +16,16 @@ export default function SettingsPage() {
   const { address, disconnectAsync, isConnected } = useWallet();
   const toast = useToast();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const { hideMessagePreviews, setHideMessagePreviews } = usePreferences();
 
   const handleCopyAddress = useCallback(async () => {
     if (!address) return;
     try {
       await navigator.clipboard.writeText(address);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Address copied');
     } catch (err) {
       console.error('Failed to copy address:', err);
-      toast.error('Failed to copy address to clipboard');
+      toast.error('Failed to copy address');
     }
   }, [address, toast]);
 
@@ -41,14 +41,6 @@ export default function SettingsPage() {
     }
   }, [disconnectAsync, router]);
 
-  const handleOpenDocs = useCallback(() => {
-    window.open('https://docs.xmtp.org', '_blank', 'noopener,noreferrer');
-  }, []);
-
-  const handleOpenSupport = useCallback(() => {
-    window.open('https://github.com/xmtp/xmtp-web/discussions', '_blank', 'noopener,noreferrer');
-  }, []);
-
   return (
     <div className={styles.container}>
       <PageHeader title="Settings" size="lg" />
@@ -56,7 +48,7 @@ export default function SettingsPage() {
       <div className={styles.sections}>
         {/* Profile Section */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Profile</h2>
+          <SectionTitle>Profile</SectionTitle>
           <div className={styles.sectionContent}>
             <div className={styles.profileCard}>
               <div className={styles.profileInfo}>
@@ -66,35 +58,55 @@ export default function SettingsPage() {
                   <span className={styles.profileAddress}>
                     {address ? truncateAddress(address, 6, 4) : 'Not connected'}
                   </span>
-                  {address && (
-                    <button
-                      type="button"
-                      className={styles.copyButton}
-                      onClick={handleCopyAddress}
-                      aria-label="Copy wallet address to clipboard"
-                    >
-                      {copied ? 'Copied!' : 'Copy full address'}
-                    </button>
-                  )}
                 </div>
               </div>
               {isConnected && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={handleDisconnect}
-                  loading={isDisconnecting}
-                >
-                  Disconnect
-                </Button>
+                <div className={styles.profileActions}>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={handleCopyAddress}
+                    aria-label="Copy wallet address"
+                  >
+                    <Icon name="copy" size="sm" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={handleDisconnect}
+                    loading={isDisconnecting}
+                  >
+                    Disconnect
+                  </Button>
+                </div>
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* General Section */}
+        <section className={styles.section}>
+          <SectionTitle>General</SectionTitle>
+          <div className={styles.sectionContent}>
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Hide message previews</span>
+                <span className={styles.settingDescription}>
+                  Show &quot;Message hidden&quot; instead of message content in the chat list
+                </span>
+              </div>
+              <Toggle
+                checked={hideMessagePreviews}
+                onChange={setHideMessagePreviews}
+                aria-label="Hide message previews"
+              />
             </div>
           </div>
         </section>
 
         {/* Messaging Section */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Messaging</h2>
+          <SectionTitle>Messaging</SectionTitle>
           <div className={styles.sectionContent}>
             <div className={styles.comingSoon}>
               <span className={styles.comingSoonBadge}>Coming Soon</span>
@@ -105,27 +117,37 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* About Section */}
+        {/* Tech Stack Section */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>About</h2>
+          <SectionTitle>Tech Stack</SectionTitle>
           <div className={styles.sectionContent}>
             <div className={styles.aboutCard}>
               <div className={styles.aboutRow}>
-                <span className={styles.aboutLabel}>Version</span>
+                <span className={styles.aboutLabel}>Kusari version</span>
                 <span className={styles.aboutValue}>{APP_VERSION}</span>
               </div>
               <div className={styles.aboutRow}>
-                <span className={styles.aboutLabel}>Built with</span>
-                <span className={styles.aboutValue}>XMTP Protocol</span>
+                <span className={styles.aboutLabel}>Messaging protocol</span>
+                <a
+                  href="https://xmtp.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.aboutLink}
+                >
+                  XMTP
+                </a>
               </div>
-            </div>
-            <div className={styles.aboutLinks}>
-              <Button variant="ghost" size="sm" onClick={handleOpenDocs}>
-                Documentation
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleOpenSupport}>
-                Support
-              </Button>
+              <div className={styles.aboutRow}>
+                <span className={styles.aboutLabel}>Reputation system</span>
+                <a
+                  href="https://ethos.network"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.aboutLink}
+                >
+                  Ethos
+                </a>
+              </div>
             </div>
           </div>
         </section>

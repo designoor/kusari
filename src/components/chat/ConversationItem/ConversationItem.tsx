@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { useEthosScore } from '@/hooks';
+import { useEthosScore, usePreferences } from '@/hooks';
 import { formatRelativeTime } from '@/lib';
 import type { ConversationPreview } from '@/types/conversation';
 import type { EthosProfile } from '@/services/ethos';
@@ -37,6 +37,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   const { data: fetchedEthosProfile } = useEthosScore(addressForEthos ?? null);
   const ethosProfile = externalEthosProfile ?? fetchedEthosProfile;
 
+  // Get user preferences for hiding message previews
+  // Use isLoading to prevent hydration flash - default to hidden for privacy during load
+  const { hideMessagePreviews, isLoading: preferencesLoading } = usePreferences();
+
   // Display name: group name or full peer Ethereum address
   // CSS will handle truncation with ellipsis if too long
   // Fall back to inbox ID if address is not available
@@ -44,8 +48,12 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
     ? (peerAddress ?? peerInboxId ?? 'Unknown')
     : groupName ?? 'Unknown Group';
 
-  // Message preview text
-  const previewText = lastMessage?.content ?? 'No messages yet';
+  // Message preview text (hidden if user preference is enabled)
+  // Default to hidden during loading to prevent flash of message content
+  const shouldHidePreview = preferencesLoading || hideMessagePreviews;
+  const previewText = lastMessage
+    ? (shouldHidePreview ? 'Message hidden' : lastMessage.content)
+    : 'No messages yet';
 
   // Time display
   const timeDisplay = lastMessage?.sentAt
