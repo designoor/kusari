@@ -62,6 +62,7 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
             size="sm"
             variant="compact"
             onProfileClick={handleProfileClick}
+            ethosProfile={ethosProfile}
           />
         </div>
         {ethosName && <span className={styles.address}>{address}</span>}

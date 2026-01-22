@@ -4,7 +4,8 @@ import React, { useMemo } from 'react';
 import { ContactItem } from '../ContactItem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useEthosScores } from '@/hooks';
+import { useEthosScores, useEthosContext } from '@/hooks';
+import type { EthosProfile } from '@/services/ethos';
 import type { ConversationPreview } from '@/types/conversation';
 import styles from './ContactList.module.css';
 
@@ -26,6 +27,12 @@ export interface ContactListProps {
   activeAddress?: string;
   /** Additional CSS class */
   className?: string;
+  /**
+   * Whether to use the global Ethos context for profiles.
+   * Set to false for requests/denied pages to fetch locally.
+   * @default true
+   */
+  useContextProfiles?: boolean;
 }
 
 /**
@@ -39,16 +46,28 @@ export const ContactList: React.FC<ContactListProps> = ({
   emptyAction,
   activeAddress,
   className,
+  useContextProfiles = true,
 }) => {
-  // Extract addresses for batch Ethos profile fetching
-  const addressesForEthos = useMemo(() => {
+  // Get global context profiles (for allowed contacts)
+  const ethosContext = useEthosContext();
+
+  // Extract addresses for local batch fetching (only when not using context)
+  const addressesForLocalFetch = useMemo(() => {
+    if (useContextProfiles) {
+      return []; // Don't fetch locally if using context
+    }
     return contacts
       .map((contact) => contact.peerAddress ?? contact.peerInboxId)
       .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
-  }, [contacts]);
+  }, [contacts, useContextProfiles]);
 
-  // Batch fetch Ethos profiles for all contacts
-  const { profiles: ethosProfiles } = useEthosScores(addressesForEthos);
+  // Local batch fetch for requests/denied pages
+  const { profiles: localProfiles } = useEthosScores(addressesForLocalFetch);
+
+  // Use context profiles or local profiles based on prop
+  const ethosProfiles: Map<string, EthosProfile> = useContextProfiles
+    ? ethosContext.profiles
+    : localProfiles;
 
   // Loading state - show skeletons
   if (isLoading) {

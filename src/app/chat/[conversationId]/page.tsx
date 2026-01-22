@@ -14,7 +14,7 @@ import { EthosScore } from '@/components/reputation/EthosScore';
 import { BanIcon, InboxIcon, ContactsIcon } from '@/components/ui/Icon/icons';
 import { useMessages } from '@/hooks/useMessages';
 import { useAllowedConversations } from '@/hooks/useConversations';
-import { useEthosScore } from '@/hooks/useEthosScore';
+import { useEthosScore, useEthosContext } from '@/hooks';
 import { useInboxConsent, useConsent } from '@/hooks/useConsent';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
@@ -57,9 +57,13 @@ export default function ConversationPage() {
   const toast = useToast();
   const [isConsentActionLoading, setIsConsentActionLoading] = useState(false);
 
-  // Fetch Ethos profile for DMs
+  // Get Ethos profile - check context first (for allowed contacts), fallback to individual fetch
   const addressForEthos = peerAddress ?? peerInboxId;
-  const { data: ethosProfile } = useEthosScore(addressForEthos);
+  const ethosContext = useEthosContext();
+  const contextProfile = addressForEthos ? ethosContext.getProfile(addressForEthos) : undefined;
+  // Only fetch individually if not in context (e.g., for requests or edge cases)
+  const { data: fetchedProfile } = useEthosScore(contextProfile ? null : addressForEthos);
+  const ethosProfile = contextProfile ?? fetchedProfile;
 
   // Compute primary name for display
   const primaryName = useMemo(() => {

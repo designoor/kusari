@@ -8,6 +8,7 @@ import {
   type ReputationBadgeSize,
   type ReputationBadgeVariant,
 } from '../ReputationBadge';
+import type { EthosProfile } from '@/services/ethos';
 import styles from './EthosScore.module.css';
 
 export interface EthosScoreProps {
@@ -25,6 +26,8 @@ export interface EthosScoreProps {
   className?: string;
   /** Click handler - if provided, badge becomes clickable and opens Ethos profile */
   onProfileClick?: (profileUrl: string) => void;
+  /** Pre-fetched Ethos profile (for batch optimization) */
+  ethosProfile?: EthosProfile | null;
 }
 
 /**
@@ -59,8 +62,13 @@ export const EthosScore: React.FC<EthosScoreProps> = ({
   showErrorAsUnverified = true,
   className,
   onProfileClick,
+  ethosProfile: externalProfile,
 }) => {
-  const { data, isLoading, error } = useEthosScore(address);
+  // Only fetch if no external profile is provided
+  const { data: fetchedData, isLoading, error } = useEthosScore(
+    externalProfile !== undefined ? null : address
+  );
+  const data = externalProfile ?? fetchedData;
 
   // Loading state
   if (isLoading && showLoading) {

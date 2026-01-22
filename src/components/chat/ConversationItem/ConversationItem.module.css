@@ -44,6 +44,14 @@
   gap: var(--spacing-sm);
 }
 
+.nameGroup {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  flex: 1;
+}
+
 .name {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
@@ -51,6 +59,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.address {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 
 .time {
