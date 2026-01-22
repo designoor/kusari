@@ -58,6 +58,13 @@ export async function getAddressesForInboxIds(
     return result;
   }
 
+  // Create a map of original inbox IDs for later lookup
+  // This handles potential case differences between input and API response
+  const originalInboxIdMap = new Map<string, string>();
+  for (const inboxId of inboxIds) {
+    originalInboxIdMap.set(inboxId.toLowerCase(), inboxId);
+  }
+
   try {
     const states = await client.preferences.getInboxStates(inboxIds);
 
@@ -67,7 +74,10 @@ export async function getAddressesForInboxIds(
         (id: Identifier) => id.identifierKind === IdentifierKind.Ethereum
       );
 
-      result.set(state.inboxId, ethIdentifier?.identifier ?? null);
+      // Use the ORIGINAL inbox ID as key (found via case-insensitive lookup)
+      // This ensures consistency between what we pass in and what we get back
+      const originalInboxId = originalInboxIdMap.get(state.inboxId.toLowerCase()) ?? state.inboxId;
+      result.set(originalInboxId, ethIdentifier?.identifier ?? null);
     }
 
     // Fill in any missing inbox IDs with null

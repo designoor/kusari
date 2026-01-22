@@ -39,8 +39,13 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
   onClick,
   ethosProfile: externalEthosProfile,
 }) => {
-  // Fetch Ethos profile only if not provided externally (fallback for standalone usage)
-  const { data: fetchedEthosProfile } = useEthosScore(externalEthosProfile ? null : address);
+  // Check if address is a valid Ethereum address (not an inbox ID)
+  const isValidEthAddress = /^0x[a-fA-F0-9]{40}$/.test(address);
+
+  // Fetch Ethos profile only if not provided externally and address is valid Ethereum format
+  // Inbox IDs are not Ethereum addresses and cannot be used for Ethos lookups
+  const addressForEthos = !externalEthosProfile && isValidEthAddress ? address : null;
+  const { data: fetchedEthosProfile } = useEthosScore(addressForEthos);
   const ethosProfile = externalEthosProfile ?? fetchedEthosProfile;
 
   // Use Ethos username if available, otherwise fall back to displayName

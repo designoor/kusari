@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
+import { usePreferencesContextSafe } from '@/providers/PreferencesProvider';
 import {
   listConversations,
   streamConversations,
@@ -10,8 +11,8 @@ import {
   getConversationById,
 } from '@/services/xmtp/conversations';
 import { getLatestMessage, syncConversation } from '@/services/xmtp/messages';
-import { getInboxConsentState } from '@/services/xmtp/consent';
-import { getAddressForInboxId } from '@/services/xmtp/identity';
+import { getInboxConsentState, getInboxConsentStates } from '@/services/xmtp/consent';
+import { getAddressForInboxId, getAddressesForInboxIds } from '@/services/xmtp/identity';
 import { useConsentStream } from './useConsent';
 import type { ConsentUpdate } from '@/types/consent';
 import type { Conversation, Dm, ConversationPreview, ConversationFilter } from '@/types/conversation';
@@ -41,11 +42,19 @@ interface UseConversationsReturn extends UseConversationsState {
  * Hook to manage XMTP conversations
  * Provides conversation list, previews, streaming updates, and filtering
  *
+ * Optimizations:
+ * - Batch address resolution (1 API call instead of N)
+ * - Batch consent state fetching (parallel)
+ * - Skip conversation sync when hideMessagePreviews is enabled
+ *
  * @param filter Optional filter to apply to conversation list
  * @returns Conversation state and helper methods
  */
 export function useConversations(filter?: ConversationFilter): UseConversationsReturn {
   const { client, isInitialized } = useXmtpContext();
+  const preferences = usePreferencesContextSafe();
+  const hideMessagePreviews = preferences?.hideMessagePreviews ?? false;
+
   const [state, setState] = useState<UseConversationsState>({
     conversations: [],
     previews: [],
@@ -84,9 +93,138 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
   useConsentStream(handleConsentUpdate);
 
   /**
-   * Build a conversation preview from a conversation
+   * Build previews for multiple conversations in batch
+   * Optimizes API calls by batching address resolution and consent fetching
    */
-  const buildPreview = useCallback(
+  const buildPreviews = useCallback(
+    async (conversations: Conversation[]): Promise<ConversationPreview[]> => {
+      if (!client || conversations.length === 0) {
+        return [];
+      }
+
+      // Phase 1: Separate DMs and Groups, get peer inbox IDs for DMs
+      const dmData: { conversation: Dm; peerInboxId?: string }[] = [];
+      const groupData: { conversation: Conversation }[] = [];
+
+      for (const conv of conversations) {
+        if (isDm(conv)) {
+          dmData.push({ conversation: conv });
+        } else {
+          groupData.push({ conversation: conv });
+        }
+      }
+
+      // Get all peer inbox IDs in parallel
+      const peerInboxIdPromises = dmData.map(async (data) => {
+        try {
+          const inboxId = await data.conversation.peerInboxId();
+          return { ...data, peerInboxId: inboxId };
+        } catch {
+          return data;
+        }
+      });
+      const dmDataWithInboxIds = await Promise.all(peerInboxIdPromises);
+
+      // Collect unique inbox IDs for batch fetching (Set for O(1) lookups)
+      const uniqueInboxIdSet = new Set<string>();
+      for (const data of dmDataWithInboxIds) {
+        if (data.peerInboxId) {
+          uniqueInboxIdSet.add(data.peerInboxId);
+        }
+      }
+      const uniqueInboxIds = Array.from(uniqueInboxIdSet);
+
+      // Phase 2: Batch fetch addresses (1 API call instead of N)
+      const addressMap = await getAddressesForInboxIds(client, uniqueInboxIds);
+
+      // Phase 3: Batch fetch consent states (parallel calls, consolidated error handling)
+      const consentMap = await getInboxConsentStates(client, uniqueInboxIds);
+
+      // Phase 4: Conditionally sync and fetch messages
+      // When hideMessagePreviews is ON, skip expensive sync but still get cached lastMessage for timestamp
+      const messageMap = new Map<string, { content: string; sentAt: Date; senderInboxId: string } | null>();
+
+      if (!hideMessagePreviews) {
+        // Full sync and fetch when previews are shown
+        await Promise.allSettled(
+          conversations.map((conv) => syncConversation(conv))
+        );
+      }
+
+      // Fetch last messages in parallel (uses cached data when sync is skipped)
+      const messagePromises = conversations.map(async (conv) => {
+        try {
+          const message = await getLatestMessage(conv);
+          const isTextMessage = message && typeof message.content === 'string';
+          return {
+            id: conv.id,
+            message: isTextMessage
+              ? {
+                  content: message.content as string,
+                  sentAt: message.sentAt,
+                  senderInboxId: message.senderInboxId,
+                }
+              : null,
+          };
+        } catch {
+          return { id: conv.id, message: null };
+        }
+      });
+      const messageResults = await Promise.allSettled(messagePromises);
+
+      for (const result of messageResults) {
+        if (result.status === 'fulfilled') {
+          messageMap.set(result.value.id, result.value.message);
+        }
+      }
+
+      // Phase 5: Assemble previews
+      const previews: ConversationPreview[] = [];
+
+      for (const conv of conversations) {
+        const conversationIsDm = isDm(conv);
+        let peerInboxId: string | undefined;
+        let peerAddress: string | undefined;
+        let consentState: ConsentState;
+        let groupName: string | undefined;
+
+        if (conversationIsDm) {
+          const dmInfo = dmDataWithInboxIds.find((d) => d.conversation.id === conv.id);
+          peerInboxId = dmInfo?.peerInboxId;
+          peerAddress = peerInboxId ? (addressMap.get(peerInboxId) ?? undefined) : undefined;
+          consentState = peerInboxId
+            ? (consentMap.get(peerInboxId) ?? ConsentState.Unknown)
+            : ConsentState.Unknown;
+        } else {
+          groupName = conv.name ?? undefined;
+          consentState = ConsentState.Allowed; // Groups default to allowed
+        }
+
+        const lastMessage = messageMap.get(conv.id) ?? null;
+
+        previews.push({
+          id: conv.id,
+          peerInboxId,
+          peerAddress,
+          groupName,
+          lastMessage,
+          consentState,
+          unreadCount: 0, // TODO: Implement unread tracking
+          createdAt: conv.createdAt ?? new Date(),
+          isDm: conversationIsDm,
+        });
+      }
+
+      return previews;
+    },
+    [client, hideMessagePreviews]
+  );
+
+  /**
+   * Build a single conversation preview (for streaming new conversations)
+   * Uses individual API calls - acceptable for single conversation at a time
+   */
+  const buildSinglePreview = useCallback(
     async (conversation: Conversation): Promise<ConversationPreview> => {
       if (!client) {
         throw new Error('XMTP client not initialized');
@@ -119,10 +257,12 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
         consentState = ConsentState.Allowed;
       }
 
-      // Sync conversation to ensure we have the latest messages
-      await syncConversation(conversation);
+      // Sync conversation only if previews are enabled (for streaming, we want fresh data)
+      if (!hideMessagePreviews) {
+        await syncConversation(conversation);
+      }
 
-      // Get the latest message
+      // Get the latest message (uses cached data when sync is skipped)
       const latestMessage = await getLatestMessage(conversation);
 
       // Only use text messages for preview (filter out system messages like group_updated)
@@ -146,11 +286,11 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
         isDm: conversationIsDm,
       };
     },
-    [client]
+    [client, hideMessagePreviews]
   );
 
   /**
-   * Load all conversations and build previews
+   * Load all conversations and build previews using batch optimization
    */
   const loadConversations = useCallback(async () => {
     if (!client || !isInitialized) {
@@ -166,19 +306,8 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
       // Get all conversations
       const conversations = await listConversations(client);
 
-      // Build previews for all conversations (use allSettled for resilience)
-      const previewPromises = conversations.map((conv) => buildPreview(conv));
-      const results = await Promise.allSettled(previewPromises);
-
-      // Filter out failed previews and log errors
-      const previews: ConversationPreview[] = [];
-      for (const result of results) {
-        if (result.status === 'fulfilled') {
-          previews.push(result.value);
-        } else {
-          console.error('Failed to build conversation preview:', result.reason);
-        }
-      }
+      // Build previews using batch optimization
+      const previews = await buildPreviews(conversations);
 
       // Sort by last message date (most recent first)
       previews.sort((a, b) => {
@@ -202,7 +331,7 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
       }));
       console.error('Failed to load conversations:', error);
     }
-  }, [client, isInitialized, buildPreview]);
+  }, [client, isInitialized, buildPreviews]);
 
   /**
    * Refresh conversations
@@ -239,8 +368,8 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
 
     const cleanup = streamConversations(client, async (newConversation) => {
       try {
-        // Build preview for the new conversation
-        const preview = await buildPreview(newConversation);
+        // Build preview for the new conversation (single conversation, use individual builder)
+        const preview = await buildSinglePreview(newConversation);
 
         setState((prev) => {
           // Check if conversation already exists
@@ -279,7 +408,7 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
     });
 
     return cleanup;
-  }, [client, isInitialized, buildPreview]);
+  }, [client, isInitialized, buildSinglePreview]);
 
   /**
    * Filter previews based on filter options
