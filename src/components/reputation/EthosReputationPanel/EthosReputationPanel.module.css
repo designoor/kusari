@@ -53,31 +53,6 @@
   flex-wrap: wrap;
 }
 
-.stat {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-}
-
-.stat.positive {
-  color: var(--color-success);
-  background-color: rgba(91, 255, 140, 0.1);
-}
-
-.stat.negative {
-  color: var(--color-error);
-  background-color: rgba(255, 91, 91, 0.1);
-}
-
-.stat.neutral {
-  color: var(--color-content-secondary);
-  background-color: rgba(161, 161, 161, 0.1);
-}
-
 /* Vouch stats */
 .vouchStat {
   display: flex;

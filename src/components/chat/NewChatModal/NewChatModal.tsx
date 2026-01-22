@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Icon } from '@/components/ui/Icon';
-import { EthosScore } from '@/components/reputation/EthosScore';
+import { EthosBadgeGroup } from '@/components/reputation/EthosBadgeGroup';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import { useNewChat } from '@/hooks/useNewChat';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import { useWallet } from '@/hooks/useWallet';
 import { useToast } from '@/providers/ToastProvider';
-import { isValidAddress, truncateAddress, addressesEqual } from '@/lib/address';
+import { isValidAddress, addressesEqual } from '@/lib/address';
 import styles from './NewChatModal.module.css';
 
 type RecipientState =
@@ -197,6 +198,10 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ className }) => {
     [recipientState, isCreating, handleStartChat]
   );
 
+  // Fetch Ethos profile when we have a valid address
+  const ethosAddress = recipientState.status === 'valid' ? recipientState.address : null;
+  const { data: ethosProfile, isLoading: isEthosLoading } = useEthosScore(ethosAddress);
+
   // Determine input error state
   const inputError =
     recipientState.status === 'invalid' || recipientState.status === 'error'
@@ -207,18 +212,28 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ className }) => {
   const canStartChat =
     recipientState.status === 'valid' && recipientState.canMessage && !isCreating;
 
+  // Get display name - prefer displayName, fall back to username
+  const displayName = useMemo(() => {
+    if (recipientState.status !== 'valid' || !ethosProfile) {
+      return null;
+    }
+    return ethosProfile.displayName || ethosProfile.username || null;
+  }, [recipientState.status, ethosProfile]);
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={closeModal}
       title="New Chat"
-      size="sm"
+      size="md"
+      noPadding
       className={className}
     >
       <div className={styles.content}>
         <div className={styles.inputSection}>
           <Input
             ref={inputRef}
+            size="lg"
             placeholder="Enter Ethereum address (0x...)"
             value={inputValue}
             onChange={handleInputChange}
@@ -243,28 +258,58 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ className }) => {
         {recipientState.status === 'valid' && (
           <div className={styles.recipientCard}>
             <div className={styles.recipientInfo}>
-              <Avatar address={recipientState.address} size="lg" />
+              <Avatar
+                src={ethosProfile?.avatarUrl}
+                address={recipientState.address}
+                size="lg"
+              />
               <div className={styles.recipientDetails}>
+                {displayName && (
+                  <span className={styles.recipientName}>{displayName}</span>
+                )}
                 <span className={styles.recipientAddress}>
-                  {truncateAddress(recipientState.address)}
+                  {recipientState.address}
                 </span>
-                <EthosScore
-                  address={recipientState.address}
-                  size="sm"
-                  variant="compact"
-                />
               </div>
             </div>
-            <div className={styles.xmtpStatus}>
+            <div className={styles.statusList}>
               {recipientState.canMessage ? (
-                <span className={styles.xmtpAvailable}>
+                <span className={styles.statusAvailable}>
                   <Icon name="check" size="sm" />
-                  Available on XMTP
+                  Available on Kusari
                 </span>
               ) : (
-                <span className={styles.xmtpUnavailable}>
+                <span className={styles.statusUnavailable}>
                   <Icon name="alertTriangle" size="sm" />
-                  Not available on XMTP
+                  Not available on Kusari
+                </span>
+              )}
+            </div>
+            <div className={styles.ethosSection}>
+              {isEthosLoading ? (
+                <span className={styles.statusLoading}>
+                  <Icon name="loader" size="sm" />
+                  Checking Ethos...
+                </span>
+              ) : ethosProfile ? (
+                <>
+                  <span className={styles.statusAvailable}>
+                    <Icon name="check" size="sm" />
+                    Registered on Ethos
+                  </span>
+                  <EthosBadgeGroup
+                    score={ethosProfile.score}
+                    level={ethosProfile.level}
+                    positiveReviews={ethosProfile.reviews.positive}
+                    negativeReviews={ethosProfile.reviews.negative}
+                    size="md"
+                    className={styles.ethosStats}
+                  />
+                </>
+              ) : (
+                <span className={styles.statusUnavailable}>
+                  <Icon name="alertTriangle" size="sm" />
+                  Not registered on Ethos
                 </span>
               )}
             </div>
@@ -282,11 +327,6 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ className }) => {
           >
             Start Chat
           </Button>
-          {recipientState.status === 'valid' && !recipientState.canMessage && (
-            <p className={styles.hint}>
-              This address hasn't enabled XMTP messaging yet.
-            </p>
-          )}
         </div>
       </div>
     </Modal>

@@ -123,6 +123,23 @@
   transform: translateY(1px);
 }
 
+.button.danger {
+  background-color: var(--color-error);
+  color: var(--color-bg-primary);
+  border: 2px solid var(--color-error);
+}
+
+.button.danger:hover:not(.disabled) {
+  background-color: #E65252;
+  border-color: #E65252;
+}
+
+.button.danger:active:not(.disabled) {
+  background-color: #CC4949;
+  border-color: #CC4949;
+  transform: translateY(1px);
+}
+
 /* States */
 .button.disabled {
   cursor: not-allowed;

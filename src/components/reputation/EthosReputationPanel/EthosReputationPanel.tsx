@@ -5,8 +5,9 @@ import { useEthosScore } from '@/hooks/useEthosScore';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { ThumbsUpIcon, ThumbsDownIcon, ExternalLinkIcon } from '@/components/ui/Icon/icons';
+import { ExternalLinkIcon } from '@/components/ui/Icon/icons';
 import { ReputationBadge } from '../ReputationBadge';
+import { ReviewStat } from '../ReviewStat';
 import type { EthosProfile } from '@/services/ethos';
 import styles from './EthosReputationPanel.module.css';
 
@@ -145,14 +146,8 @@ const ProfileContent: React.FC<{
             Reviews ({totalReviews})
           </span>
           <div className={styles.statsRow}>
-            <div className={`${styles.stat} ${styles.positive}`}>
-              <ThumbsUpIcon size={14} />
-              <span>{profile.reviews.positive}</span>
-            </div>
-            <div className={`${styles.stat} ${styles.negative}`}>
-              <ThumbsDownIcon size={14} />
-              <span>{profile.reviews.negative}</span>
-            </div>
+            <ReviewStat variant="positive" count={profile.reviews.positive} />
+            <ReviewStat variant="negative" count={profile.reviews.negative} />
           </div>
         </div>
       )}

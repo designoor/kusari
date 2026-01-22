@@ -1,0 +1,42 @@
+.stat {
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Size variants - matching ReputationBadge sizes */
+.stat.sm {
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: var(--font-size-sm);
+  height: 22px;
+}
+
+.stat.md {
+  gap: var(--spacing-xs);
+  padding: 4px 10px;
+  font-size: var(--font-size-sm);
+  height: 28px;
+}
+
+.stat.lg {
+  gap: var(--spacing-xs);
+  padding: 6px 14px;
+  font-size: var(--font-size-md);
+  height: 34px;
+}
+
+/* Color variants */
+.stat.positive {
+  color: var(--color-success);
+  background-color: rgba(91, 255, 140, 0.1);
+}
+
+.stat.negative {
+  color: var(--color-error);
+  background-color: rgba(255, 91, 91, 0.1);
+}
