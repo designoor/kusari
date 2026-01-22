@@ -4,7 +4,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
+import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { EthosReputationPanel } from '@/components/reputation/EthosReputationPanel';
 import { ContactActions } from '../ContactActions';
@@ -68,6 +68,21 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
 
   // Primary display: username (with @) if available, otherwise address
   const primaryName = displayName ?? (ethosUsername ? `@${ethosUsername}` : address);
+
+  // Calculate accept button variant based on Ethos score
+  const acceptVariant: ButtonVariant = useMemo(() => {
+    if (!ethosProfile) {
+      return 'danger';
+    }
+    const score = ethosProfile.score;
+    if (score < 1300) {
+      return 'danger';
+    }
+    if (score <= 1500) {
+      return 'secondary';
+    }
+    return 'primary';
+  }, [ethosProfile]);
 
   const handleOpenChat = useCallback(() => {
     if (conversationId) {
@@ -185,6 +200,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
             layout="horizontal"
             size="lg"
             fullWidth
+            acceptVariant={acceptVariant}
           />
         )}
       </div>

@@ -13,3 +13,9 @@ export type { EthosScoreProps } from './EthosScore';
 
 export { EthosReputationPanel } from './EthosReputationPanel';
 export type { EthosReputationPanelProps } from './EthosReputationPanel';
+
+export { ReviewStat } from './ReviewStat';
+export type { ReviewStatProps, ReviewStatVariant, ReviewStatSize } from './ReviewStat';
+
+export { EthosBadgeGroup } from './EthosBadgeGroup';
+export type { EthosBadgeGroupProps } from './EthosBadgeGroup';

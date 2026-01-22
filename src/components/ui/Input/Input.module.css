@@ -30,13 +30,13 @@
 /* Sizes - matching Button spec (height accounts for 1px bottom border) */
 .inputContainer.sm {
   height: 31px;
-  padding: 0 var(--spacing-xs);
+  padding: 0 var(--spacing-sm);
   font-size: var(--font-size-sm);
 }
 
 .inputContainer.md {
   height: 39px;
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-sm);
   font-size: var(--font-size-md);
 }
 
@@ -46,30 +46,30 @@
   font-size: var(--font-size-lg);
 }
 
-/* Element padding adjustments - left element reduces left padding */
+/* Element padding adjustments - variants with icons get more padding */
 .inputContainer.sm.hasLeftElement {
-  padding-left: var(--spacing-xs);
+  padding-left: var(--spacing-sm);
 }
 
 .inputContainer.md.hasLeftElement {
-  padding-left: calc(var(--spacing-md) / 2);
-}
-
-.inputContainer.lg.hasLeftElement {
   padding-left: var(--spacing-md);
 }
 
-/* Element padding adjustments - right element reduces right padding */
+.inputContainer.lg.hasLeftElement {
+  padding-left: var(--spacing-lg);
+}
+
+/* Element padding adjustments - variants with icons get more padding */
 .inputContainer.sm.hasRightElement {
-  padding-right: var(--spacing-xs);
+  padding-right: var(--spacing-sm);
 }
 
 .inputContainer.md.hasRightElement {
-  padding-right: calc(var(--spacing-md) / 2);
+  padding-right: var(--spacing-md);
 }
 
 .inputContainer.lg.hasRightElement {
-  padding-right: var(--spacing-md);
+  padding-right: var(--spacing-lg);
 }
 
 /* States */

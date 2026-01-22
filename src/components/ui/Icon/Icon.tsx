@@ -18,6 +18,9 @@ import {
   RefreshIcon,
   PlusIcon,
   CopyIcon,
+  ThumbsUpIcon,
+  ThumbsDownIcon,
+  MinusIcon,
 } from './icons';
 import styles from './Icon.module.css';
 
@@ -39,7 +42,10 @@ export type IconName =
   | 'info'
   | 'refresh'
   | 'plus'
-  | 'copy';
+  | 'copy'
+  | 'thumbsUp'
+  | 'thumbsDown'
+  | 'minus';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -77,6 +83,9 @@ const ICON_MAP = {
   refresh: RefreshIcon,
   plus: PlusIcon,
   copy: CopyIcon,
+  thumbsUp: ThumbsUpIcon,
+  thumbsDown: ThumbsDownIcon,
+  minus: MinusIcon,
 } as const;
 
 export const Icon: React.FC<IconProps> = React.memo(({

@@ -13,6 +13,7 @@ export interface ModalProps {
   footer?: React.ReactNode;
   size?: ModalSize;
   closeOnOverlayClick?: boolean;
+  noPadding?: boolean;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   size = 'md',
   closeOnOverlayClick = true,
+  noPadding = false,
   className,
 }) => {
   const modalRef = React.useRef<HTMLDivElement>(null);
@@ -135,7 +137,7 @@ export const Modal: React.FC<ModalProps> = ({
             <Icon name="x" size="md" />
           </button>
         )}
-        <div className={styles.content}>{children}</div>
+        <div className={`${styles.content} ${noPadding ? styles.noPadding : ''}`}>{children}</div>
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </div>,

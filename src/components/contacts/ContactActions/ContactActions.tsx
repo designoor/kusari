@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { ConsentState } from '@xmtp/browser-sdk';
-import { Button } from '@/components/ui/Button';
+import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { CheckIcon, XIcon, BanIcon, UserCheckIcon } from '@/components/ui/Icon/icons';
 import { useConsent } from '@/hooks/useConsent';
 import styles from './ContactActions.module.css';
@@ -29,6 +29,8 @@ export interface ContactActionsProps {
   size?: 'sm' | 'md' | 'lg';
   /** Show full-width buttons */
   fullWidth?: boolean;
+  /** Variant for the Accept button (based on reputation) */
+  acceptVariant?: ButtonVariant;
   /** Additional CSS class */
   className?: string;
 }
@@ -48,6 +50,7 @@ export const ContactActions: React.FC<ContactActionsProps> = ({
   layout = 'horizontal',
   size = 'md',
   fullWidth = false,
+  acceptVariant = 'secondary',
   className,
 }) => {
   const { allowContact, denyContact, isLoading } = useConsent();
@@ -90,7 +93,7 @@ export const ContactActions: React.FC<ContactActionsProps> = ({
       <div className={`${styles.wrapper} ${className ?? ''}`}>
         <div className={`${styles.container} ${styles[layout]}`}>
           <Button
-            variant="primary"
+            variant={acceptVariant}
             size={size}
             fullWidth={fullWidth}
             leftIcon={<CheckIcon size={16} />}
@@ -101,7 +104,7 @@ export const ContactActions: React.FC<ContactActionsProps> = ({
             Accept
           </Button>
           <Button
-            variant="ghost"
+            variant="secondary"
             size={size}
             fullWidth={fullWidth}
             leftIcon={<XIcon size={16} />}
