@@ -53,10 +53,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <div className={styles.stepIndicatorWrapper}>
-          <StepIndicator currentStep={stepIndex} totalSteps={totalSteps} />
-        </div>
-
         <div className={styles.stepContent}>
           {currentStep === 'welcome' && <WelcomeStep onNext={nextStep} />}
 
@@ -67,6 +63,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           {currentStep === 'sign' && (
             <SignMessageStep onComplete={handleComplete} onBack={prevStep} />
           )}
+        </div>
+
+        <div className={styles.stepIndicatorWrapper}>
+          <StepIndicator currentStep={stepIndex} totalSteps={totalSteps} />
         </div>
       </div>
     </div>

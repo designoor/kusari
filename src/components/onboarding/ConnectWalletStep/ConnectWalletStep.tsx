@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { FeatureItem } from '../FeatureItem';
 import { useWallet } from '@/hooks/useWallet';
 import { truncateAddress } from '@/lib';
 import styles from './ConnectWalletStep.module.css';
@@ -16,7 +17,7 @@ export interface ConnectWalletStepProps {
 
 /**
  * Second step of the onboarding flow
- * Allows users to connect their wallet via WalletConnect
+ * Allows users to connect their wallet via Reown
  */
 export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
   onNext,
@@ -40,7 +41,7 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
         <h1 className={styles.title}>Connect Your Wallet</h1>
 
         <p className={styles.description}>
-          Connect your Ethereum wallet to get started with Kusari. We support browser wallets and mobile wallets via WalletConnect.
+          Connect your Ethereum wallet to get started with Kusari. We support browser wallets and mobile wallets via Reown.
         </p>
 
         {!isConfigured && (
@@ -69,15 +70,19 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
             </div>
           </div>
         ) : isConfigured ? (
-          <div className={styles.walletInfo}>
-            <div className={styles.infoItem}>
-              <Icon name="shield" size="md" />
-              <span>Secure connection via WalletConnect v2</span>
-            </div>
-            <div className={styles.infoItem}>
-              <Icon name="wallet" size="md" />
-              <span>Supports MetaMask, Rainbow, and more</span>
-            </div>
+          <div className={styles.features}>
+            <FeatureItem
+              icon={<Icon name="shield" size="md" />}
+              title="Secure Connection"
+              description="Connect securely via Reown"
+              iconColor="#BF5AF2"
+            />
+            <FeatureItem
+              icon={<Icon name="wallet" size="md" />}
+              title="Multi-Wallet Support"
+              description="Supports MetaMask, Rainbow, and more"
+              iconColor="#FF8C00"
+            />
           </div>
         ) : null}
       </div>

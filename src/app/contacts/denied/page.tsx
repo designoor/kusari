@@ -23,7 +23,6 @@ export default function DeniedPage() {
     <div className={styles.container}>
       <PageHeader
         title="Denied Contacts"
-        subtitle="Blocked contacts cannot send you messages. You can unblock them from their profile."
         backButton={{ href: '/contacts' }}
         size="lg"
       />

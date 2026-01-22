@@ -17,7 +17,6 @@ export default function RequestsPage() {
     <div className={styles.container}>
       <PageHeader
         title="New Requests"
-        subtitle="Review message requests before accepting. Check reputation to make informed decisions."
         backButton={{ href: '/contacts' }}
         size="lg"
       />
