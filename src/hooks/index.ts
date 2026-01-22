@@ -6,6 +6,7 @@ export * from './useXmtp';
 
 // Chat Hooks
 export * from './useConversations';
+export * from './useCoordinatedConversations';
 export * from './useMessages';
 export * from './useConsent';
 export * from './useNewRequestsCount';
@@ -16,7 +17,6 @@ export * from './useNavItems';
 
 // Reputation Hooks
 export * from './useEthosScore';
-export { useEthosContext, useEthosContextSafe } from '@/providers/EthosProvider';
 
 // Preferences Hooks
 export * from './usePreferences';

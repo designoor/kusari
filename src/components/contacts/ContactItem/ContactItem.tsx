@@ -4,7 +4,6 @@ import React, { useCallback } from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { EthosScore } from '@/components/reputation/EthosScore';
-import { useEthosScore } from '@/hooks';
 import type { EthosProfile } from '@/services/ethos';
 import styles from './ContactItem.module.css';
 
@@ -19,7 +18,7 @@ export interface ContactItemProps {
   isActive?: boolean;
   /** Click handler - if provided, overrides default navigation */
   onClick?: () => void;
-  /** Pre-fetched Ethos profile (for batch optimization) */
+  /** Pre-fetched Ethos profile from coordinated loading */
   ethosProfile?: EthosProfile | null;
 }
 
@@ -37,16 +36,8 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
   conversationId,
   isActive = false,
   onClick,
-  ethosProfile: externalEthosProfile,
+  ethosProfile,
 }) => {
-  // Check if address is a valid Ethereum address (not an inbox ID)
-  const isValidEthAddress = /^0x[a-fA-F0-9]{40}$/.test(address);
-
-  // Fetch Ethos profile only if not provided externally and address is valid Ethereum format
-  // Inbox IDs are not Ethereum addresses and cannot be used for Ethos lookups
-  const addressForEthos = !externalEthosProfile && isValidEthAddress ? address : null;
-  const { data: fetchedEthosProfile } = useEthosScore(addressForEthos);
-  const ethosProfile = externalEthosProfile ?? fetchedEthosProfile;
 
   // Use Ethos username if available, otherwise fall back to displayName
   const ethosName = ethosProfile?.username ?? displayName;
@@ -64,10 +55,10 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
           <span className={styles.name}>{ethosName ?? address}</span>
           <EthosScore
             address={address}
+            profile={ethosProfile}
             size="sm"
             variant="compact"
             onProfileClick={handleProfileClick}
-            ethosProfile={ethosProfile}
           />
         </div>
         {ethosName && <span className={styles.address}>{address}</span>}

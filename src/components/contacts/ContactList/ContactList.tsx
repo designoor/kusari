@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ContactItem } from '../ContactItem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useEthosScores, useEthosContext } from '@/hooks';
-import type { EthosProfile } from '@/services/ethos';
 import type { ConversationPreview } from '@/types/conversation';
+import type { EthosProfile } from '@/services/ethos';
 import styles from './ContactList.module.css';
 
 export interface ContactListProps {
   /** Contacts to display */
   contacts: ConversationPreview[];
+  /** Pre-fetched Ethos profiles (keyed by lowercase address) */
+  ethosProfiles?: Map<string, EthosProfile>;
   /** Whether data is loading */
   isLoading?: boolean;
   /** Title for empty state */
@@ -27,12 +28,6 @@ export interface ContactListProps {
   activeAddress?: string;
   /** Additional CSS class */
   className?: string;
-  /**
-   * Whether to use the global Ethos context for profiles.
-   * Set to false for requests/denied pages to fetch locally.
-   * @default true
-   */
-  useContextProfiles?: boolean;
 }
 
 /**
@@ -40,34 +35,14 @@ export interface ContactListProps {
  */
 export const ContactList: React.FC<ContactListProps> = ({
   contacts,
+  ethosProfiles = new Map(),
   isLoading = false,
   emptyTitle = 'No contacts',
   emptyDescription,
   emptyAction,
   activeAddress,
   className,
-  useContextProfiles = true,
 }) => {
-  // Get global context profiles (for allowed contacts)
-  const ethosContext = useEthosContext();
-
-  // Extract addresses for local batch fetching (only when not using context)
-  const addressesForLocalFetch = useMemo(() => {
-    if (useContextProfiles) {
-      return []; // Don't fetch locally if using context
-    }
-    return contacts
-      .map((contact) => contact.peerAddress ?? contact.peerInboxId)
-      .filter((addr): addr is string => !!addr && /^0x[a-fA-F0-9]{40}$/.test(addr));
-  }, [contacts, useContextProfiles]);
-
-  // Local batch fetch for requests/denied pages
-  const { profiles: localProfiles } = useEthosScores(addressesForLocalFetch);
-
-  // Use context profiles or local profiles based on prop
-  const ethosProfiles: Map<string, EthosProfile> = useContextProfiles
-    ? ethosContext.profiles
-    : localProfiles;
 
   // Loading state - show skeletons
   if (isLoading) {

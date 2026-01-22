@@ -79,48 +79,6 @@ export async function getInboxConsentState(
 }
 
 /**
- * Get consent states for multiple inbox IDs in batch
- * Fetches consent states in parallel for efficiency
- *
- * @param client XMTP client instance
- * @param inboxIds Array of inbox IDs to check
- * @returns Map of inbox ID to consent state (defaults to Unknown on error)
- */
-export async function getInboxConsentStates(
-  client: Client,
-  inboxIds: string[]
-): Promise<Map<string, ConsentState>> {
-  const result = new Map<string, ConsentState>();
-
-  if (inboxIds.length === 0) {
-    return result;
-  }
-
-  // Fetch consent states in parallel (SDK doesn't have batch API for consent)
-  // Each promise handles its own errors and always resolves, so Promise.all is safe
-  const results = await Promise.all(
-    inboxIds.map(async (inboxId) => {
-      try {
-        const state = await client.preferences.getConsentState(
-          ConsentEntityType.InboxId,
-          inboxId
-        );
-        return { inboxId, state };
-      } catch (error) {
-        console.error(`Failed to get consent state for ${inboxId}:`, error);
-        return { inboxId, state: ConsentState.Unknown };
-      }
-    })
-  );
-
-  for (const { inboxId, state } of results) {
-    result.set(inboxId, state);
-  }
-
-  return result;
-}
-
-/**
  * Set consent state for a conversation (group)
  * @param client XMTP client instance
  * @param conversationId Conversation ID (group ID)

@@ -69,7 +69,6 @@ export default function ContactDetailPage() {
         <PageHeader
           title="Profile"
           backButton={{ href: '/contacts' }}
-          size="lg"
           isLoading
         />
         <div className={styles.content}>
@@ -91,7 +90,6 @@ export default function ContactDetailPage() {
         <PageHeader
           title="Profile"
           backButton={{ href: '/contacts' }}
-          size="lg"
         />
         <div className={styles.content}>
           <EmptyState
@@ -113,7 +111,6 @@ export default function ContactDetailPage() {
       <PageHeader
         title="Profile"
         backButton={{ href: getBackLink() }}
-        size="lg"
       />
       <div className={styles.content}>
         <ContactDetail

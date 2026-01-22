@@ -48,11 +48,9 @@
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: 0;
   background-color: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-accent);
   margin-top: var(--spacing-md);
   text-align: left;
-  width: 100%;
-  max-width: 480px;
 }
 
 .successIcon {
@@ -62,7 +60,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 0;
-  background-color: var(--color-content-tertiary);
+  background-color: var(--color-accent);
   color: var(--color-bg-primary);
   flex-shrink: 0;
 }
@@ -146,9 +144,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  width: 100%;
-  max-width: 480px;
-  align-self: center;
 }
 
 @media (min-width: 768px) {

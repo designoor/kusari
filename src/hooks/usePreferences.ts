@@ -5,7 +5,7 @@
  * Provides reactive access to preferences with localStorage persistence
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   getHideMessagePreviews,
   setHideMessagePreviews as saveHideMessagePreviews,
@@ -36,13 +36,9 @@ export function usePreferences(): PreferencesState {
     setHideMessagePreviewsState(hide);
   }, []);
 
-  // Memoize return object to provide stable reference for context consumers
-  return useMemo(
-    () => ({
-      isLoading,
-      hideMessagePreviews,
-      setHideMessagePreviews,
-    }),
-    [isLoading, hideMessagePreviews, setHideMessagePreviews]
-  );
+  return {
+    isLoading,
+    hideMessagePreviews,
+    setHideMessagePreviews,
+  };
 }

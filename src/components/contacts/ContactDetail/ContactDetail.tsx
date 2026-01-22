@@ -4,15 +4,13 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { Avatar } from '@/components/ui/Avatar';
-import { AlertBanner } from '@/components/ui/AlertBanner';
 import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
-import { SectionTitle } from '@/components/ui/SectionTitle';
 import { EthosReputationPanel } from '@/components/reputation/EthosReputationPanel';
-import { formatRelativeTime } from '@/lib';
 import { ContactActions } from '../ContactActions';
-import { useConsent, useEthosScore, useEthosContext } from '@/hooks';
-import { ChatIcon, BanIcon, InboxIcon, AlertTriangleIcon } from '@/components/ui/Icon/icons';
+import { useConsent } from '@/hooks/useConsent';
+import { useEthosScore } from '@/hooks/useEthosScore';
+import { ChatIcon, BanIcon, InboxIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactDetail.module.css';
 
 export interface ContactDetailProps {
@@ -62,18 +60,14 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   const [isBlocking, setIsBlocking] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
-  // Get Ethos profile - check context first (for allowed contacts), fallback to individual fetch
-  const ethosContext = useEthosContext();
-  const contextProfile = ethosContext.getProfile(address);
-  // Only fetch individually if not in context (e.g., for requests or denied contacts)
-  const { data: fetchedProfile } = useEthosScore(contextProfile ? null : address);
-  const ethosProfile = contextProfile ?? fetchedProfile;
+  // Fetch Ethos profile for the address
+  const { data: ethosProfile } = useEthosScore(address);
 
   // Get Ethos username if available
   const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
 
-  // Primary display: username if available, otherwise address
-  const primaryName = displayName ?? ethosUsername ?? address;
+  // Primary display: username (with @) if available, otherwise address
+  const primaryName = displayName ?? (ethosUsername ? `@${ethosUsername}` : address);
 
   // Calculate accept button variant based on Ethos score
   const acceptVariant: ButtonVariant = useMemo(() => {
@@ -89,30 +83,6 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
     }
     return 'primary';
   }, [ethosProfile]);
-
-  // Warning message for low/no reputation contacts
-  const reputationWarning = useMemo(() => {
-    // Only show warning for unknown consent state (pending requests)
-    if (consentState !== ConsentState.Unknown) {
-      return null;
-    }
-
-    if (!ethosProfile) {
-      return {
-        title: 'Unverified Contact',
-        message: 'This contact has no reputation score on Ethos. Exercise caution when accepting messages from unknown senders.',
-      };
-    }
-
-    if (ethosProfile.score < 1300) {
-      return {
-        title: 'Low Reputation',
-        message: 'This contact has a low reputation score. Be cautious when accepting this request.',
-      };
-    }
-
-    return null;
-  }, [consentState, ethosProfile]);
 
   const handleOpenChat = useCallback(() => {
     if (conversationId) {
@@ -181,35 +151,24 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
       </div>
 
       {/* Reputation Panel */}
-      <SectionTitle>Reputation</SectionTitle>
-      <EthosReputationPanel
-        address={address}
-        showUserInfo={false}
-        showReviews={true}
-        showVouches={true}
-        showProfileLink={true}
-      />
+      <div className={styles.section}>
+        <EthosReputationPanel
+          address={address}
+          showUserInfo={false}
+          showReviews={true}
+          showVouches={true}
+          showProfileLink={true}
+        />
+      </div>
 
       {/* Message Preview (for requests) */}
       {consentState === ConsentState.Unknown && lastMessage && (
-        <>
-          <SectionTitle>Message Preview</SectionTitle>
-          <div className={styles.messagePanel}>
-            <span className={styles.messageTimestamp}>{formatRelativeTime(lastMessage.sentAt)}</span>
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Message Preview</h3>
+          <div className={styles.messagePreview}>
             <p className={styles.messageContent}>{lastMessage.content}</p>
           </div>
-        </>
-      )}
-
-      {/* Reputation Warning Banner */}
-      {reputationWarning && (
-        <AlertBanner
-          variant="warning"
-          title={reputationWarning.title}
-          icon={<AlertTriangleIcon size={20} />}
-        >
-          <p>{reputationWarning.message}</p>
-        </AlertBanner>
+        </div>
       )}
 
       {/* Actions */}

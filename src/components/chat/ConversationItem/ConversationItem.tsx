@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { useEthosScore, usePreferences } from '@/hooks';
-import { formatRelativeTime, truncateAddress } from '@/lib';
+import { usePreferences } from '@/hooks';
+import { formatRelativeTime } from '@/lib';
 import type { ConversationPreview } from '@/types/conversation';
 import type { EthosProfile } from '@/services/ethos';
 import styles from './ConversationItem.module.css';
@@ -13,14 +13,14 @@ import styles from './ConversationItem.module.css';
 export interface ConversationItemProps {
   conversation: ConversationPreview;
   isActive?: boolean;
-  /** Pre-fetched Ethos profile (for batch optimization) */
+  /** Pre-fetched Ethos profile from coordinated loading */
   ethosProfile?: EthosProfile | null;
 }
 
 export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   conversation,
   isActive = false,
-  ethosProfile: externalEthosProfile,
+  ethosProfile,
 }) => {
   const {
     id,
@@ -32,29 +32,15 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
     isDm,
   } = conversation;
 
-  // Fetch Ethos profile for avatar (only for DMs, and only if not provided externally)
-  // Only use peerAddress for Ethos lookup since peerInboxId is not an Ethereum address
-  const addressForEthos = isDm && !externalEthosProfile ? peerAddress : undefined;
-  const { data: fetchedEthosProfile } = useEthosScore(addressForEthos ?? null);
-  const ethosProfile = externalEthosProfile ?? fetchedEthosProfile;
-
   // Get user preferences for hiding message previews
   // Use isLoading to prevent hydration flash - default to hidden for privacy during load
   const { hideMessagePreviews, isLoading: preferencesLoading } = usePreferences();
 
-  // Display name: prefer Ethos username, fall back to address
-  // For groups, use group name
-  const ethosName = isDm
-    ? (ethosProfile?.username ?? ethosProfile?.displayName)
-    : null;
+  // Display name: prefer Ethos username/displayName for DMs, then fall back to address
+  // CSS will handle truncation with ellipsis if too long
   const displayName = isDm
-    ? (ethosName ?? peerAddress ?? peerInboxId ?? 'Unknown')
+    ? (ethosProfile?.username ?? ethosProfile?.displayName ?? peerAddress ?? peerInboxId ?? 'Unknown')
     : groupName ?? 'Unknown Group';
-
-  // Secondary text: show truncated address when username is displayed
-  const secondaryAddress = isDm && ethosName
-    ? truncateAddress(peerAddress ?? peerInboxId ?? '')
-    : null;
 
   // Message preview text (hidden if user preference is enabled)
   // Default to hidden during loading to prevent flash of message content
@@ -78,12 +64,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
       />
       <div className={styles.content}>
         <div className={styles.header}>
-          <div className={styles.nameGroup}>
-            <span className={styles.name}>{displayName}</span>
-            {secondaryAddress && (
-              <span className={styles.address}>{secondaryAddress}</span>
-            )}
-          </div>
+          <span className={styles.name}>{displayName}</span>
           {timeDisplay && (
             <span className={styles.time}>{timeDisplay}</span>
           )}

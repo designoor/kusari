@@ -127,7 +127,7 @@ const ProfileContent: React.FC<{
       ) : (
         <div className={styles.section}>
           <span className={styles.sectionLabel}>
-            Score
+            Reputation
           </span>
           <div className={styles.statsRow}>
             <ReputationBadge

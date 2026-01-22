@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-xl);
   padding: var(--spacing-lg);
   width: 100%;
   max-width: 460px;
@@ -36,19 +36,25 @@
   word-break: break-all;
 }
 
-.messagePanel {
+.section {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background-color: var(--color-bg-tertiary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
 }
 
-.messageTimestamp {
+.sectionTitle {
   font-size: var(--font-size-sm);
-  color: var(--color-content-tertiary);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-content-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.messagePreview {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
 }
 
 .messageContent {
@@ -63,6 +69,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 .allowedActions {

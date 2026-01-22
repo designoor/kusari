@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useXmtp } from '@/hooks/useXmtp';
@@ -23,6 +23,16 @@ export const SignMessageStep: React.FC<SignMessageStepProps> = ({
   const { initializeWithWallet, isInitializing, isInitialized, error } = useXmtp();
   const { isConnected } = useWallet();
   const [hasAttempted, setHasAttempted] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEnableMessaging = async () => {
     if (!isConnected) {
@@ -33,6 +43,10 @@ export const SignMessageStep: React.FC<SignMessageStepProps> = ({
 
     try {
       await initializeWithWallet();
+      // Brief delay to show success state before navigating
+      timeoutRef.current = setTimeout(() => {
+        onComplete();
+      }, 1500);
     } catch (err) {
       console.error('Failed to initialize XMTP:', err);
     }

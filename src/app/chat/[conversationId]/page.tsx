@@ -13,8 +13,8 @@ import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMen
 import { EthosScore } from '@/components/reputation/EthosScore';
 import { BanIcon, InboxIcon, ContactsIcon } from '@/components/ui/Icon/icons';
 import { useMessages } from '@/hooks/useMessages';
-import { useAllowedConversations } from '@/hooks/useConversations';
-import { useEthosScore, useEthosContext } from '@/hooks';
+import { useCoordinatedAllowedConversations } from '@/hooks/useCoordinatedConversations';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import { useInboxConsent, useConsent } from '@/hooks/useConsent';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
@@ -34,8 +34,8 @@ export default function ConversationPage() {
   const isMobile = useIsMobile();
   const { client, isInitialized } = useXmtpContext();
 
-  // Get conversation list for desktop sidebar
-  const { filteredPreviews, isLoading: isLoadingConversations } = useAllowedConversations();
+  // Get conversation list for desktop sidebar with coordinated Ethos loading
+  const { previews, ethosProfiles: sidebarEthosProfiles, isLoading: isLoadingConversations } = useCoordinatedAllowedConversations();
   const { openModal } = useNewChatModal();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
@@ -57,13 +57,9 @@ export default function ConversationPage() {
   const toast = useToast();
   const [isConsentActionLoading, setIsConsentActionLoading] = useState(false);
 
-  // Get Ethos profile - check context first (for allowed contacts), fallback to individual fetch
-  // Only use peerAddress for Ethos lookups since peerInboxId is not a valid Ethereum address
-  const ethosContext = useEthosContext();
-  const contextProfile = peerAddress ? ethosContext.getProfile(peerAddress) : undefined;
-  // Only fetch individually if not in context and we have a valid Ethereum address
-  const { data: fetchedProfile } = useEthosScore(contextProfile ? null : peerAddress);
-  const ethosProfile = contextProfile ?? fetchedProfile;
+  // Fetch Ethos profile for DMs
+  const addressForEthos = peerAddress ?? peerInboxId;
+  const { data: ethosProfile } = useEthosScore(addressForEthos);
 
   // Compute primary name for display
   const primaryName = useMemo(() => {
@@ -258,7 +254,7 @@ export default function ConversationPage() {
           title={primaryName}
           subtitle={conversationIsDm && peerAddress ? peerAddress : undefined}
           avatar={conversationIsDm ? { address: peerAddress ?? peerInboxId, src: ethosProfile?.avatarUrl } : undefined}
-          badge={conversationIsDm && peerAddress ? <EthosScore address={peerAddress} size="sm" variant="compact" /> : undefined}
+          badge={conversationIsDm && peerAddress ? <EthosScore address={peerAddress} profile={ethosProfile} size="sm" variant="compact" /> : undefined}
           backButton={isMobile ? { href: '/chat', mobileOnly: true } : undefined}
           actionsElement={showContactMenu ? <DropdownMenu items={contactMenuItems} ariaLabel="Contact options" /> : undefined}
           size="lg"
@@ -301,7 +297,8 @@ export default function ConversationPage() {
           }]}
         />
         <ConversationList
-          conversations={filteredPreviews}
+          conversations={previews}
+          ethosProfiles={sidebarEthosProfiles}
           isLoading={isLoadingConversations}
           activeConversationId={conversationId}
           emptyStateTitle="No conversations yet"
