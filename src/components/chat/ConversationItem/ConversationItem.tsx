@@ -33,7 +33,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   } = conversation;
 
   // Fetch Ethos profile for avatar (only for DMs, and only if not provided externally)
-  const addressForEthos = isDm && !externalEthosProfile ? (peerAddress ?? peerInboxId) : undefined;
+  // Only use peerAddress for Ethos lookup since peerInboxId is not an Ethereum address
+  const addressForEthos = isDm && !externalEthosProfile ? peerAddress : undefined;
   const { data: fetchedEthosProfile } = useEthosScore(addressForEthos ?? null);
   const ethosProfile = externalEthosProfile ?? fetchedEthosProfile;
 

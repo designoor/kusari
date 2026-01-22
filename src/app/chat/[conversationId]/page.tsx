@@ -58,11 +58,11 @@ export default function ConversationPage() {
   const [isConsentActionLoading, setIsConsentActionLoading] = useState(false);
 
   // Get Ethos profile - check context first (for allowed contacts), fallback to individual fetch
-  const addressForEthos = peerAddress ?? peerInboxId;
+  // Only use peerAddress for Ethos lookups since peerInboxId is not a valid Ethereum address
   const ethosContext = useEthosContext();
-  const contextProfile = addressForEthos ? ethosContext.getProfile(addressForEthos) : undefined;
-  // Only fetch individually if not in context (e.g., for requests or edge cases)
-  const { data: fetchedProfile } = useEthosScore(contextProfile ? null : addressForEthos);
+  const contextProfile = peerAddress ? ethosContext.getProfile(peerAddress) : undefined;
+  // Only fetch individually if not in context and we have a valid Ethereum address
+  const { data: fetchedProfile } = useEthosScore(contextProfile ? null : peerAddress);
   const ethosProfile = contextProfile ?? fetchedProfile;
 
   // Compute primary name for display
