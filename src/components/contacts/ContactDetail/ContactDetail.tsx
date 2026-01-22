@@ -8,8 +8,7 @@ import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { EthosReputationPanel } from '@/components/reputation/EthosReputationPanel';
 import { ContactActions } from '../ContactActions';
-import { useConsent } from '@/hooks/useConsent';
-import { useEthosScore } from '@/hooks/useEthosScore';
+import { useConsent, useEthosScore, useEthosContext } from '@/hooks';
 import { ChatIcon, BanIcon, InboxIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactDetail.module.css';
 
@@ -60,8 +59,12 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   const [isBlocking, setIsBlocking] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
-  // Fetch Ethos profile for the address
-  const { data: ethosProfile } = useEthosScore(address);
+  // Get Ethos profile - check context first (for allowed contacts), fallback to individual fetch
+  const ethosContext = useEthosContext();
+  const contextProfile = ethosContext.getProfile(address);
+  // Only fetch individually if not in context (e.g., for requests or denied contacts)
+  const { data: fetchedProfile } = useEthosScore(contextProfile ? null : address);
+  const ethosProfile = contextProfile ?? fetchedProfile;
 
   // Get Ethos username if available
   const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;

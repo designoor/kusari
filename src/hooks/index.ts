@@ -16,6 +16,7 @@ export * from './useNavItems';
 
 // Reputation Hooks
 export * from './useEthosScore';
+export { useEthosContext, useEthosContextSafe } from '@/providers/EthosProvider';
 
 // Preferences Hooks
 export * from './usePreferences';

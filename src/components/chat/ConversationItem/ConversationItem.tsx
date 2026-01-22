@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { useEthosScore, usePreferences } from '@/hooks';
-import { formatRelativeTime } from '@/lib';
+import { formatRelativeTime, truncateAddress } from '@/lib';
 import type { ConversationPreview } from '@/types/conversation';
 import type { EthosProfile } from '@/services/ethos';
 import styles from './ConversationItem.module.css';
@@ -41,12 +41,19 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
   // Use isLoading to prevent hydration flash - default to hidden for privacy during load
   const { hideMessagePreviews, isLoading: preferencesLoading } = usePreferences();
 
-  // Display name: group name or full peer Ethereum address
-  // CSS will handle truncation with ellipsis if too long
-  // Fall back to inbox ID if address is not available
+  // Display name: prefer Ethos username, fall back to address
+  // For groups, use group name
+  const ethosName = isDm
+    ? (ethosProfile?.username ?? ethosProfile?.displayName)
+    : null;
   const displayName = isDm
-    ? (peerAddress ?? peerInboxId ?? 'Unknown')
+    ? (ethosName ?? peerAddress ?? peerInboxId ?? 'Unknown')
     : groupName ?? 'Unknown Group';
+
+  // Secondary text: show truncated address when username is displayed
+  const secondaryAddress = isDm && ethosName
+    ? truncateAddress(peerAddress ?? peerInboxId ?? '')
+    : null;
 
   // Message preview text (hidden if user preference is enabled)
   // Default to hidden during loading to prevent flash of message content
@@ -70,7 +77,12 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
       />
       <div className={styles.content}>
         <div className={styles.header}>
-          <span className={styles.name}>{displayName}</span>
+          <div className={styles.nameGroup}>
+            <span className={styles.name}>{displayName}</span>
+            {secondaryAddress && (
+              <span className={styles.address}>{secondaryAddress}</span>
+            )}
+          </div>
           {timeDisplay && (
             <span className={styles.time}>{timeDisplay}</span>
           )}

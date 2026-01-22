@@ -13,12 +13,16 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
 import { useConversations, useMessageRequests } from '@/hooks/useConversations';
+import { useEthosContext } from '@/hooks';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import styles from './contacts.module.css';
 
 export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { openModal } = useNewChatModal();
+
+  // Get global Ethos profiles for search
+  const { profiles: ethosProfiles } = useEthosContext();
 
   // Get all conversations to filter by consent state
   const { filteredPreviews: allPreviews, isLoading, error, refresh } = useConversations();
@@ -48,16 +52,25 @@ export default function ContactsPage() {
     [allPreviews]
   );
 
-  // Apply search filter (by wallet address or inbox ID)
+  // Apply search filter (by wallet address, inbox ID, or Ethos username)
   const filteredContacts = useMemo(() => {
     if (!searchQuery) return allowedContacts;
 
     const query = searchQuery.toLowerCase();
-    return allowedContacts.filter((contact) =>
-      contact.peerAddress?.toLowerCase().includes(query) ||
-      contact.peerInboxId?.toLowerCase().includes(query)
-    );
-  }, [allowedContacts, searchQuery]);
+    return allowedContacts.filter((contact) => {
+      const matchesAddress = contact.peerAddress?.toLowerCase().includes(query);
+      const matchesInboxId = contact.peerInboxId?.toLowerCase().includes(query);
+
+      // Also match Ethos username/displayName
+      const address = (contact.peerAddress ?? contact.peerInboxId)?.toLowerCase();
+      const ethosProfile = address ? ethosProfiles.get(address) : undefined;
+      const matchesEthosName =
+        ethosProfile?.username?.toLowerCase().includes(query) ||
+        ethosProfile?.displayName?.toLowerCase().includes(query);
+
+      return matchesAddress || matchesInboxId || matchesEthosName;
+    });
+  }, [allowedContacts, searchQuery, ethosProfiles]);
 
   // Error state
   if (error && !isLoading) {
