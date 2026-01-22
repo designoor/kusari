@@ -15,3 +15,5 @@ export * from './DropdownMenu';
 export * from './Toast';
 export * from './SectionTitle';
 export * from './Toggle';
+export * from './NotificationBadge';
+export * from './AlertBanner';

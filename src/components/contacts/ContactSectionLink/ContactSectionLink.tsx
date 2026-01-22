@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/Badge';
+import { NotificationBadge } from '@/components/ui/NotificationBadge';
 import { ChevronRightIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactSectionLink.module.css';
 
@@ -17,8 +18,8 @@ export interface ContactSectionLinkProps {
   count?: number;
   /** Additional description */
   description?: string;
-  /** Badge variant */
-  variant?: 'default' | 'accent' | 'warning';
+  /** Badge variant - use 'error' for notification-style badges (red) */
+  variant?: 'default' | 'accent' | 'warning' | 'error';
   /** Additional CSS class */
   className?: string;
 }
@@ -48,7 +49,11 @@ export const ContactSectionLink: React.FC<ContactSectionLinkProps> = ({
       </div>
       <div className={styles.right}>
         {count !== undefined && count > 0 && (
-          <Badge variant={variant} size="sm" count={count} />
+          variant === 'error' ? (
+            <NotificationBadge count={count} />
+          ) : (
+            <Badge variant={variant} size="sm" count={count} />
+          )
         )}
         <ChevronRightIcon className={styles.chevron} size={16} />
       </div>

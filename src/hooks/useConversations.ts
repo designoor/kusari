@@ -9,7 +9,7 @@ import {
   syncConversations,
   getConversationById,
 } from '@/services/xmtp/conversations';
-import { getLatestMessage } from '@/services/xmtp/messages';
+import { getLatestMessage, syncConversation } from '@/services/xmtp/messages';
 import { getInboxConsentState } from '@/services/xmtp/consent';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useConsentStream } from './useConsent';
@@ -118,6 +118,9 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
         // For groups, default to allowed for now (group consent handled separately)
         consentState = ConsentState.Allowed;
       }
+
+      // Sync conversation to ensure we have the latest messages
+      await syncConversation(conversation);
 
       // Get the latest message
       const latestMessage = await getLatestMessage(conversation);

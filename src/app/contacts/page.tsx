@@ -114,7 +114,7 @@ export default function ContactsPage() {
           title="New requests"
           description="Message requests from unknown contacts"
           count={requestPreviews.length}
-          variant="accent"
+          variant="error"
         />
 
         <ContactSectionLink
