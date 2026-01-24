@@ -1,5 +1,6 @@
 'use client';
 
+import { useAccount } from 'wagmi';
 import { useAppKitState, useAppKitAccount } from '@reown/appkit/react';
 
 export type WalletConnectionStatus =
@@ -21,12 +22,11 @@ export interface WalletConnectionState {
 }
 
 /**
- * Unified wallet connection hook using AppKit as the single source of truth.
+ * Unified wallet connection hook combining wagmi and AppKit state.
  *
- * Handles SSR hydration gracefully by checking:
- * - `initialized` from useAppKitState (false during SSR hydration)
- * - `loading` from useAppKitState (true while AppKit is processing, e.g., session restoration)
- * - `status` from useAppKitAccount (includes 'reconnecting' during wallet reconnection)
+ * Uses both wagmi's isReconnecting and AppKit's status for reliable
+ * reconnection detection. The flash prevention is handled at the page
+ * level with dynamic imports (ssr: false), so this hook can be simple.
  *
  * CRITICAL: Never make routing decisions while `isLoading` is true.
  * This prevents redirect loops during hydration.
@@ -34,14 +34,15 @@ export interface WalletConnectionState {
 export function useWalletConnection(): WalletConnectionState {
   const { initialized, loading: appKitLoading } = useAppKitState();
   const { address, isConnected, status: appKitStatus } = useAppKitAccount();
+  const { isReconnecting: wagmiIsReconnecting } = useAccount();
 
   let status: WalletConnectionStatus;
 
   if (!initialized || appKitLoading) {
-    // AppKit is still initializing or processing (e.g., restoring session)
+    // AppKit is still initializing or processing
     status = 'initializing';
-  } else if (appKitStatus === 'reconnecting') {
-    // Wallet is reconnecting after page refresh
+  } else if (wagmiIsReconnecting || appKitStatus === 'reconnecting') {
+    // Reconnecting - check both wagmi and AppKit
     status = 'reconnecting';
   } else if (appKitStatus === 'connecting') {
     // User-initiated connection in progress

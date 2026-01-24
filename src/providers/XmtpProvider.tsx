@@ -103,11 +103,10 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     // Skip if wallet is still loading (initializing, reconnecting, connecting)
     if (walletLoading) return;
 
-    // If wallet not connected, mark as attempted (no auto-init needed)
-    if (!isConnected) {
-      setHasAttemptedAutoInit(true);
-      return;
-    }
+    // Skip if wallet not connected - no need to set hasAttemptedAutoInit here
+    // because useAppState's loading logic doesn't depend on it when disconnected.
+    // The address change effect will reset hasAttemptedAutoInit when wallet reconnects.
+    if (!isConnected) return;
 
     // Wait for wallet data to be fully available before probing
     // Don't mark as attempted - we're still waiting for data
@@ -163,19 +162,31 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     checkIdentity();
   }, [walletLoading, isConnected, walletClient, address, isInitialized, isInitializing, hasAttemptedAutoInit]);
 
-  // Detect wallet address changes and disconnect old client
+  // Detect wallet address changes and handle reconnection
   // This ensures we don't show stale data from a previous account
+  // and properly handles the reconnection case during page refresh
   useEffect(() => {
-    // Skip on initial mount
-    if (previousAddressRef.current === undefined) {
+    const previousAddress = previousAddressRef.current;
+
+    // Case 1: Initial mount with no address yet - just record
+    if (previousAddress === undefined && address === undefined) {
       previousAddressRef.current = address;
       return;
     }
 
-    // Detect address change (including disconnect: address becomes undefined)
-    if (previousAddressRef.current !== address) {
+    // Case 2: Wallet reconnected (undefined -> valid address)
+    // This is the KEY FIX: Reset hasAttemptedAutoInit to allow probe to run
+    // This handles the race condition where wallet appears disconnected briefly
+    // before reconnecting during page refresh
+    if (previousAddress === undefined && address !== undefined) {
+      previousAddressRef.current = address;
+      setHasAttemptedAutoInit(false);
+      return;
+    }
+
+    // Case 3: Address actually changed (account switch or wallet disconnect)
+    if (previousAddress !== address) {
       disconnect();
-      // Reset auto-init flag so new address triggers fresh initialization
       setHasAttemptedAutoInit(false);
     }
 
