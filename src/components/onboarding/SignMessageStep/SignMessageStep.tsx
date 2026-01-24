@@ -10,19 +10,19 @@ import styles from './SignMessageStep.module.css';
 
 export interface SignMessageStepProps {
   onComplete: () => void;
-  onBack: () => void;
 }
 
 /**
  * Third and final step of the onboarding flow
- * Prompts users to sign a message to enable XMTP messaging
+ * Prompts users to sign a message to enable XMTP messaging.
+ *
+ * "Back" disconnects the wallet, returning to welcome step via app state.
  */
 export const SignMessageStep: React.FC<SignMessageStepProps> = ({
   onComplete,
-  onBack,
 }) => {
   const { initializeWithWallet, isInitializing, isInitialized, error } = useXmtp();
-  const { isConnected } = useWallet();
+  const { isConnected, disconnectAsync } = useWallet();
   const [hasAttempted, setHasAttempted] = useState(false);
 
   const handleEnableMessaging = async () => {
@@ -37,6 +37,10 @@ export const SignMessageStep: React.FC<SignMessageStepProps> = ({
     } catch (err) {
       console.error('Failed to initialize XMTP:', err);
     }
+  };
+
+  const handleBack = async () => {
+    await disconnectAsync();
   };
 
   const canProceed = isInitialized;
@@ -114,7 +118,7 @@ export const SignMessageStep: React.FC<SignMessageStepProps> = ({
               variant="ghost"
               size="lg"
               fullWidth
-              onClick={onBack}
+              onClick={handleBack}
               disabled={isInitializing}
             >
               Back

@@ -1,18 +1,22 @@
+'use client';
+
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { FeatureItem } from '../FeatureItem';
+import { useWallet } from '@/hooks/useWallet';
 import styles from './WelcomeStep.module.css';
-
-export interface WelcomeStepProps {
-  onNext: () => void;
-}
 
 /**
  * First step of the onboarding flow
  * Introduces users to Kusari and Web3 messaging
+ *
+ * "Get Started" triggers wallet connection directly.
+ * Step automatically advances when wallet connects (via app state).
  */
-export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
+export const WelcomeStep: React.FC = () => {
+  const { connect, isConnecting } = useWallet();
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -48,8 +52,14 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
       </div>
 
       <div className={styles.actions}>
-        <Button variant="primary" size="lg" fullWidth onClick={onNext}>
-          Get Started
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          onClick={connect}
+          loading={isConnecting}
+        >
+          {isConnecting ? 'Connecting...' : 'Get Started'}
         </Button>
       </div>
     </div>

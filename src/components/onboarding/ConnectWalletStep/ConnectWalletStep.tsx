@@ -9,21 +9,21 @@ import styles from './ConnectWalletStep.module.css';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
-export interface ConnectWalletStepProps {
-  onNext: () => void;
-  onBack: () => void;
-}
-
 /**
  * Second step of the onboarding flow
- * Allows users to connect their wallet via WalletConnect
+ * Shows wallet connection in progress.
+ *
+ * This step is shown while wallet is connecting. Once connected,
+ * the app state automatically advances to the sign step.
+ * "Back" disconnects the wallet, returning to welcome step.
  */
-export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
-  onNext,
-  onBack,
-}) => {
+export const ConnectWalletStep: React.FC = () => {
   const { address, isConnected, isConnecting, connect, disconnectAsync } = useWallet();
   const isConfigured = Boolean(projectId);
+
+  const handleBack = async () => {
+    await disconnectAsync();
+  };
 
   const handleChangeWallet = async () => {
     await disconnectAsync();
@@ -99,19 +99,14 @@ export const ConnectWalletStep: React.FC<ConnectWalletStepProps> = ({
             >
               {isConnecting ? 'Connecting...' : 'Connect Wallet'}
             </Button>
-            <Button variant="ghost" size="lg" fullWidth onClick={onBack}>
+            <Button variant="ghost" size="lg" fullWidth onClick={handleBack}>
               Back
             </Button>
           </>
         ) : (
-          <>
-            <Button variant="primary" size="lg" fullWidth onClick={onNext}>
-              Continue
-            </Button>
-            <Button variant="ghost" size="lg" fullWidth onClick={handleChangeWallet}>
-              Change Wallet
-            </Button>
-          </>
+          <Button variant="ghost" size="lg" fullWidth onClick={handleChangeWallet}>
+            Change Wallet
+          </Button>
         )}
       </div>
     </div>
