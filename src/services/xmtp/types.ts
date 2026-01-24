@@ -12,6 +12,8 @@ export interface XmtpState {
   isInitialized: boolean;
   isInitializing: boolean;
   error: Error | null;
+  /** True after identity check has completed (found identity, no identity, or error) */
+  hasAttemptedAutoInit: boolean;
 }
 
 export interface XmtpContextValue extends XmtpState {

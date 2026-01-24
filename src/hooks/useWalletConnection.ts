@@ -25,19 +25,20 @@ export interface WalletConnectionState {
  *
  * Handles SSR hydration gracefully by checking:
  * - `initialized` from useAppKitState (false during SSR hydration)
+ * - `loading` from useAppKitState (true while AppKit is processing, e.g., session restoration)
  * - `status` from useAppKitAccount (includes 'reconnecting' during wallet reconnection)
  *
  * CRITICAL: Never make routing decisions while `isLoading` is true.
  * This prevents redirect loops during hydration.
  */
 export function useWalletConnection(): WalletConnectionState {
-  const { initialized } = useAppKitState();
+  const { initialized, loading: appKitLoading } = useAppKitState();
   const { address, isConnected, status: appKitStatus } = useAppKitAccount();
 
   let status: WalletConnectionStatus;
 
-  if (!initialized) {
-    // AppKit is still initializing (SSR hydration)
+  if (!initialized || appKitLoading) {
+    // AppKit is still initializing or processing (e.g., restoring session)
     status = 'initializing';
   } else if (appKitStatus === 'reconnecting') {
     // Wallet is reconnecting after page refresh

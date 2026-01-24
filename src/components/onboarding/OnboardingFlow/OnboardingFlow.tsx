@@ -2,42 +2,46 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useOnboardingState } from '@/hooks/useOnboardingState';
-import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
+import type { OnboardingStep } from '@/hooks/useAppState';
 import { StepIndicator } from '../StepIndicator';
 import { WelcomeStep } from '../WelcomeStep';
 import { ConnectWalletStep } from '../ConnectWalletStep';
 import { SignMessageStep } from '../SignMessageStep';
 import styles from './OnboardingFlow.module.css';
 
+// Map step names to indices for the step indicator
+const STEP_INDEX: Record<OnboardingStep, number> = {
+  welcome: 0,
+  connect: 1,
+  sign: 2,
+};
+
+const TOTAL_STEPS = 3;
+
 export interface OnboardingFlowProps {
+  /** Current step derived from app state */
+  currentStep: OnboardingStep;
+  /** Optional callback for testing */
   onComplete?: () => void;
 }
 
 /**
  * Main onboarding flow container
- * Manages the multi-step onboarding process:
- * 1. Welcome - Introduction to Kusari
- * 2. Connect - Connect wallet via WalletConnect
- * 3. Sign - Sign message to enable XMTP
+ *
+ * Steps are now reactive to SDK state changes:
+ * - welcome: Shown when wallet not connected
+ * - connect: Shown when wallet is connecting
+ * - sign: Shown when wallet connected but XMTP not initialized
+ *
+ * Navigation is implicit - step changes when SDK state changes.
  */
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
+  currentStep,
   onComplete,
 }) => {
   const router = useRouter();
-  const {
-    isLoading,
-    currentStep,
-    stepIndex,
-    totalSteps,
-    nextStep,
-    prevStep,
-    completeOnboarding,
-  } = useOnboardingState();
 
   const handleComplete = () => {
-    completeOnboarding();
-
     if (onComplete) {
       onComplete();
     } else {
@@ -45,28 +49,23 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   };
 
-  // Show app skeleton while state is being loaded
-  if (isLoading) {
-    return <AppShellSkeleton />;
-  }
+  const stepIndex = STEP_INDEX[currentStep];
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.stepContent}>
-          {currentStep === 'welcome' && <WelcomeStep onNext={nextStep} />}
+          {currentStep === 'welcome' && <WelcomeStep />}
 
-          {currentStep === 'connect' && (
-            <ConnectWalletStep onNext={nextStep} onBack={prevStep} />
-          )}
+          {currentStep === 'connect' && <ConnectWalletStep />}
 
           {currentStep === 'sign' && (
-            <SignMessageStep onComplete={handleComplete} onBack={prevStep} />
+            <SignMessageStep onComplete={handleComplete} />
           )}
         </div>
 
         <div className={styles.stepIndicatorWrapper}>
-          <StepIndicator currentStep={stepIndex} totalSteps={totalSteps} />
+          <StepIndicator currentStep={stepIndex} totalSteps={TOTAL_STEPS} />
         </div>
       </div>
     </div>

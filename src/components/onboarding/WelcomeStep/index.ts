@@ -1,2 +1,1 @@
 export { WelcomeStep } from './WelcomeStep';
-export type { WelcomeStepProps } from './WelcomeStep';
