@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { useWalletClient, useAccount } from 'wagmi';
+import { useWalletClient } from 'wagmi';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
 import { createXmtpClient, createXmtpSigner } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
 import { isOnboardingComplete } from '@/lib/onboarding/storage';
+import { useWalletConnection } from '@/hooks/useWalletConnection';
 
 const XmtpContext = createContext<XmtpContextValue | null>(null);
 
@@ -28,9 +29,9 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
   const [error, setError] = useState<Error | null>(null);
   const clientRef = useRef<Client | null>(null);
 
-  // Wallet state for auto-initialization
+  // Wallet state for auto-initialization (AppKit as single source of truth)
   const { data: walletClient } = useWalletClient();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, isLoading: walletLoading } = useWalletConnection();
 
   // Track previous wallet address to detect account switches
   const previousAddressRef = useRef<string | undefined>(undefined);
@@ -86,6 +87,9 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     // Skip if already initialized or currently initializing
     if (isInitialized || isInitializing) return;
 
+    // Skip if wallet is still loading (initializing, reconnecting, connecting)
+    if (walletLoading) return;
+
     // Skip if wallet not ready
     if (!isConnected || !walletClient || !address) return;
 
@@ -97,7 +101,7 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     initialize(signer).catch((err) => {
       console.error('XMTP auto-initialization failed:', err);
     });
-  }, [isConnected, walletClient, address, isInitialized, isInitializing, initialize]);
+  }, [walletLoading, isConnected, walletClient, address, isInitialized, isInitializing, initialize]);
 
   // Detect wallet address changes and disconnect old client
   // This ensures we don't show stale data from a previous account

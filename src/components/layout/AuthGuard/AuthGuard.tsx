@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
-import { useWallet } from '@/hooks/useWallet';
+import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { useXmtpContext } from '@/providers/XmtpProvider';
 import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
 
@@ -22,16 +22,16 @@ interface AuthGuardProps {
  */
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
-  const { isLoading, isComplete, reset } = useOnboardingState();
-  const { isConnected } = useWallet();
+  const { isLoading: onboardingLoading, isComplete, reset } = useOnboardingState();
+  const { isConnected, isLoading: walletLoading } = useWalletConnection();
   const { isInitialized: isXmtpInitialized } = useXmtpContext();
   const wasConnectedRef = useRef<boolean | null>(null);
 
   // Track wallet disconnection and reset onboarding state
   // Note: This effect only handles state cleanup. The redirect is handled by the effect below.
   useEffect(() => {
-    // Skip during initial loading
-    if (isLoading) return;
+    // Skip during any loading state
+    if (onboardingLoading || walletLoading) return;
 
     // Initialize the ref on first render after loading
     if (wasConnectedRef.current === null) {
@@ -45,17 +45,19 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
 
     wasConnectedRef.current = isConnected;
-  }, [isConnected, isLoading, reset]);
+  }, [isConnected, onboardingLoading, walletLoading, reset]);
 
   // Redirect if onboarding not complete or wallet not connected
+  // CRITICAL: Only redirect when wallet state is DEFINITIVELY known (not loading)
   useEffect(() => {
-    if (!isLoading && (!isComplete || !isConnected)) {
+    if (onboardingLoading || walletLoading) return;
+    if (!isComplete || !isConnected) {
       router.replace('/');
     }
-  }, [isLoading, isComplete, isConnected, router]);
+  }, [onboardingLoading, walletLoading, isComplete, isConnected, router]);
 
   // Show loading state while checking or if conditions not met (including XMTP initialization)
-  if (isLoading || !isComplete || !isConnected || !isXmtpInitialized) {
+  if (onboardingLoading || walletLoading || !isComplete || !isConnected || !isXmtpInitialized) {
     return <AppShellSkeleton />;
   }
 

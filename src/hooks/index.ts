@@ -2,6 +2,7 @@
 export * from './useMediaQuery';
 export * from './useOnboardingState';
 export * from './useWallet';
+export * from './useWalletConnection';
 export * from './useXmtp';
 
 // Chat Hooks
