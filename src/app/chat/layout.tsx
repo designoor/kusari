@@ -4,6 +4,7 @@ import React from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { AuthGuard } from '@/components/layout/AuthGuard';
 import { Logo } from '@/components/ui/Logo';
+import { ConversationListProvider } from '@/providers/ConversationListProvider';
 import { useNavItems } from '@/hooks';
 
 function ChatLayoutContent({ children }: { children: React.ReactNode }) {
@@ -23,7 +24,9 @@ export default function ChatLayout({
 }) {
   return (
     <AuthGuard>
-      <ChatLayoutContent>{children}</ChatLayoutContent>
+      <ConversationListProvider>
+        <ChatLayoutContent>{children}</ChatLayoutContent>
+      </ConversationListProvider>
     </AuthGuard>
   );
 }
