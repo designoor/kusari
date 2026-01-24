@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { OnboardingFlow, OnboardingSkeleton } from '@/components/onboarding';
+import { OnboardingFlow } from '@/components/onboarding';
 import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
@@ -39,9 +39,9 @@ export default function Home() {
     return <AppShellSkeleton />;
   }
 
-  // Show onboarding skeleton while checking state
+  // Show app skeleton while checking state
   if (onboardingLoading || walletLoading) {
-    return <OnboardingSkeleton />;
+    return <AppShellSkeleton />;
   }
 
   // Show onboarding flow for new or incomplete users
