@@ -3,13 +3,12 @@
 /**
  * Custom hook for managing user preferences
  * Provides reactive access to preferences with localStorage persistence
+ *
+ * This hook consumes from PreferencesProvider to ensure preferences
+ * are loaded once and persist across page navigations.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import {
-  getHideMessagePreviews,
-  setHideMessagePreviews as saveHideMessagePreviews,
-} from '@/lib/preferences/storage';
+import { usePreferencesContext } from '@/providers/PreferencesProvider';
 
 export interface PreferencesState {
   /** Whether state is still loading from localStorage */
@@ -21,24 +20,5 @@ export interface PreferencesState {
 }
 
 export function usePreferences(): PreferencesState {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hideMessagePreviews, setHideMessagePreviewsState] = useState(false);
-
-  // Load preferences from localStorage on mount
-  useEffect(() => {
-    setHideMessagePreviewsState(getHideMessagePreviews());
-    setIsLoading(false);
-  }, []);
-
-  // Update hide message previews
-  const setHideMessagePreviews = useCallback((hide: boolean) => {
-    saveHideMessagePreviews(hide);
-    setHideMessagePreviewsState(hide);
-  }, []);
-
-  return {
-    isLoading,
-    hideMessagePreviews,
-    setHideMessagePreviews,
-  };
+  return usePreferencesContext();
 }

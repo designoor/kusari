@@ -13,7 +13,7 @@ import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMen
 import { EthosScore } from '@/components/reputation/EthosScore';
 import { BanIcon, InboxIcon, ContactsIcon } from '@/components/ui/Icon/icons';
 import { useMessages } from '@/hooks/useMessages';
-import { useCoordinatedAllowedConversations } from '@/hooks/useCoordinatedConversations';
+import { useConversationList } from '@/providers/ConversationListProvider';
 import { useEthosScore } from '@/hooks/useEthosScore';
 import { useInboxConsent, useConsent } from '@/hooks/useConsent';
 import { ConsentState } from '@xmtp/browser-sdk';
@@ -35,7 +35,7 @@ export default function ConversationPage() {
   const { client, isInitialized } = useXmtpContext();
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
-  const { previews, ethosProfiles: sidebarEthosProfiles, isLoading: isLoadingConversations } = useCoordinatedAllowedConversations();
+  const { previews, ethosProfiles: sidebarEthosProfiles, isInitialLoading: isLoadingConversations } = useConversationList();
   const { openModal } = useNewChatModal();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);

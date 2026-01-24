@@ -106,13 +106,6 @@ export function useCoordinatedConversations(
 }
 
 /**
- * Hook for allowed conversations (main chat view) with coordinated Ethos loading
- */
-export function useCoordinatedAllowedConversations(): CoordinatedConversationsReturn {
-  return useCoordinatedConversations({ consentState: ConsentState.Allowed });
-}
-
-/**
  * Hook for message requests (unknown consent) with coordinated Ethos loading
  */
 export function useCoordinatedMessageRequests(): CoordinatedConversationsReturn {

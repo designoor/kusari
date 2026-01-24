@@ -1,0 +1,74 @@
+'use client';
+
+import React, { createContext, useContext, useCallback, useEffect, useState } from 'react';
+import {
+  getHideMessagePreviews,
+  setHideMessagePreviews as saveHideMessagePreviews,
+} from '@/lib/preferences/storage';
+
+/**
+ * Context value for preferences
+ */
+interface PreferencesContextValue {
+  /** Whether state is still loading from localStorage */
+  isLoading: boolean;
+  /** Whether message previews should be hidden in conversation list */
+  hideMessagePreviews: boolean;
+  /** Toggle hide message previews setting */
+  setHideMessagePreviews: (hide: boolean) => void;
+}
+
+const PreferencesContext = createContext<PreferencesContextValue | null>(null);
+
+/**
+ * Hook to access preferences from the provider.
+ * Must be used within a PreferencesProvider.
+ *
+ * @returns Preferences state and setters
+ * @throws Error if used outside of PreferencesProvider
+ */
+export function usePreferencesContext(): PreferencesContextValue {
+  const context = useContext(PreferencesContext);
+  if (!context) {
+    throw new Error('usePreferencesContext must be used within PreferencesProvider');
+  }
+  return context;
+}
+
+/**
+ * Provider that manages user preferences at the app level.
+ *
+ * This provider ensures preferences are loaded once and persist across
+ * page navigations, preventing "Message hidden" flashing during navigation.
+ */
+export function PreferencesProvider({ children }: { children: React.ReactNode }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hideMessagePreviews, setHideMessagePreviewsState] = useState(false);
+
+  // Load preferences from localStorage on mount
+  useEffect(() => {
+    setHideMessagePreviewsState(getHideMessagePreviews());
+    setIsLoading(false);
+  }, []);
+
+  // Update hide message previews
+  const setHideMessagePreviews = useCallback((hide: boolean) => {
+    saveHideMessagePreviews(hide);
+    setHideMessagePreviewsState(hide);
+  }, []);
+
+  const value = React.useMemo(
+    () => ({
+      isLoading,
+      hideMessagePreviews,
+      setHideMessagePreviews,
+    }),
+    [isLoading, hideMessagePreviews, setHideMessagePreviews]
+  );
+
+  return (
+    <PreferencesContext.Provider value={value}>
+      {children}
+    </PreferencesContext.Provider>
+  );
+}
