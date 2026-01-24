@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { OnboardingFlow, OnboardingSkeleton } from '@/components/onboarding';
 import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
+import { useWalletConnection } from '@/hooks/useWalletConnection';
 
 /**
  * Landing page - handles onboarding flow and redirects
@@ -21,22 +22,25 @@ import { useOnboardingState } from '@/hooks/useOnboardingState';
  */
 export default function Home() {
   const router = useRouter();
-  const { isLoading, isComplete } = useOnboardingState();
+  const { isLoading: onboardingLoading, isComplete } = useOnboardingState();
+  const { isConnected, isLoading: walletLoading } = useWalletConnection();
 
-  // Redirect to chat if onboarding is complete
+  // Redirect to chat if onboarding is complete AND wallet is connected
+  // CRITICAL: Only redirect when wallet state is DEFINITIVELY known (not loading)
   useEffect(() => {
-    if (!isLoading && isComplete) {
+    if (onboardingLoading || walletLoading) return;
+    if (isComplete && isConnected) {
       router.push('/chat');
     }
-  }, [isLoading, isComplete, router]);
+  }, [onboardingLoading, walletLoading, isComplete, isConnected, router]);
 
   // Show app skeleton when redirecting (seamless transition to /chat)
-  if (isComplete) {
+  if (!onboardingLoading && !walletLoading && isComplete && isConnected) {
     return <AppShellSkeleton />;
   }
 
-  // Show onboarding skeleton while checking localStorage state
-  if (isLoading) {
+  // Show onboarding skeleton while checking state
+  if (onboardingLoading || walletLoading) {
     return <OnboardingSkeleton />;
   }
 
