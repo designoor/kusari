@@ -216,8 +216,11 @@ export function useConsentStream(onUpdate?: (updates: ConsentUpdate[]) => void) 
   onUpdateRef.current = onUpdate;
 
   // Stream consent updates
+  // Clear cache when client becomes unavailable to prevent stale data
   useEffect(() => {
     if (!client || !isInitialized) {
+      // Clear consent cache when client is gone (e.g., wallet disconnected)
+      setConsentCache(new Map());
       return;
     }
 

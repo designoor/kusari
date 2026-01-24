@@ -9,7 +9,7 @@ import {
   syncConversations,
   getConversationById,
 } from '@/services/xmtp/conversations';
-import { getLatestMessage } from '@/services/xmtp/messages';
+import { getLatestMessage, streamAllMessages } from '@/services/xmtp/messages';
 import { getInboxConsentState } from '@/services/xmtp/consent';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useConsentStream } from './useConsent';
@@ -222,10 +222,20 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
   );
 
   // Load conversations on mount and when client changes
+  // Clear state when client becomes unavailable to prevent showing stale data
   useEffect(() => {
-    if (isInitialized && client) {
-      void loadConversations();
+    if (!client || !isInitialized) {
+      // Explicitly clear state when client is gone (e.g., wallet disconnected)
+      setState({
+        conversations: [],
+        previews: [],
+        isLoading: false,
+        error: null,
+      });
+      return;
     }
+
+    void loadConversations();
   }, [isInitialized, client, loadConversations]);
 
   // Stream new conversations
@@ -277,6 +287,70 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
 
     return cleanup;
   }, [client, isInitialized, buildPreview]);
+
+  // Stream all messages to update conversation previews in real-time
+  // This ensures the conversation list shows the latest message and correct ordering
+  useEffect(() => {
+    if (!client || !isInitialized) {
+      return;
+    }
+
+    const cleanup = streamAllMessages(client, (message) => {
+      setState((prev) => {
+        // Find the conversation this message belongs to
+        const conversationId = message.conversationId;
+        const previewIndex = prev.previews.findIndex((p) => p.id === conversationId);
+
+        // Get the current preview for this conversation
+        const currentPreview = prev.previews[previewIndex];
+
+        if (previewIndex === -1 || !currentPreview) {
+          // Message is for a conversation not in our list yet
+          // It will be picked up by streamConversations
+          return prev;
+        }
+
+        // Only update if the message is newer than the current last message
+        const currentLastMessageTime = currentPreview.lastMessage?.sentAt?.getTime() ?? 0;
+        const newMessageTime = message.sentAt.getTime();
+
+        if (newMessageTime <= currentLastMessageTime) {
+          // Message is older or same as current, no update needed
+          return prev;
+        }
+
+        // Only use text messages for preview (filter out system messages)
+        const isTextMessage = typeof message.content === 'string';
+        if (!isTextMessage) {
+          return prev;
+        }
+
+        // Create updated preview with new last message
+        const updatedPreview: ConversationPreview = {
+          ...currentPreview,
+          lastMessage: {
+            content: message.content as string,
+            sentAt: message.sentAt,
+            senderInboxId: message.senderInboxId,
+          },
+        };
+
+        // Create new previews array with updated preview moved to top (most recent first)
+        const updatedPreviews = [
+          updatedPreview,
+          ...prev.previews.slice(0, previewIndex),
+          ...prev.previews.slice(previewIndex + 1),
+        ];
+
+        return {
+          ...prev,
+          previews: updatedPreviews,
+        };
+      });
+    });
+
+    return cleanup;
+  }, [client, isInitialized]);
 
   /**
    * Filter previews based on filter options
