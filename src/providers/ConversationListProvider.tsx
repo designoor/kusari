@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useMemo, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, useRef } from 'react';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useConversations } from '@/hooks/useConversations';
 import { useEthosScores } from '@/hooks/useEthosScore';
@@ -73,20 +73,20 @@ function extractValidAddresses(previews: ConversationPreview[]): string[] {
  * - Distinguishes between initial load (show skeleton) and refresh (show cached data)
  */
 export function ConversationListProvider({ children }: { children: React.ReactNode }) {
-  // Track if we've ever completed loading successfully
+  // Track if we've ever completed a full load cycle (persists across refreshes)
   const hasLoadedOnceRef = useRef(false);
 
   // Phase 1: XMTP data (allowed conversations only)
   const xmtp = useConversations({ consentState: ConsentState.Allowed });
 
-  // Only extract addresses when XMTP is NOT loading
+  // Only extract addresses when XMTP has attempted load AND is not currently loading
   // This ensures Ethos fetch only starts after XMTP is complete
   const addressesForEthos = useMemo(() => {
-    if (xmtp.isLoading) {
+    if (!xmtp.hasAttemptedLoad || xmtp.isLoading) {
       return []; // Don't trigger Ethos fetch yet
     }
     return extractValidAddresses(xmtp.filteredPreviews);
-  }, [xmtp.isLoading, xmtp.filteredPreviews]);
+  }, [xmtp.hasAttemptedLoad, xmtp.isLoading, xmtp.filteredPreviews]);
 
   // Phase 2: Ethos data (only fetches when addresses become available)
   const { profiles: ethosProfiles, isLoading: isEthosLoading } = useEthosScores(addressesForEthos);
@@ -95,16 +95,18 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
   const isLoading = xmtp.isLoading || isEthosLoading;
   const isReady = !isLoading;
 
-  // Track when we've successfully loaded for the first time
-  useEffect(() => {
-    if (!isLoading) {
-      hasLoadedOnceRef.current = true;
-    }
-  }, [isLoading]);
+  // Mark as loaded once:
+  // 1. XMTP has attempted load (first load completed or determined nothing to load)
+  // 2. XMTP is not currently loading
+  // 3. Ethos is not currently loading
+  const allDataReady = xmtp.hasAttemptedLoad && !xmtp.isLoading && !isEthosLoading;
+  if (allDataReady) {
+    hasLoadedOnceRef.current = true;
+  }
 
-  // Key insight: isInitialLoading is only true when we haven't loaded data yet
-  // This is what ConversationList should use for skeleton display
-  const isInitialLoading = isLoading && !hasLoadedOnceRef.current;
+  // Show skeleton until first complete load cycle finishes
+  // After first load, show cached data during refreshes (no skeleton flash)
+  const isInitialLoading = !hasLoadedOnceRef.current;
 
   const value = useMemo(
     () => ({

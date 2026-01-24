@@ -28,6 +28,8 @@ interface UseConversationsState {
   conversations: Conversation[];
   previews: ConversationPreview[];
   isLoading: boolean;
+  /** True after first load attempt completes (success or error) */
+  hasAttemptedLoad: boolean;
   error: Error | null;
 }
 
@@ -50,6 +52,7 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
     conversations: [],
     previews: [],
     isLoading: false,
+    hasAttemptedLoad: false,
     error: null,
   });
 
@@ -188,6 +191,7 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
         conversations,
         previews,
         isLoading: false,
+        hasAttemptedLoad: true,
         error: null,
       });
     } catch (err) {
@@ -195,6 +199,7 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
       setState((prev) => ({
         ...prev,
         isLoading: false,
+        hasAttemptedLoad: true,
         error,
       }));
       console.error('Failed to load conversations:', error);
@@ -226,10 +231,12 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
   useEffect(() => {
     if (!client || !isInitialized) {
       // Explicitly clear state when client is gone (e.g., wallet disconnected)
+      // Set hasAttemptedLoad: true to indicate there's nothing to load
       setState({
         conversations: [],
         previews: [],
         isLoading: false,
+        hasAttemptedLoad: true,
         error: null,
       });
       return;
