@@ -17,26 +17,25 @@ const queryClient = new QueryClient({
 });
 
 // Initialize AppKit (only once, outside component)
-if (projectId) {
-  createAppKit({
-    adapters: [wagmiAdapter],
-    projectId,
-    networks,
-    metadata,
-    themeMode: 'dark',
-    themeVariables: {
-      '--apkt-accent': '#5BFF8C',
-      '--apkt-color-mix': '#000000',
-      '--apkt-color-mix-strength': 20,
-      '--apkt-border-radius-master': '0px',
-    },
-    features: {
-      analytics: false,
-      email: false,
-      socials: [],
-    },
-  });
-}
+// Always call createAppKit to ensure hooks work during SSR/prerendering
+createAppKit({
+  adapters: [wagmiAdapter],
+  projectId: projectId || '',
+  networks,
+  metadata,
+  themeMode: 'dark',
+  themeVariables: {
+    '--apkt-accent': '#5BFF8C',
+    '--apkt-color-mix': '#000000',
+    '--apkt-color-mix-strength': 20,
+    '--apkt-border-radius-master': '0px',
+  },
+  features: {
+    analytics: false,
+    email: false,
+    socials: [],
+  },
+});
 
 export interface WalletProviderProps {
   children: React.ReactNode;

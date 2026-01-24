@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useWalletClient, useAccount } from 'wagmi';
+import { useWalletClient } from 'wagmi';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { useXmtpContext } from '@/providers/XmtpProvider';
 import { createXmtpSigner } from '@/services/xmtp';
 
@@ -12,7 +13,7 @@ export function useXmtp() {
   const context = useXmtpContext();
   const { initialize } = context;
   const { data: walletClient } = useWalletClient();
-  const { address } = useAccount();
+  const { address } = useAppKitAccount();
 
   /**
    * Initialize XMTP client with the connected wallet
