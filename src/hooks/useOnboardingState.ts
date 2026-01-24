@@ -57,7 +57,7 @@ export interface OnboardingState {
  *   const { isLoading, currentStep, nextStep, prevStep, completeOnboarding } = useOnboardingState();
  *
  *   if (isLoading) {
- *     return <OnboardingSkeleton />;
+ *     return <AppShellSkeleton />;
  *   }
  *
  *   return (

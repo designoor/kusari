@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
-import { OnboardingSkeleton } from '../OnboardingSkeleton';
+import { AppShellSkeleton } from '@/components/layout/AppShellSkeleton';
 import { StepIndicator } from '../StepIndicator';
 import { WelcomeStep } from '../WelcomeStep';
 import { ConnectWalletStep } from '../ConnectWalletStep';
@@ -45,9 +45,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   };
 
-  // Show loading skeleton while state is being loaded
+  // Show app skeleton while state is being loaded
   if (isLoading) {
-    return <OnboardingSkeleton />;
+    return <AppShellSkeleton />;
   }
 
   return (
