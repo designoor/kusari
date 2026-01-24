@@ -1,7 +1,7 @@
 'use client';
 
-import { useAccount, useDisconnect } from 'wagmi';
-import { useAppKit, useAppKitState } from '@reown/appkit/react';
+import { useState, useCallback } from 'react';
+import { useAppKit, useAppKitAccount, useDisconnect } from '@reown/appkit/react';
 
 export interface WalletState {
   address: string | undefined;
@@ -13,24 +13,36 @@ export interface WalletState {
 }
 
 export function useWallet(): WalletState {
-  const { address, isConnected, isConnecting: isAccountConnecting } = useAccount();
-  const { disconnect, disconnectAsync } = useDisconnect();
+  const { address, isConnected } = useAppKitAccount();
+  const { disconnect } = useDisconnect();
   const { open } = useAppKit();
-  const { open: isModalOpen } = useAppKitState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleConnect = () => {
+  const handleConnect = useCallback(() => {
+    setIsModalOpen(true);
     open();
-  };
+  }, [open]);
 
-  // Consider connecting if either the modal is open or account is connecting
-  const isConnecting = isModalOpen || isAccountConnecting;
+  const handleDisconnect = useCallback(() => {
+    setIsModalOpen(false);
+    disconnect();
+  }, [disconnect]);
+
+  const handleDisconnectAsync = useCallback(async () => {
+    setIsModalOpen(false);
+    await disconnect();
+  }, [disconnect]);
+
+  // Only show connecting state if user initiated connection in this session
+  // This prevents stale wagmi state from showing perpetual loading
+  const isConnecting = isModalOpen && !isConnected;
 
   return {
     address,
     isConnected,
     isConnecting,
     connect: handleConnect,
-    disconnect,
-    disconnectAsync,
+    disconnect: handleDisconnect,
+    disconnectAsync: handleDisconnectAsync,
   };
 }
