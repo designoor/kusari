@@ -1,4 +1,4 @@
-import type { DecodedMessage, ListMessagesOptions } from '@xmtp/browser-sdk';
+import type { Client, DecodedMessage, ListMessagesOptions } from '@xmtp/browser-sdk';
 import type { Conversation } from '@/types/conversation';
 
 /**
@@ -98,6 +98,44 @@ export async function getLatestMessage(
     console.error('Failed to get latest message:', error);
     throw new Error('Failed to get latest message');
   }
+}
+
+/**
+ * Stream all incoming messages across all conversations in real-time
+ * Useful for updating conversation previews when new messages arrive
+ * @param client XMTP client instance
+ * @param onMessage Callback function called for each new message
+ * @returns Cleanup function to stop streaming
+ */
+export function streamAllMessages(
+  client: Client,
+  onMessage: (message: DecodedMessage) => void
+): () => void {
+  let isStopped = false;
+  let stream: Awaited<ReturnType<typeof client.conversations.streamAllMessages>> | null = null;
+
+  (async () => {
+    try {
+      stream = await client.conversations.streamAllMessages();
+
+      for await (const message of stream) {
+        if (isStopped) break;
+        onMessage(message);
+      }
+    } catch (error) {
+      if (!isStopped) {
+        console.error('All messages stream error:', error);
+      }
+    }
+  })();
+
+  // Return cleanup function
+  return () => {
+    isStopped = true;
+    if (stream) {
+      void stream.return();
+    }
+  };
 }
 
 /**

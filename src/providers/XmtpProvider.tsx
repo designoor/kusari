@@ -32,6 +32,9 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
   const { data: walletClient } = useWalletClient();
   const { address, isConnected } = useAccount();
 
+  // Track previous wallet address to detect account switches
+  const previousAddressRef = useRef<string | undefined>(undefined);
+
   const initialize = useCallback(async (signer: EOASigner) => {
     // Prevent multiple simultaneous initialization attempts
     if (isInitializing) {
@@ -64,7 +67,12 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
 
   const disconnect = useCallback(() => {
     if (client) {
-      // Cleanup client resources if needed
+      try {
+        // Terminate web worker and clean up resources
+        client.close();
+      } catch (err) {
+        console.error('Error closing XMTP client:', err);
+      }
       setClient(null);
       setIsInitialized(false);
       setError(null);
@@ -91,6 +99,23 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     });
   }, [isConnected, walletClient, address, isInitialized, isInitializing, initialize]);
 
+  // Detect wallet address changes and disconnect old client
+  // This ensures we don't show stale data from a previous account
+  useEffect(() => {
+    // Skip on initial mount
+    if (previousAddressRef.current === undefined) {
+      previousAddressRef.current = address;
+      return;
+    }
+
+    // Detect address change (including disconnect: address becomes undefined)
+    if (previousAddressRef.current !== address) {
+      disconnect();
+    }
+
+    previousAddressRef.current = address;
+  }, [address, disconnect]);
+
   // Keep ref in sync with client state
   useEffect(() => {
     clientRef.current = client;
@@ -100,8 +125,11 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
   useEffect(() => {
     return () => {
       if (clientRef.current) {
-        // Perform any necessary cleanup
-        // Reset state without triggering re-renders during unmount
+        try {
+          clientRef.current.close();
+        } catch (err) {
+          console.error('Error closing XMTP client on unmount:', err);
+        }
         clientRef.current = null;
       }
     };
