@@ -267,7 +267,9 @@ function buildProfile(
   scoreData: EthosScoreResponse | null,
   userData: EthosUserResponse | null
 ): EthosProfile | null {
-  if (!scoreData && !userData) {
+  // Require user data to confirm a real profile exists
+  // The score endpoint returns default scores for ALL addresses (even without profiles)
+  if (!userData) {
     return null;
   }
 

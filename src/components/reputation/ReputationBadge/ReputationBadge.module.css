@@ -113,11 +113,15 @@
   color: #CC7EAA;
 }
 
-/* Unverified badge */
+/* Unverified badge - styled like regular badges but neutral gray */
 .badge.unverified {
   background-color: rgba(107, 107, 107, 0.1);
   color: var(--color-content-tertiary);
-  font-style: italic;
+}
+
+/* No reputation label text */
+.noReputationLabel {
+  font-weight: var(--font-weight-medium);
 }
 
 /* Indicator dot for compact variant */

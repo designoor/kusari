@@ -148,6 +148,17 @@ export default function SettingsPage() {
                   Ethos
                 </a>
               </div>
+              <div className={styles.aboutRow}>
+                <span className={styles.aboutLabel}>Wallet connect</span>
+                <a
+                  href="https://reown.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.aboutLink}
+                >
+                  Reown AppKit
+                </a>
+              </div>
             </div>
           </div>
         </section>

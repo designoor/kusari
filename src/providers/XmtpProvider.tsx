@@ -13,6 +13,20 @@ const XmtpContext = createContext<XmtpContextValue | null>(null);
 // Error thrown by probe signer to detect when signature is needed
 const XMTP_IDENTITY_PROBE_ERROR = 'XMTP_IDENTITY_PROBE';
 
+/**
+ * Sync conversations and preferences from the XMTP network.
+ * Ensures fresh data after client initialization.
+ * Failures are logged but don't block initialization.
+ */
+async function syncClientData(xmtpClient: Client): Promise<void> {
+  try {
+    await xmtpClient.conversations.sync();
+    await xmtpClient.preferences.sync();
+  } catch (syncError) {
+    console.warn('Network sync failed, continuing with local data:', syncError);
+  }
+}
+
 export function useXmtpContext() {
   const context = useContext(XmtpContext);
   if (!context) {
@@ -61,6 +75,7 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
 
     try {
       const xmtpClient = await createXmtpClient(signer);
+      await syncClientData(xmtpClient);
       setClient(xmtpClient);
       setIsInitialized(true);
     } catch (err) {
@@ -141,6 +156,7 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
 
         // Identity exists! Client was created without needing a signature.
         // The probe signer was never asked to sign.
+        await syncClientData(xmtpClient);
         setClient(xmtpClient);
         setIsInitialized(true);
       } catch (err) {

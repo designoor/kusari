@@ -66,7 +66,7 @@ const InputInner = React.forwardRef<HTMLInputElement, InputProps>(
           {rightElement && <div className={styles.rightElement}>{rightElement}</div>}
         </div>
         {error && (
-          <p id={errorId} className={styles.error} role="alert">
+          <p id={errorId} className={`${styles.error} ${styles[size]}`} role="alert">
             {error}
           </p>
         )}
