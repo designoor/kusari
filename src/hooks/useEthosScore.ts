@@ -5,6 +5,17 @@ import { fetchEthosProfile, fetchEthosProfiles } from '@/services/ethos';
 import type { EthosProfile, UseEthosScoreReturn } from '@/services/ethos';
 
 /**
+ * Generates a stable, sorted key from an array of addresses.
+ * Used for comparing address sets and tracking which addresses have been processed.
+ *
+ * @param addresses - Array of Ethereum addresses
+ * @returns Lowercase, sorted, comma-separated string of addresses
+ */
+export function generateAddressesKey(addresses: string[]): string {
+  return addresses.map((a) => a.toLowerCase()).sort().join(',');
+}
+
+/**
  * Hook to fetch and cache Ethos reputation data for an address.
  *
  * Features:
@@ -122,6 +133,8 @@ export function useEthosScores(addresses: string[]): {
   profiles: Map<string, EthosProfile>;
   isLoading: boolean;
   errors: Map<string, Error>;
+  /** Key representing the addresses that have been fully processed */
+  completedKey: string;
 } {
   const [profiles, setProfiles] = useState<Map<string, EthosProfile>>(new Map());
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -131,10 +144,7 @@ export function useEthosScores(addresses: string[]): {
 
   // Create a stable key from addresses for comparison and dependency tracking
   // Sort to ensure consistent ordering regardless of input order
-  const addressesKey = useMemo(
-    () => addresses.map((a) => a.toLowerCase()).sort().join(','),
-    [addresses]
-  );
+  const addressesKey = useMemo(() => generateAddressesKey(addresses), [addresses]);
 
   // Track current key to handle race conditions (compare by content, not reference)
   const currentKeyRef = useRef<string>(addressesKey);
@@ -190,5 +200,5 @@ export function useEthosScores(addresses: string[]): {
   // This handles the render gap where effect hasn't run yet
   const isLoading = isFetching || (addresses.length > 0 && addressesKey !== loadedKey);
 
-  return { profiles, isLoading, errors };
+  return { profiles, isLoading, errors, completedKey: loadedKey };
 }

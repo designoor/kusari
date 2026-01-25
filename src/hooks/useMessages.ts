@@ -279,16 +279,34 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        await syncConversation(conversation);
-        const messages = await listMessages(conversation);
+        // Step 1: Load cached messages immediately for fast display
+        const cachedMessages = await listMessages(conversation);
 
         if (!cancelled) {
           setState((prev) => ({
             ...prev,
-            messages,
+            messages: cachedMessages,
             isLoading: false,
             error: null,
           }));
+        }
+
+        // Step 2: Sync in background (non-blocking) to get any new messages
+        try {
+          await syncConversation(conversation);
+
+          if (!cancelled) {
+            // Step 3: Reload messages after sync to get any new ones
+            const freshMessages = await listMessages(conversation);
+
+            // Only update if there are changes (avoid unnecessary re-renders)
+            if (freshMessages.length !== cachedMessages.length) {
+              setState((prev) => ({ ...prev, messages: freshMessages }));
+            }
+          }
+        } catch (syncErr) {
+          // Sync failure is non-critical - we already showed cached messages
+          console.warn('Background sync failed:', syncErr);
         }
       } catch (err) {
         if (!cancelled) {
