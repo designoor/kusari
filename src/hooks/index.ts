@@ -12,6 +12,7 @@ export * from './useMessages';
 export * from './useConsent';
 export * from './useNewRequestsCount';
 export * from './useNewChat';
+export * from './useUnreadMessages';
 
 // Navigation Hooks
 export * from './useNavItems';

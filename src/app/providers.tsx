@@ -2,6 +2,7 @@
 
 import { WalletProvider } from '@/providers/WalletProvider';
 import { XmtpProvider } from '@/providers/XmtpProvider';
+import { UnreadProvider } from '@/providers/UnreadProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { NewChatModalProvider } from '@/providers/NewChatModalProvider';
 import { PreferencesProvider } from '@/providers/PreferencesProvider';
@@ -16,12 +17,14 @@ export function Providers({ children }: ProvidersProps) {
     <PreferencesProvider>
       <WalletProvider>
         <XmtpProvider>
-          <ToastProvider>
-            <NewChatModalProvider>
-              {children}
-              <NewChatModal />
-            </NewChatModalProvider>
-          </ToastProvider>
+          <UnreadProvider>
+            <ToastProvider>
+              <NewChatModalProvider>
+                {children}
+                <NewChatModal />
+              </NewChatModalProvider>
+            </ToastProvider>
+          </UnreadProvider>
         </XmtpProvider>
       </WalletProvider>
     </PreferencesProvider>

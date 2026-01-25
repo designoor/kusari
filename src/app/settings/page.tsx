@@ -16,7 +16,12 @@ export default function SettingsPage() {
   const { address, disconnectAsync, isConnected } = useWallet();
   const toast = useToast();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
-  const { hideMessagePreviews, setHideMessagePreviews } = usePreferences();
+  const {
+    hideMessagePreviews,
+    setHideMessagePreviews,
+    disableReadReceipts,
+    setDisableReadReceipts,
+  } = usePreferences();
 
   const handleCopyAddress = useCallback(async () => {
     if (!address) return;
@@ -84,9 +89,9 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* General Section */}
+        {/* Privacy Section */}
         <section className={styles.section}>
-          <SectionTitle>General</SectionTitle>
+          <SectionTitle>Privacy</SectionTitle>
           <div className={styles.sectionContent}>
             <div className={styles.settingRow}>
               <div className={styles.settingInfo}>
@@ -99,6 +104,19 @@ export default function SettingsPage() {
                 checked={hideMessagePreviews}
                 onChange={setHideMessagePreviews}
                 aria-label="Hide message previews"
+              />
+            </div>
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Disable read receipts</span>
+                <span className={styles.settingDescription}>
+                  Don&apos;t let others know when you&apos;ve read their messages
+                </span>
+              </div>
+              <Toggle
+                checked={disableReadReceipts}
+                onChange={setDisableReadReceipts}
+                aria-label="Disable read receipts"
               />
             </div>
           </div>

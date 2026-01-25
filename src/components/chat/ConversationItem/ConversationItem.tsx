@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { usePreferences } from '@/hooks';
+import { usePreferences, useUnreadCount } from '@/hooks';
 import { formatRelativeTime } from '@/lib';
 import type { ConversationPreview } from '@/types/conversation';
 import type { EthosProfile } from '@/services/ethos';
@@ -28,13 +28,15 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
     peerAddress,
     groupName,
     lastMessage,
-    unreadCount,
     isDm,
   } = conversation;
 
   // Get user preferences for hiding message previews
   // Use isLoading to prevent hydration flash - default to hidden for privacy during load
   const { hideMessagePreviews, isLoading: preferencesLoading } = usePreferences();
+
+  // Get unread count from centralized UnreadProvider (source of truth)
+  const unreadCount = useUnreadCount(id);
 
   // Display name: prefer Ethos username/displayName for DMs, then fall back to address
   // CSS will handle truncation with ellipsis if too long
@@ -72,7 +74,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = React.memo(({
         <div className={styles.preview}>
           <span className={styles.message}>{previewText}</span>
           {unreadCount > 0 && (
-            <Badge variant="accent" size="sm" count={unreadCount} className={styles.badge} />
+            <Badge variant="error" size="sm" count={unreadCount} className={styles.badge} />
           )}
         </div>
       </div>

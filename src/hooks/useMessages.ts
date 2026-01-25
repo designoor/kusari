@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { DecodedMessage } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
+import { useUnreadContext } from '@/providers/UnreadProvider';
 import { getConversationById } from '@/services/xmtp/conversations';
 import {
   listMessages,
@@ -125,6 +126,7 @@ interface UseMessagesReturn extends UseMessagesState {
  */
 export function useMessages(conversationId: string | null): UseMessagesReturn {
   const { client, isInitialized } = useXmtpContext();
+  const { markAsRead } = useUnreadContext();
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [state, setState] = useState<UseMessagesState>({
     messages: [],
@@ -346,6 +348,13 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
 
     return cleanup;
   }, [conversation, client]);
+
+  // Mark conversation as read when messages are loaded
+  useEffect(() => {
+    if (conversationId && !state.isLoading && state.messages.length > 0) {
+      void markAsRead(conversationId);
+    }
+  }, [conversationId, state.isLoading, state.messages.length, markAsRead]);
 
   /**
    * Convert messages to display format
