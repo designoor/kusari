@@ -16,6 +16,7 @@ export interface ConversationPreview {
   lastMessage: {
     content: string;
     sentAt: Date;
+    sentAtNs: bigint; // Nanosecond timestamp for accurate unread comparison
     senderInboxId: string;
   } | null;
   consentState: ConsentState;

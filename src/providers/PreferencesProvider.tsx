@@ -4,6 +4,8 @@ import React, { createContext, useContext, useCallback, useEffect, useState } fr
 import {
   getHideMessagePreviews,
   setHideMessagePreviews as saveHideMessagePreviews,
+  getDisableReadReceipts,
+  setDisableReadReceipts as saveDisableReadReceipts,
 } from '@/lib/preferences/storage';
 
 /**
@@ -16,6 +18,10 @@ interface PreferencesContextValue {
   hideMessagePreviews: boolean;
   /** Toggle hide message previews setting */
   setHideMessagePreviews: (hide: boolean) => void;
+  /** Whether read receipts are disabled (privacy setting) */
+  disableReadReceipts: boolean;
+  /** Toggle disable read receipts setting */
+  setDisableReadReceipts: (disable: boolean) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextValue | null>(null);
@@ -44,10 +50,12 @@ export function usePreferencesContext(): PreferencesContextValue {
 export function PreferencesProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hideMessagePreviews, setHideMessagePreviewsState] = useState(false);
+  const [disableReadReceipts, setDisableReadReceiptsState] = useState(false);
 
   // Load preferences from localStorage on mount
   useEffect(() => {
     setHideMessagePreviewsState(getHideMessagePreviews());
+    setDisableReadReceiptsState(getDisableReadReceipts());
     setIsLoading(false);
   }, []);
 
@@ -57,13 +65,21 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     setHideMessagePreviewsState(hide);
   }, []);
 
+  // Update disable read receipts
+  const setDisableReadReceipts = useCallback((disable: boolean) => {
+    saveDisableReadReceipts(disable);
+    setDisableReadReceiptsState(disable);
+  }, []);
+
   const value = React.useMemo(
     () => ({
       isLoading,
       hideMessagePreviews,
       setHideMessagePreviews,
+      disableReadReceipts,
+      setDisableReadReceipts,
     }),
-    [isLoading, hideMessagePreviews, setHideMessagePreviews]
+    [isLoading, hideMessagePreviews, setHideMessagePreviews, disableReadReceipts, setDisableReadReceipts]
   );
 
   return (

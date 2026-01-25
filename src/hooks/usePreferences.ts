@@ -17,6 +17,10 @@ export interface PreferencesState {
   hideMessagePreviews: boolean;
   /** Toggle hide message previews setting */
   setHideMessagePreviews: (hide: boolean) => void;
+  /** Whether read receipts are disabled (privacy setting) */
+  disableReadReceipts: boolean;
+  /** Toggle disable read receipts setting */
+  setDisableReadReceipts: (disable: boolean) => void;
 }
 
 export function usePreferences(): PreferencesState {

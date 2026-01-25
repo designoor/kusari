@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
+import { useUnreadContext } from '@/providers/UnreadProvider';
 import {
   listConversations,
   streamConversations,
@@ -10,6 +11,7 @@ import {
   getConversationById,
 } from '@/services/xmtp/conversations';
 import { getLatestMessage, streamAllMessages } from '@/services/xmtp/messages';
+import { getLastReadTimes } from '@/services/xmtp/readReceipts';
 import { getInboxConsentState } from '@/services/xmtp/consent';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useConsentStream } from './useConsent';
@@ -48,6 +50,7 @@ interface UseConversationsReturn extends UseConversationsState {
  */
 export function useConversations(filter?: ConversationFilter): UseConversationsReturn {
   const { client, isInitialized } = useXmtpContext();
+  const { setUnreadCount } = useUnreadContext();
   const [state, setState] = useState<UseConversationsState>({
     conversations: [],
     previews: [],
@@ -128,6 +131,25 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
       // Only use text messages for preview (filter out system messages like group_updated)
       const isTextMessage = latestMessage && typeof latestMessage.content === 'string';
 
+      // Get last read times to compute unread state
+      let unreadCount = 0;
+      const currentInboxId = client.inboxId;
+      if (isTextMessage && currentInboxId && latestMessage.senderInboxId !== currentInboxId) {
+        try {
+          const lastReadTimesMap = await getLastReadTimes(conversation);
+          const myLastReadTime = lastReadTimesMap.get(currentInboxId) ?? BigInt(0);
+          // If the latest message is newer than my last read time, mark as unread
+          if (latestMessage.sentAtNs > myLastReadTime) {
+            unreadCount = 1; // Initial load shows "has unread" indicator
+          }
+        } catch {
+          // If we can't get last read times, default to 0 unread
+        }
+      }
+
+      // Sync unread count to UnreadProvider for centralized state
+      setUnreadCount(conversation.id, unreadCount);
+
       return {
         id: conversation.id,
         peerInboxId,
@@ -137,16 +159,17 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
           ? {
               content: latestMessage.content as string,
               sentAt: latestMessage.sentAt,
+              sentAtNs: latestMessage.sentAtNs,
               senderInboxId: latestMessage.senderInboxId,
             }
           : null,
         consentState,
-        unreadCount: 0, // TODO: Implement unread tracking
+        unreadCount,
         createdAt: conversation.createdAt ?? new Date(),
         isDm: conversationIsDm,
       };
     },
-    [client]
+    [client, setUnreadCount]
   );
 
   /**
@@ -303,9 +326,21 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
     }
 
     const cleanup = streamAllMessages(client, (message) => {
+      // Only use text messages for preview (filter out system messages)
+      const isTextMessage = typeof message.content === 'string';
+      if (!isTextMessage) {
+        return;
+      }
+
+      // Determine if this is an incoming message (from peer, not current user)
+      const isIncomingMessage = message.senderInboxId !== client.inboxId;
+      const conversationId = message.conversationId;
+
+      // Note: incrementUnread is handled by UnreadProvider's own stream
+      // to avoid duplicate increments when multiple useConversations instances exist
+
       setState((prev) => {
         // Find the conversation this message belongs to
-        const conversationId = message.conversationId;
         const previewIndex = prev.previews.findIndex((p) => p.id === conversationId);
 
         // Get the current preview for this conversation
@@ -326,20 +361,19 @@ export function useConversations(filter?: ConversationFilter): UseConversationsR
           return prev;
         }
 
-        // Only use text messages for preview (filter out system messages)
-        const isTextMessage = typeof message.content === 'string';
-        if (!isTextMessage) {
-          return prev;
-        }
-
         // Create updated preview with new last message
         const updatedPreview: ConversationPreview = {
           ...currentPreview,
           lastMessage: {
             content: message.content as string,
             sentAt: message.sentAt,
+            sentAtNs: message.sentAtNs,
             senderInboxId: message.senderInboxId,
           },
+          // Keep unreadCount in preview for backwards compatibility, but UnreadProvider is source of truth
+          unreadCount: isIncomingMessage
+            ? (currentPreview.unreadCount ?? 0) + 1
+            : currentPreview.unreadCount,
         };
 
         // Create new previews array with updated preview moved to top (most recent first)
