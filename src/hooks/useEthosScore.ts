@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { fetchEthosProfile, fetchEthosProfiles } from '@/services/ethos';
+import { fetchEthosProfile, fetchEthosProfiles, getCachedProfiles } from '@/services/ethos';
 import type { EthosProfile, UseEthosScoreReturn } from '@/services/ethos';
 
 /**
@@ -136,7 +136,7 @@ export function useEthosScores(addresses: string[]): {
   /** Key representing the addresses that have been fully processed */
   completedKey: string;
 } {
-  const [profiles, setProfiles] = useState<Map<string, EthosProfile>>(new Map());
+  const [fetchedProfiles, setFetchedProfiles] = useState<Map<string, EthosProfile>>(new Map());
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [errors, setErrors] = useState<Map<string, Error>>(new Map());
   // Track which addressesKey the current profiles correspond to
@@ -146,6 +146,16 @@ export function useEthosScores(addresses: string[]): {
   // Sort to ensure consistent ordering regardless of input order
   const addressesKey = useMemo(() => generateAddressesKey(addresses), [addresses]);
 
+  // Check cache synchronously during render to avoid loading flash
+  // This runs before the effect, so we can return cached data immediately
+  const cacheResult = useMemo(() => {
+    if (addresses.length === 0) {
+      return { cached: new Map<string, EthosProfile>(), uncached: [] as string[], allCached: true };
+    }
+    const { cached, uncached } = getCachedProfiles(addresses);
+    return { cached, uncached, allCached: uncached.length === 0 };
+  }, [addresses]);
+
   // Track current key to handle race conditions (compare by content, not reference)
   const currentKeyRef = useRef<string>(addressesKey);
 
@@ -153,14 +163,23 @@ export function useEthosScores(addresses: string[]): {
     currentKeyRef.current = addressesKey;
 
     if (addresses.length === 0) {
-      setProfiles(new Map());
+      setFetchedProfiles(new Map());
       setIsFetching(false);
       setErrors(new Map());
       setLoadedKey('');
       return;
     }
 
-    // Set fetching immediately (synchronously) to avoid render gap
+    // If all cached, just update state to match (no fetch needed)
+    if (cacheResult.allCached) {
+      setFetchedProfiles(cacheResult.cached);
+      setErrors(new Map());
+      setIsFetching(false);
+      setLoadedKey(addressesKey);
+      return;
+    }
+
+    // Some addresses need fetching - show loading state
     setIsFetching(true);
 
     const fetchAll = async () => {
@@ -170,7 +189,7 @@ export function useEthosScores(addresses: string[]): {
 
         // Only update state if addresses haven't changed (compare by content via key)
         if (currentKeyRef.current === addressesKey) {
-          setProfiles(profilesMap);
+          setFetchedProfiles(profilesMap);
           setErrors(new Map());
           setIsFetching(false);
           setLoadedKey(addressesKey);
@@ -185,7 +204,7 @@ export function useEthosScores(addresses: string[]): {
             newErrors.set(addr.toLowerCase(), error);
           }
           setErrors(newErrors);
-          setProfiles(new Map());
+          setFetchedProfiles(new Map());
           setIsFetching(false);
           setLoadedKey(addressesKey); // Still mark as loaded (with errors)
         }
@@ -193,12 +212,16 @@ export function useEthosScores(addresses: string[]): {
     };
 
     void fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- addressesKey captures content changes; addresses ref not needed
-  }, [addressesKey]);
+  }, [addresses, addressesKey, cacheResult]);
 
-  // Derived loading state: loading if we're actively fetching OR if addressesKey doesn't match loadedKey
-  // This handles the render gap where effect hasn't run yet
-  const isLoading = isFetching || (addresses.length > 0 && addressesKey !== loadedKey);
+  // If all addresses are cached, use cache directly (no loading flash)
+  // Otherwise use fetched profiles from state
+  const profiles = cacheResult.allCached ? cacheResult.cached : fetchedProfiles;
 
-  return { profiles, isLoading, errors, completedKey: loadedKey };
+  // Derived loading state:
+  // - NOT loading if all addresses are cached (immediate return)
+  // - Loading if we're actively fetching OR if addressesKey doesn't match loadedKey
+  const isLoading = !cacheResult.allCached && (isFetching || (addresses.length > 0 && addressesKey !== loadedKey));
+
+  return { profiles, isLoading, errors, completedKey: cacheResult.allCached ? addressesKey : loadedKey };
 }

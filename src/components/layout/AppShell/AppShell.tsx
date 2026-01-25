@@ -16,20 +16,14 @@ export const AppShell: React.FC<AppShellProps> = ({ navItems, logo, children }) 
   const isMobile = useIsMobile();
   const pathname = usePathname();
 
-  // Hide mobile nav on chat detail pages (full-screen chat experience)
+  // Hide nav and use fullscreen on chat detail pages (mobile only)
   const isChatDetail = pathname?.startsWith('/chat/') && pathname !== '/chat';
-  const hideNav = isMobile && isChatDetail;
+  const isFullscreen = isMobile && isChatDetail;
 
   return (
     <div className={styles.appShell}>
-      {!hideNav && (
-        <MainNav
-          items={navItems}
-          orientation={isMobile ? 'horizontal' : 'vertical'}
-          logo={!isMobile ? logo : undefined}
-        />
-      )}
-      <main className={`${styles.content} ${hideNav ? styles.fullscreen : isMobile ? styles.mobile : styles.desktop}`}>
+      {!isFullscreen && <MainNav items={navItems} logo={logo} />}
+      <main className={`${styles.content} ${isFullscreen ? styles.fullscreen : ''}`}>
         {children}
       </main>
     </div>

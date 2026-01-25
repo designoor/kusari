@@ -6,7 +6,7 @@ import { useCoordinatedDeniedContacts } from '@/hooks/useCoordinatedConversation
 import styles from '../subpage.module.css';
 
 export default function DeniedPage() {
-  const { previews: deniedContacts, ethosProfiles, isLoading } = useCoordinatedDeniedContacts();
+  const { previews: deniedContacts, ethosProfiles, isInitialLoading } = useCoordinatedDeniedContacts();
 
   return (
     <div className={styles.container}>
@@ -21,7 +21,7 @@ export default function DeniedPage() {
         <ContactList
           contacts={deniedContacts}
           ethosProfiles={ethosProfiles}
-          isLoading={isLoading}
+          isLoading={isInitialLoading}
           emptyTitle="No blocked contacts"
           emptyDescription="When you block someone, they will appear here"
         />

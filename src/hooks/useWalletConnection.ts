@@ -34,15 +34,16 @@ export interface WalletConnectionState {
 export function useWalletConnection(): WalletConnectionState {
   const { initialized, loading: appKitLoading } = useAppKitState();
   const { address, isConnected, status: appKitStatus } = useAppKitAccount();
-  const { isReconnecting: wagmiIsReconnecting } = useAccount();
+  const { isReconnecting: wagmiIsReconnecting, isConnecting: wagmiIsConnecting } = useAccount();
 
   let status: WalletConnectionStatus;
 
   if (!initialized || appKitLoading) {
     // AppKit is still initializing or processing
     status = 'initializing';
-  } else if (wagmiIsReconnecting || appKitStatus === 'reconnecting') {
-    // Reconnecting - check both wagmi and AppKit
+  } else if (wagmiIsReconnecting || wagmiIsConnecting || appKitStatus === 'reconnecting') {
+    // Reconnecting - check wagmi isReconnecting, isConnecting, and AppKit status
+    // wagmiIsConnecting stays true during session restoration even when appKitStatus shows 'disconnected'
     status = 'reconnecting';
   } else if (appKitStatus === 'connecting') {
     // User-initiated connection in progress

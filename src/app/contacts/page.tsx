@@ -12,7 +12,8 @@ import { Icon } from '@/components/ui/Icon';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
-import { useCoordinatedConversations, useCoordinatedMessageRequests } from '@/hooks/useCoordinatedConversations';
+import { useCoordinatedConversations } from '@/hooks/useCoordinatedConversations';
+import { useMessageRequests, useDeniedConversations } from '@/hooks/useConversations';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import styles from './contacts.module.css';
 
@@ -20,33 +21,17 @@ export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { openModal } = useNewChatModal();
 
-  // Get all conversations with coordinated Ethos loading
-  const { previews: allPreviews, ethosProfiles, isLoading, error, refresh } = useCoordinatedConversations();
+  // Get allowed contacts with coordinated Ethos loading (shares cache with /chat)
+  const { previews: allowedContacts, ethosProfiles, isLoading, isInitialLoading, error, refresh } =
+    useCoordinatedConversations({ consentState: ConsentState.Allowed });
 
-  // Get message requests count (uses same underlying data but filtered)
-  const { previews: requestPreviews } = useCoordinatedMessageRequests();
+  // Get counts without Ethos (fetched on-demand when visiting those pages)
+  const { filteredPreviews: requestPreviews } = useMessageRequests();
+  const { filteredPreviews: deniedPreviews } = useDeniedConversations();
 
   const handleRetry = useCallback(() => {
     void refresh();
   }, [refresh]);
-
-  // Filter for allowed contacts
-  const allowedContacts = useMemo(
-    () =>
-      allPreviews.filter(
-        (preview) => preview.consentState === ConsentState.Allowed
-      ),
-    [allPreviews]
-  );
-
-  // Filter for denied contacts
-  const deniedContacts = useMemo(
-    () =>
-      allPreviews.filter(
-        (preview) => preview.consentState === ConsentState.Denied
-      ),
-    [allPreviews]
-  );
 
   // Apply search filter (by wallet address or inbox ID)
   const filteredContacts = useMemo(() => {
@@ -109,7 +94,7 @@ export default function ContactsPage() {
           icon={<BanIcon size={20} />}
           title="Denied"
           description="Blocked contacts"
-          count={deniedContacts.length}
+          count={deniedPreviews.length}
           variant="default"
         />
       </div>
@@ -119,7 +104,7 @@ export default function ContactsPage() {
         <ContactList
           contacts={filteredContacts}
           ethosProfiles={ethosProfiles}
-          isLoading={isLoading}
+          isLoading={isInitialLoading}
           emptyTitle="No contacts yet"
           emptyDescription="Accept message requests to add contacts"
           activeAddress={undefined}

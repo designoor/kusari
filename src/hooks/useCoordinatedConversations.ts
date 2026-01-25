@@ -17,6 +17,8 @@ export interface CoordinatedConversationsReturn {
   ethosProfiles: Map<string, EthosProfile>;
   /** True while either XMTP or Ethos data is loading */
   isLoading: boolean;
+  /** True only on initial load (no cached data yet) - use this for skeleton display */
+  isInitialLoading: boolean;
   /** True when both XMTP and Ethos data have finished loading */
   isReady: boolean;
   /** Error from XMTP conversation loading */
@@ -95,10 +97,16 @@ export function useCoordinatedConversations(
   // Ready when both phases complete
   const isReady = !xmtp.isLoading && !isEthosLoading;
 
+  // Check if parent provider has already loaded data (handles navigation back case)
+  // This prevents showing skeleton when we already have cached data
+  const hasCachedData = xmtp.hasAttemptedLoad && !xmtp.isLoading;
+  const isInitialLoading = isLoading && !hasCachedData;
+
   return {
     previews: xmtp.filteredPreviews,
     ethosProfiles,
     isLoading,
+    isInitialLoading,
     isReady,
     error: xmtp.error,
     refresh: xmtp.refresh,

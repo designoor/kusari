@@ -17,8 +17,9 @@ const ETHOS_CLIENT_HEADER = 'kusari@1.0.0';
 /**
  * Cache for Ethos profile data
  * TTL: 5 minutes
+ * Note: data can be null to indicate "checked but no profile exists"
  */
-const profileCache = new Map<string, { data: EthosProfile; timestamp: number }>();
+const profileCache = new Map<string, { data: EthosProfile | null; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 /**
@@ -36,20 +37,59 @@ function isCacheValid(timestamp: number): boolean {
 }
 
 /**
+ * Check if an address has been cached (even if result was null/no profile)
+ */
+function isAddressCached(address: string): boolean {
+  const cached = profileCache.get(address.toLowerCase());
+  return cached !== undefined && isCacheValid(cached.timestamp);
+}
+
+/**
  * Get cached profile if valid
+ * Returns null if not in cache OR if cached as "no profile"
  */
 function getCachedProfile(address: string): EthosProfile | null {
   const cached = profileCache.get(address.toLowerCase());
   if (cached && isCacheValid(cached.timestamp)) {
-    return cached.data;
+    return cached.data; // Can be null if "checked but no profile"
   }
   return null;
 }
 
 /**
- * Set profile in cache
+ * Get cached profiles for multiple addresses (synchronous)
+ * Returns a Map of cached profiles and an array of uncached addresses
+ * Addresses that were checked but have no profile are considered "cached" (not uncached)
+ * Useful for checking cache before triggering async fetches
  */
-function setCachedProfile(address: string, data: EthosProfile): void {
+export function getCachedProfiles(addresses: string[]): {
+  cached: Map<string, EthosProfile>;
+  uncached: string[];
+} {
+  const cached = new Map<string, EthosProfile>();
+  const uncached: string[] = [];
+
+  for (const address of addresses) {
+    if (isAddressCached(address)) {
+      // Address has been checked - get the profile (may be null)
+      const profile = getCachedProfile(address);
+      if (profile) {
+        cached.set(address.toLowerCase(), profile);
+      }
+      // If profile is null, we still don't add to uncached (it was checked)
+    } else {
+      // Address has never been checked
+      uncached.push(address);
+    }
+  }
+
+  return { cached, uncached };
+}
+
+/**
+ * Set profile in cache (can be null to indicate "checked but no profile")
+ */
+function setCachedProfile(address: string, data: EthosProfile | null): void {
   profileCache.set(address.toLowerCase(), { data, timestamp: Date.now() });
 }
 
@@ -208,10 +248,9 @@ export async function fetchEthosProfile(address: string): Promise<EthosProfile |
   // Periodically clean up expired cache entries (throttled to once per minute)
   maybeClearExpiredCache();
 
-  // Check cache first
-  const cached = getCachedProfile(address);
-  if (cached) {
-    return cached;
+  // Check cache first (includes addresses checked but with no profile)
+  if (isAddressCached(address)) {
+    return getCachedProfile(address);
   }
 
   // Fetch score and user data in parallel
@@ -223,10 +262,8 @@ export async function fetchEthosProfile(address: string): Promise<EthosProfile |
   // Build normalized profile from combined data
   const profile = buildProfile(address, scoreData, userData);
 
-  // Cache the result if we got a profile
-  if (profile) {
-    setCachedProfile(address, profile);
-  }
+  // Always cache the result, even if null (to mark as "checked")
+  setCachedProfile(address, profile);
 
   return profile;
 }
@@ -346,8 +383,9 @@ export async function fetchEthosProfiles(
     const userData = usersMap.get(normalizedAddr) ?? usersMap.get(addr) ?? null;
     const profile = buildProfile(addr, scoreData, userData);
 
+    // Always cache the result, even if null (to mark as "checked")
+    setCachedProfile(addr, profile);
     if (profile) {
-      setCachedProfile(addr, profile);
       results.set(normalizedAddr, profile);
     }
   }
