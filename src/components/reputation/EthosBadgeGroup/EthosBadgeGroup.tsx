@@ -11,6 +11,8 @@ export interface EthosBadgeGroupProps {
   level: EthosScoreLevel;
   /** Number of positive reviews */
   positiveReviews: number;
+  /** Number of neutral reviews */
+  neutralReviews: number;
   /** Number of negative reviews */
   negativeReviews: number;
   /** Size variant - applies to all badges */
@@ -20,8 +22,8 @@ export interface EthosBadgeGroupProps {
 }
 
 /**
- * EthosBadgeGroup displays the reputation score badge alongside positive and negative
- * review badges, tightly packed together.
+ * EthosBadgeGroup displays the reputation score badge alongside positive, neutral,
+ * and negative review badges, tightly packed together.
  *
  * @example
  * ```tsx
@@ -29,6 +31,7 @@ export interface EthosBadgeGroupProps {
  *   score={1250}
  *   level="reputable"
  *   positiveReviews={42}
+ *   neutralReviews={5}
  *   negativeReviews={3}
  *   size="md"
  * />
@@ -38,6 +41,7 @@ export const EthosBadgeGroup: React.FC<EthosBadgeGroupProps> = ({
   score,
   level,
   positiveReviews,
+  neutralReviews,
   negativeReviews,
   size = 'md',
   className,
@@ -51,6 +55,7 @@ export const EthosBadgeGroup: React.FC<EthosBadgeGroupProps> = ({
         variant="full"
       />
       <ReviewStat variant="positive" count={positiveReviews} size={size} />
+      <ReviewStat variant="neutral" count={neutralReviews} size={size} />
       <ReviewStat variant="negative" count={negativeReviews} size={size} />
     </div>
   );

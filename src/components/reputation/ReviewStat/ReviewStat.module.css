@@ -36,6 +36,11 @@
   background-color: rgba(91, 255, 140, 0.1);
 }
 
+.stat.neutral {
+  color: var(--color-content-secondary);
+  background-color: rgba(128, 128, 128, 0.1);
+}
+
 .stat.negative {
   color: var(--color-error);
   background-color: rgba(255, 91, 91, 0.1);
