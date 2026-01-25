@@ -23,6 +23,7 @@ import { getConversationById, isDm } from '@/services/xmtp/conversations';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
+import { useActiveConversation } from '@/providers/ActiveConversationProvider';
 import { truncateAddress } from '@/lib';
 import type { Conversation } from '@/types/conversation';
 import styles from './conversation.module.css';
@@ -37,6 +38,7 @@ export default function ConversationPage() {
   // Get conversation list for desktop sidebar with coordinated Ethos loading
   const { previews, ethosProfiles: sidebarEthosProfiles, isInitialLoading: isLoadingConversations } = useConversationList();
   const { openModal } = useNewChatModal();
+  const { setActiveConversationId } = useActiveConversation();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [peerInboxId, setPeerInboxId] = useState<string | undefined>();
@@ -115,6 +117,12 @@ export default function ConversationPage() {
   useEffect(() => {
     void loadConversation();
   }, [loadConversation]);
+
+  // Track active conversation for notification suppression
+  useEffect(() => {
+    setActiveConversationId(conversationId);
+    return () => setActiveConversationId(null);
+  }, [conversationId, setActiveConversationId]);
 
   const handleSendMessage = async (content: string) => {
     await sendMessage(content);

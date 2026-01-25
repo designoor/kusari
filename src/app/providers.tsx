@@ -4,6 +4,8 @@ import { WalletProvider } from '@/providers/WalletProvider';
 import { XmtpProvider } from '@/providers/XmtpProvider';
 import { UnreadProvider } from '@/providers/UnreadProvider';
 import { ConversationDataProvider } from '@/providers/ConversationDataProvider';
+import { ActiveConversationProvider } from '@/providers/ActiveConversationProvider';
+import { NotificationProvider } from '@/providers/NotificationProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { NewChatModalProvider } from '@/providers/NewChatModalProvider';
 import { PreferencesProvider } from '@/providers/PreferencesProvider';
@@ -20,12 +22,16 @@ export function Providers({ children }: ProvidersProps) {
         <XmtpProvider>
           <UnreadProvider>
             <ConversationDataProvider>
-              <ToastProvider>
-                <NewChatModalProvider>
-                  {children}
-                  <NewChatModal />
-                </NewChatModalProvider>
-              </ToastProvider>
+              <ActiveConversationProvider>
+                <NotificationProvider>
+                  <ToastProvider>
+                    <NewChatModalProvider>
+                      {children}
+                      <NewChatModal />
+                    </NewChatModalProvider>
+                  </ToastProvider>
+                </NotificationProvider>
+              </ActiveConversationProvider>
             </ConversationDataProvider>
           </UnreadProvider>
         </XmtpProvider>

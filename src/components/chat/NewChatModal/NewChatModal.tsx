@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useLatest } from '@/hooks/useLatest';
 import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -39,14 +40,9 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ className }) => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   // Track modal open state for async operations to avoid stale updates
-  const isOpenRef = useRef(isOpen);
+  const isOpenRef = useLatest(isOpen);
   // Track address being checked to prevent stale async results from updating state
   const addressBeingCheckedRef = useRef<string | null>(null);
-
-  // Keep ref in sync with isOpen state
-  useEffect(() => {
-    isOpenRef.current = isOpen;
-  }, [isOpen]);
 
   // Reset state when modal closes
   useEffect(() => {

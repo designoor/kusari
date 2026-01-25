@@ -21,6 +21,14 @@ export interface PreferencesState {
   disableReadReceipts: boolean;
   /** Toggle disable read receipts setting */
   setDisableReadReceipts: (disable: boolean) => void;
+  /** Whether browser notifications are enabled */
+  notificationsEnabled: boolean;
+  /** Toggle notifications enabled setting */
+  setNotificationsEnabled: (enabled: boolean) => void;
+  /** Whether to notify for message requests (unknown consent) */
+  notifyForRequests: boolean;
+  /** Toggle notify for requests setting */
+  setNotifyForRequests: (notify: boolean) => void;
 }
 
 export function usePreferences(): PreferencesState {
