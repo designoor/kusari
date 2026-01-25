@@ -14,6 +14,8 @@ import styles from './EthosReputationPanel.module.css';
 export interface EthosReputationPanelProps {
   /** Ethereum address to display reputation for */
   address: string;
+  /** Pre-fetched Ethos profile (skips internal fetch if provided) */
+  profile?: EthosProfile | null;
   /** Whether to show the user's avatar and display name */
   showUserInfo?: boolean;
   /** Whether to show the vouch stats section */
@@ -78,8 +80,7 @@ const UnverifiedPanel: React.FC<{ className?: string }> = ({ className }) => (
     <div className={styles.unverifiedContent}>
       <ReputationBadge verified={false} size="lg" />
       <p className={styles.unverifiedText}>
-        This address has no Ethos profile. Exercise caution when interacting with
-        unverified users.
+        This address has no Ethos reputation.
       </p>
     </div>
   </div>
@@ -219,15 +220,22 @@ const ProfileContent: React.FC<{
  */
 export const EthosReputationPanel: React.FC<EthosReputationPanelProps> = React.memo(({
   address,
+  profile: externalProfile,
   showUserInfo = true,
   showVouches = true,
   showReviews = true,
   showProfileLink = true,
   className,
 }) => {
-  const { data, isLoading, error } = useEthosScore(address);
+  // Only fetch if no external profile provided
+  const shouldFetch = externalProfile === undefined;
+  const { data: fetchedProfile, isLoading, error } = useEthosScore(shouldFetch ? address : null);
 
-  if (isLoading) {
+  // Use external profile if provided, otherwise use fetched profile
+  const profile = externalProfile !== undefined ? externalProfile : fetchedProfile;
+
+  // Show loading skeleton only when fetching (not when external profile provided)
+  if (shouldFetch && isLoading) {
     return (
       <PanelSkeleton
         showUserInfo={showUserInfo}
@@ -237,14 +245,14 @@ export const EthosReputationPanel: React.FC<EthosReputationPanelProps> = React.m
     );
   }
 
-  if (error || !data) {
+  if (error || !profile) {
     return <UnverifiedPanel className={className} />;
   }
 
   return (
     <div className={`${styles.panel} ${className ?? ''}`}>
       <ProfileContent
-        profile={data}
+        profile={profile}
         address={address}
         showUserInfo={showUserInfo}
         showReviews={showReviews}

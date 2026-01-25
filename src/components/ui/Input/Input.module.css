@@ -1,7 +1,6 @@
 .wrapper {
   display: inline-flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
   padding: 0;
 }
 
@@ -13,6 +12,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-content-primary);
+  margin-bottom: var(--spacing-xs);
 }
 
 .inputContainer {
@@ -108,6 +108,11 @@
   cursor: not-allowed;
 }
 
+/* Remove focus-visible outline since wrapper handles focus state */
+.input:focus-visible {
+  outline: none;
+}
+
 /* Left and right elements */
 .leftElement,
 .rightElement {
@@ -118,16 +123,28 @@
 }
 
 /* Helper text */
-.error,
 .hint {
   font-size: var(--font-size-sm);
+  color: var(--color-content-secondary);
   margin: 0;
 }
 
 .error {
+  font-size: var(--font-size-sm);
   color: var(--color-error);
+  background-color: rgba(217, 92, 92, 0.1);
+  margin: 0;
 }
 
-.hint {
-  color: var(--color-content-secondary);
+/* Error padding matches input padding by size */
+.error.sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.error.md {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.error.lg {
+  padding: var(--spacing-sm) var(--spacing-lg);
 }

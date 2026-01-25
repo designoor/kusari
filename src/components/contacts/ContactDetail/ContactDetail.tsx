@@ -11,6 +11,7 @@ import { EthosReputationPanel } from '@/components/reputation/EthosReputationPan
 import { ContactActions } from '../ContactActions';
 import { useConsent } from '@/hooks/useConsent';
 import { useEthosScore } from '@/hooks/useEthosScore';
+import type { EthosProfile } from '@/services/ethos';
 import { ChatIcon, BanIcon, InboxIcon, AlertTriangleIcon } from '@/components/ui/Icon/icons';
 import styles from './ContactDetail.module.css';
 
@@ -21,6 +22,8 @@ export interface ContactDetailProps {
   peerInboxId: string;
   /** Optional display name or ENS name */
   displayName?: string;
+  /** Pre-fetched Ethos profile (skips internal fetch if provided) */
+  ethosProfile?: EthosProfile | null;
   /** Current consent state */
   consentState: ConsentState;
   /** Optional conversation ID */
@@ -49,6 +52,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   address,
   peerInboxId,
   displayName,
+  ethosProfile: externalEthosProfile,
   consentState,
   conversationId,
   lastMessage,
@@ -61,8 +65,10 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
   const [isBlocking, setIsBlocking] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
-  // Fetch Ethos profile for the address
-  const { data: ethosProfile } = useEthosScore(address);
+  // Use external profile if provided, otherwise fetch
+  const shouldFetch = externalEthosProfile === undefined;
+  const { data: fetchedProfile } = useEthosScore(shouldFetch ? address : null);
+  const ethosProfile = externalEthosProfile !== undefined ? externalEthosProfile : fetchedProfile;
 
   // Get Ethos username if available
   const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
@@ -84,6 +90,9 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
     }
     return 'primary';
   }, [ethosProfile]);
+
+  // Show warning for unknown contacts with no profile or low trust score
+  const showLowTrustWarning = consentState === ConsentState.Unknown && acceptVariant === 'danger';
 
   const handleOpenChat = useCallback(() => {
     if (conversationId) {
@@ -156,6 +165,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
         <SectionTitle>Reputation</SectionTitle>
         <EthosReputationPanel
           address={address}
+          profile={ethosProfile}
           showUserInfo={false}
           showReviews={true}
           showVouches={true}
@@ -174,13 +184,15 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
       )}
 
       {/* System Message (warning for low/no reputation) */}
-      {consentState === ConsentState.Unknown && acceptVariant === 'danger' && (
+      {showLowTrustWarning && (
         <div className={styles.section}>
           <SectionTitle>System Message</SectionTitle>
           <div className={styles.systemMessage}>
             <AlertTriangleIcon size={20} className={styles.systemMessageIcon} />
             <p className={styles.systemMessageContent}>
-              This account has no verified reputation or a very low trust score. Exercise caution before accepting this connection request.
+              {!ethosProfile
+                ? 'This account has no verified reputation. Exercise caution before accepting this connection request.'
+                : 'This account has a very low trust score. Exercise caution before accepting this connection request.'}
             </p>
           </div>
         </div>

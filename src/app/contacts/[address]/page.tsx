@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ContactsIcon } from '@/components/ui/Icon/icons';
 import { useConversations } from '@/hooks/useConversations';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import { identifiersMatch } from '@/lib';
 import styles from './contact.module.css';
 
@@ -19,7 +20,13 @@ export default function ContactDetailPage() {
   const address = decodeURIComponent(params.address as string);
   const conversationIdFromQuery = searchParams.get('conversation');
 
-  const { filteredPreviews: allPreviews, isLoading } = useConversations();
+  const { filteredPreviews: allPreviews, isLoading: conversationsLoading } = useConversations();
+
+  // Fetch Ethos profile at page level to avoid skeleton flash
+  const { data: ethosProfile, isLoading: ethosLoading } = useEthosScore(address);
+
+  // Combined loading state - wait for both conversations and Ethos
+  const isLoading = conversationsLoading || ethosLoading;
 
   // Find the contact/conversation preview for this address
   // Uses identifiersMatch to handle hex addresses (case-insensitive) and other identifier formats
@@ -119,6 +126,7 @@ export default function ContactDetailPage() {
         <ContactDetail
           address={address}
           peerInboxId={contactPreview.peerInboxId}
+          ethosProfile={ethosProfile}
           consentState={consentState}
           conversationId={conversationId}
           lastMessage={lastMessage}

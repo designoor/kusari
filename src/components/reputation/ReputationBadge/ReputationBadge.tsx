@@ -65,15 +65,28 @@ export const ReputationBadge: React.FC<ReputationBadgeProps> = ({
   className,
   onClick,
 }) => {
-  // If not verified or no score data, show "Not verified" badge
+  const getIconSize = () => {
+    switch (size) {
+      case 'sm':
+        return 10;
+      case 'lg':
+        return 16;
+      default:
+        return 12;
+    }
+  };
+
+  // If not verified or no score data, show "No reputation" badge
   if (!verified || score === null || score === undefined || !level) {
     return (
       <span
         className={`${styles.badge} ${styles.unverified} ${styles[size]} ${className ?? ''}`}
         role="status"
-        aria-label="Not verified on Ethos"
+        aria-label="No reputation on Ethos"
       >
-        Not verified
+        <EthosIcon size={getIconSize()} className={styles.icon} />
+        <span className={styles.separator}>·</span>
+        <span className={styles.noReputationLabel}>No reputation</span>
       </span>
     );
   }
@@ -96,17 +109,6 @@ export const ReputationBadge: React.FC<ReputationBadgeProps> = ({
         }
       }
     : undefined;
-
-  const getIconSize = () => {
-    switch (size) {
-      case 'sm':
-        return 10;
-      case 'lg':
-        return 16;
-      default:
-        return 12;
-    }
-  };
 
   const badgeContent = () => {
     const icon = <EthosIcon size={getIconSize()} className={styles.icon} />;
