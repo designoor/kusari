@@ -1,12 +1,8 @@
 .logo {
   width: 32px;
   height: 32px;
-  border-radius: 0;
-  background-color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  color: var(--color-bg-primary);
-  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
 }

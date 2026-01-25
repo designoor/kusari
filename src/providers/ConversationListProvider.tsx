@@ -1,8 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useRef } from 'react';
-import { ConsentState } from '@xmtp/browser-sdk';
-import { useConversations } from '@/hooks/useConversations';
+import { useConversationData } from './ConversationDataProvider';
 import { useEthosScores } from '@/hooks/useEthosScore';
 import type { ConversationPreview } from '@/types/conversation';
 import type { EthosProfile } from '@/services/ethos';
@@ -11,7 +10,7 @@ import type { EthosProfile } from '@/services/ethos';
  * Context value for the conversation list provider
  */
 interface ConversationListContextValue {
-  /** Filtered conversation previews from XMTP */
+  /** Allowed conversation previews */
   previews: ConversationPreview[];
   /** Map of lowercase address to Ethos profile */
   ethosProfiles: Map<string, EthosProfile>;
@@ -63,9 +62,9 @@ function extractValidAddresses(previews: ConversationPreview[]): string[] {
 /**
  * Provider that manages conversation list state at the layout level.
  *
- * This provider ensures conversation list data persists across page navigations
- * within the chat section, preventing unnecessary skeleton flashing when moving
- * between conversations.
+ * This provider reads from the centralized ConversationDataProvider and adds:
+ * - Ethos profile loading for DM addresses
+ * - Initial loading state tracking for skeleton display
  *
  * Key features:
  * - Persists data across page navigations
@@ -76,49 +75,45 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
   // Track if we've ever completed a full load cycle (persists across refreshes)
   const hasLoadedOnceRef = useRef(false);
 
-  // Phase 1: XMTP data (allowed conversations only)
-  const xmtp = useConversations({ consentState: ConsentState.Allowed });
+  // Get allowed conversations from centralized provider
+  const data = useConversationData();
+  const previews = data.allowedPreviews;
 
-  // Only extract addresses when XMTP has attempted load AND is not currently loading
-  // This ensures Ethos fetch only starts after XMTP is complete
+  // Only extract addresses when data has loaded
   const addressesForEthos = useMemo(() => {
-    if (!xmtp.hasAttemptedLoad || xmtp.isLoading) {
-      return []; // Don't trigger Ethos fetch yet
+    if (!data.hasAttemptedLoad || data.isLoading) {
+      return [];
     }
-    return extractValidAddresses(xmtp.filteredPreviews);
-  }, [xmtp.hasAttemptedLoad, xmtp.isLoading, xmtp.filteredPreviews]);
+    return extractValidAddresses(previews);
+  }, [data.hasAttemptedLoad, data.isLoading, previews]);
 
-  // Phase 2: Ethos data (only fetches when addresses become available)
+  // Ethos data (only fetches when addresses become available)
   const { profiles: ethosProfiles, isLoading: isEthosLoading } = useEthosScores(addressesForEthos);
 
   // Combined loading state
-  const isLoading = xmtp.isLoading || isEthosLoading;
+  const isLoading = data.isLoading || isEthosLoading;
   const isReady = !isLoading;
 
-  // Mark as loaded once:
-  // 1. XMTP has attempted load (first load completed or determined nothing to load)
-  // 2. XMTP is not currently loading
-  // 3. Ethos is not currently loading
-  const allDataReady = xmtp.hasAttemptedLoad && !xmtp.isLoading && !isEthosLoading;
+  // Mark as loaded once all data is ready
+  const allDataReady = data.hasAttemptedLoad && !data.isLoading && !isEthosLoading;
   if (allDataReady) {
     hasLoadedOnceRef.current = true;
   }
 
   // Show skeleton until first complete load cycle finishes
-  // After first load, show cached data during refreshes (no skeleton flash)
   const isInitialLoading = !hasLoadedOnceRef.current;
 
   const value = useMemo(
     () => ({
-      previews: xmtp.filteredPreviews,
+      previews,
       ethosProfiles,
       isLoading,
       isInitialLoading,
       isReady,
-      error: xmtp.error,
-      refresh: xmtp.refresh,
+      error: data.error,
+      refresh: data.refresh,
     }),
-    [xmtp.filteredPreviews, ethosProfiles, isLoading, isInitialLoading, isReady, xmtp.error, xmtp.refresh]
+    [previews, ethosProfiles, isLoading, isInitialLoading, isReady, data.error, data.refresh]
   );
 
   return (
