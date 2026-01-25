@@ -3,6 +3,7 @@ import {
   ChatIcon,
   ContactsIcon,
   SettingsIcon,
+  GearIcon,
   SendIcon,
   SearchIcon,
   ChevronLeftIcon,
@@ -30,6 +31,7 @@ export type IconName =
   | 'chat'
   | 'contacts'
   | 'settings'
+  | 'gear'
   | 'send'
   | 'search'
   | 'chevron-left'
@@ -72,6 +74,7 @@ const ICON_MAP = {
   chat: ChatIcon,
   contacts: ContactsIcon,
   settings: SettingsIcon,
+  gear: GearIcon,
   send: SendIcon,
   search: SearchIcon,
   'chevron-left': ChevronLeftIcon,

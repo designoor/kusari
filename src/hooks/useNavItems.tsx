@@ -52,7 +52,7 @@ export function useNavItems(): NavItem[] {
         id: 'settings',
         label: 'Settings',
         href: '/settings',
-        icon: <Icon name="settings" size="md" />,
+        icon: <Icon name="gear" size="md" />,
       },
     ],
     [newRequestsCount, allowedUnreadCount]

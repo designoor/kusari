@@ -28,6 +28,13 @@ function isSameDay(date1: Date, date2: Date): boolean {
   );
 }
 
+/**
+ * Get total message count from groups
+ */
+function getMessageCount(groups: MessageGroup[]): number {
+  return groups.reduce((count, group) => count + group.messages.length, 0);
+}
+
 export const MessageList: React.FC<MessageListProps> = ({
   messageGroups,
   isLoading = false,
@@ -37,6 +44,8 @@ export const MessageList: React.FC<MessageListProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
+  // Track previous message count to detect actual new messages
+  const prevMessageCountRef = useRef(0);
 
   // Check if user is near the bottom of the scroll container
   const checkIfNearBottom = useCallback(() => {
@@ -54,9 +63,16 @@ export const MessageList: React.FC<MessageListProps> = ({
 
   // Auto-scroll to bottom when new messages arrive (only if user is near bottom)
   useEffect(() => {
-    if (isNearBottomRef.current) {
+    const currentCount = getMessageCount(messageGroups);
+    const prevCount = prevMessageCountRef.current;
+
+    // Only scroll if there are actually new messages AND user is near bottom
+    // This prevents scrolling when the component re-renders with the same messages
+    if (currentCount > prevCount && isNearBottomRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
+
+    prevMessageCountRef.current = currentCount;
   }, [messageGroups]);
 
   // Loading state

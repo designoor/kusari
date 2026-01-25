@@ -87,23 +87,14 @@ export function useAppState(): AppStateResult {
   const wallet = useWalletConnection();
   const xmtp = useXmtpContext();
 
-  // Loading = still collecting state from SDKs
-  // This is the ultimate decision maker for showing skeleton vs actual UI
-  const isLoading = useMemo(() => {
-    // 1. AppKit still initializing, reconnecting, or connecting
-    if (wallet.isLoading) return true;
-
-    // 2. Wallet connected, but XMTP identity check hasn't completed yet
-    // We need to wait for the probe to complete before deciding what to show
-    if (wallet.isConnected && !xmtp.hasAttemptedAutoInit) return true;
-
-    // All systems settled - we can now determine the final UI
-    return false;
-  }, [wallet.isLoading, wallet.isConnected, xmtp.hasAttemptedAutoInit]);
-
-  // Derive state (only meaningful when !isLoading)
+  // Derive the canonical app state from wallet + XMTP state
   const state = useMemo((): AppState => {
-    // While loading, always return initializing
+    // Loading = still collecting state from SDKs
+    // 1. AppKit still initializing, reconnecting, or connecting
+    // 2. Wallet connected, but XMTP identity check hasn't completed yet
+    const isLoading =
+      wallet.isLoading || (wallet.isConnected && !xmtp.hasAttemptedAutoInit);
+
     if (isLoading) {
       return { status: 'initializing' };
     }
@@ -134,16 +125,17 @@ export function useAppState(): AppStateResult {
     // Fully authenticated (show chat app)
     return { status: 'ready', address };
   }, [
-    isLoading,
+    wallet.isLoading,
     wallet.status,
     wallet.isConnected,
     wallet.address,
+    xmtp.hasAttemptedAutoInit,
     xmtp.isInitializing,
     xmtp.isInitialized,
   ]);
 
   // Derive onboarding step from app state
-  const onboardingStep = useMemo((): OnboardingStep | null => {
+  const getOnboardingStep = (): OnboardingStep | null => {
     switch (state.status) {
       case 'disconnected':
         return 'welcome';
@@ -154,15 +146,15 @@ export function useAppState(): AppStateResult {
         return 'sign';
       case 'initializing':
       case 'ready':
-        return null; // Not in onboarding
+        return null;
     }
-  }, [state.status]);
+  };
 
   return {
     state,
     isReady: state.status !== 'initializing',
     isAuthenticated: state.status === 'ready',
-    onboardingStep,
+    onboardingStep: getOnboardingStep(),
     address: 'address' in state ? state.address : undefined,
     xmtpError: xmtp.error,
   };
