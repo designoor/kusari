@@ -6,7 +6,7 @@ import { ConsentState } from '@xmtp/browser-sdk';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { DropdownMenu, type DropdownMenuItem } from '@/components/ui/DropdownMenu';
-import { SectionTitle } from '@/components/ui/SectionTitle';
+import { Section } from '@/components/ui/Section';
 import { EthosReputationPanel } from '@/components/reputation/EthosReputationPanel';
 import { ContactActions } from '../ContactActions';
 import { useConsent } from '@/hooks/useConsent';
@@ -161,8 +161,7 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
       </div>
 
       {/* Reputation Panel */}
-      <div className={styles.section}>
-        <SectionTitle>Reputation</SectionTitle>
+      <Section title="Reputation" variant="bare">
         <EthosReputationPanel
           address={address}
           profile={ethosProfile}
@@ -171,31 +170,25 @@ export const ContactDetail: React.FC<ContactDetailProps> = React.memo(({
           showVouches={true}
           showProfileLink={true}
         />
-      </div>
+      </Section>
 
       {/* Message Preview (for requests) */}
       {consentState === ConsentState.Unknown && lastMessage && (
-        <div className={styles.section}>
-          <SectionTitle>Message Preview</SectionTitle>
-          <div className={styles.messagePreview}>
-            <p className={styles.messageContent}>{lastMessage.content}</p>
-          </div>
-        </div>
+        <Section title="Message Preview">
+          <p className={styles.messageContent}>{lastMessage.content}</p>
+        </Section>
       )}
 
       {/* System Message (warning for low/no reputation) */}
       {showLowTrustWarning && (
-        <div className={styles.section}>
-          <SectionTitle>System Message</SectionTitle>
-          <div className={styles.systemMessage}>
-            <AlertTriangleIcon size={20} className={styles.systemMessageIcon} />
-            <p className={styles.systemMessageContent}>
-              {!ethosProfile
-                ? 'This account has no verified reputation. Exercise caution before accepting this connection request.'
-                : 'This account has a very low trust score. Exercise caution before accepting this connection request.'}
-            </p>
-          </div>
-        </div>
+        <Section title="System Message" variant="error" contentClassName={styles.systemMessage}>
+          <AlertTriangleIcon size={20} className={styles.systemMessageIcon} />
+          <p className={styles.systemMessageContent}>
+            {!ethosProfile
+              ? 'This account has no verified reputation. Exercise caution before accepting this connection request.'
+              : 'This account has a very low trust score. Exercise caution before accepting this connection request.'}
+          </p>
+        </Section>
       )}
 
       {/* Actions */}
