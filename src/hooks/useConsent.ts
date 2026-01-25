@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLatest } from './useLatest';
 import type { Consent } from '@xmtp/browser-sdk';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
@@ -212,8 +213,7 @@ export function useConsentStream(onUpdate?: (updates: ConsentUpdate[]) => void) 
   const [consentCache, setConsentCache] = useState<Map<string, ConsentState>>(new Map());
 
   // Store callback in ref to avoid recreating stream when callback changes
-  const onUpdateRef = useRef(onUpdate);
-  onUpdateRef.current = onUpdate;
+  const onUpdateRef = useLatest(onUpdate);
 
   // Stream consent updates
   // Clear cache when client becomes unavailable to prevent stale data

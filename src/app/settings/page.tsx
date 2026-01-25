@@ -1,12 +1,18 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Avatar, Button, Icon, PageHeader, Section, Toggle } from '@/components/ui';
 import { useWallet } from '@/hooks/useWallet';
 import { usePreferences } from '@/hooks/usePreferences';
 import { useToast } from '@/providers/ToastProvider';
 import { truncateAddress } from '@/lib';
+import {
+  isBrowserNotificationSupported,
+  getNotificationPermissionState,
+  requestNotificationPermission,
+  type NotificationPermissionState,
+} from '@/lib/notifications';
 import styles from './settings.module.css';
 
 const APP_VERSION = '0.1.0';
@@ -21,7 +27,25 @@ export default function SettingsPage() {
     setHideMessagePreviews,
     disableReadReceipts,
     setDisableReadReceipts,
+    notificationsEnabled,
+    setNotificationsEnabled,
+    notifyForRequests,
+    setNotifyForRequests,
   } = usePreferences();
+
+  // Notification permission state
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermissionState>('default');
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const notificationsSupported = isBrowserNotificationSupported();
+
+  // Load initial notification permission state
+  useEffect(() => {
+    if (notificationsSupported) {
+      setNotificationPermission(getNotificationPermissionState());
+    } else {
+      setNotificationPermission('unsupported');
+    }
+  }, [notificationsSupported]);
 
   const handleCopyAddress = useCallback(async () => {
     if (!address) return;
@@ -45,6 +69,31 @@ export default function SettingsPage() {
       setIsDisconnecting(false);
     }
   }, [disconnectAsync, router]);
+
+  const handleToggleNotifications = useCallback(async (enabled: boolean) => {
+    if (enabled) {
+      // If enabling and permission not yet granted, request it
+      if (notificationPermission === 'default') {
+        setIsRequestingPermission(true);
+        try {
+          const result = await requestNotificationPermission();
+          setNotificationPermission(result);
+          if (result === 'granted') {
+            setNotificationsEnabled(true);
+            toast.success('Notifications enabled');
+          } else if (result === 'denied') {
+            toast.error('Notifications blocked by browser');
+          }
+        } finally {
+          setIsRequestingPermission(false);
+        }
+      } else if (notificationPermission === 'granted') {
+        setNotificationsEnabled(true);
+      }
+    } else {
+      setNotificationsEnabled(false);
+    }
+  }, [notificationPermission, setNotificationsEnabled, toast]);
 
   return (
     <div className={styles.container}>
@@ -115,6 +164,46 @@ export default function SettingsPage() {
             />
           </div>
         </Section>
+
+        {/* Notifications Section */}
+        {notificationsSupported && (
+          <Section title="Notifications">
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Enable notifications</span>
+                <span className={styles.settingDescription}>
+                  Receive browser notifications for new messages
+                </span>
+              </div>
+              <Toggle
+                checked={notificationsEnabled && notificationPermission === 'granted'}
+                onChange={(checked) => void handleToggleNotifications(checked)}
+                disabled={notificationPermission === 'denied' || isRequestingPermission}
+                aria-label="Enable notifications"
+              />
+            </div>
+            {notificationsEnabled && notificationPermission === 'granted' && (
+              <div className={styles.settingRow}>
+                <div className={styles.settingInfo}>
+                  <span className={styles.settingLabel}>Include message requests</span>
+                  <span className={styles.settingDescription}>
+                    Also notify for messages from new contacts
+                  </span>
+                </div>
+                <Toggle
+                  checked={notifyForRequests}
+                  onChange={setNotifyForRequests}
+                  aria-label="Include message requests in notifications"
+                />
+              </div>
+            )}
+            {notificationPermission === 'denied' && (
+              <p className={styles.settingWarning}>
+                Notifications are blocked by your browser. Enable them in your browser settings to receive message alerts.
+              </p>
+            )}
+          </Section>
+        )}
 
         {/* Messaging Section */}
         <Section title="Messaging">

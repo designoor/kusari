@@ -78,6 +78,13 @@
   line-height: var(--line-height-base);
 }
 
+.settingWarning {
+  font-size: var(--font-size-sm);
+  color: var(--color-warning);
+  line-height: var(--line-height-base);
+  margin-top: var(--spacing-2);
+}
+
 /* Messaging Section - Coming Soon */
 .comingSoon {
   display: flex;

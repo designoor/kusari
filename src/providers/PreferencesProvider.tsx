@@ -6,6 +6,10 @@ import {
   setHideMessagePreviews as saveHideMessagePreviews,
   getDisableReadReceipts,
   setDisableReadReceipts as saveDisableReadReceipts,
+  getNotificationsEnabled,
+  setNotificationsEnabled as saveNotificationsEnabled,
+  getNotifyForRequests,
+  setNotifyForRequests as saveNotifyForRequests,
 } from '@/lib/preferences/storage';
 
 /**
@@ -22,6 +26,14 @@ interface PreferencesContextValue {
   disableReadReceipts: boolean;
   /** Toggle disable read receipts setting */
   setDisableReadReceipts: (disable: boolean) => void;
+  /** Whether browser notifications are enabled */
+  notificationsEnabled: boolean;
+  /** Toggle notifications enabled setting */
+  setNotificationsEnabled: (enabled: boolean) => void;
+  /** Whether to notify for message requests (unknown consent) */
+  notifyForRequests: boolean;
+  /** Toggle notify for requests setting */
+  setNotifyForRequests: (notify: boolean) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextValue | null>(null);
@@ -51,11 +63,15 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
   const [isLoading, setIsLoading] = useState(true);
   const [hideMessagePreviews, setHideMessagePreviewsState] = useState(false);
   const [disableReadReceipts, setDisableReadReceiptsState] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
+  const [notifyForRequests, setNotifyForRequestsState] = useState(false);
 
   // Load preferences from localStorage on mount
   useEffect(() => {
     setHideMessagePreviewsState(getHideMessagePreviews());
     setDisableReadReceiptsState(getDisableReadReceipts());
+    setNotificationsEnabledState(getNotificationsEnabled());
+    setNotifyForRequestsState(getNotifyForRequests());
     setIsLoading(false);
   }, []);
 
@@ -71,6 +87,18 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     setDisableReadReceiptsState(disable);
   }, []);
 
+  // Update notifications enabled
+  const setNotificationsEnabled = useCallback((enabled: boolean) => {
+    saveNotificationsEnabled(enabled);
+    setNotificationsEnabledState(enabled);
+  }, []);
+
+  // Update notify for requests
+  const setNotifyForRequests = useCallback((notify: boolean) => {
+    saveNotifyForRequests(notify);
+    setNotifyForRequestsState(notify);
+  }, []);
+
   const value = React.useMemo(
     () => ({
       isLoading,
@@ -78,8 +106,22 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
       setHideMessagePreviews,
       disableReadReceipts,
       setDisableReadReceipts,
+      notificationsEnabled,
+      setNotificationsEnabled,
+      notifyForRequests,
+      setNotifyForRequests,
     }),
-    [isLoading, hideMessagePreviews, setHideMessagePreviews, disableReadReceipts, setDisableReadReceipts]
+    [
+      isLoading,
+      hideMessagePreviews,
+      setHideMessagePreviews,
+      disableReadReceipts,
+      setDisableReadReceipts,
+      notificationsEnabled,
+      setNotificationsEnabled,
+      notifyForRequests,
+      setNotifyForRequests,
+    ]
   );
 
   return (
