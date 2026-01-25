@@ -36,19 +36,6 @@
   word-break: break-all;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.messagePreview {
-  background-color: var(--color-bg-tertiary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  padding: var(--spacing-md);
-}
-
 .messageContent {
   font-size: var(--font-size-md);
   color: var(--color-content-primary);
@@ -58,13 +45,8 @@
 }
 
 .systemMessage {
-  display: flex;
+  flex-direction: row;
   align-items: flex-start;
-  gap: var(--spacing-sm);
-  background-color: rgba(255, 91, 91, 0.1);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 91, 91, 0.3);
-  padding: var(--spacing-md);
 }
 
 .systemMessageIcon {

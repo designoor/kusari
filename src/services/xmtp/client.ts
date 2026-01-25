@@ -1,4 +1,4 @@
-import { Client } from '@xmtp/browser-sdk';
+import { Client, LogLevel } from '@xmtp/browser-sdk';
 import type { EOASigner } from '@xmtp/browser-sdk';
 import type { XmtpClientConfig, XmtpEnv } from './types';
 
@@ -46,6 +46,7 @@ export async function createXmtpClient(signer: EOASigner): Promise<Client> {
   try {
     const client = await Client.create(signer, {
       env: config.env,
+      loggingLevel: LogLevel.Off,
       ...(config.apiUrl && { apiUrl: config.apiUrl }),
     });
 
