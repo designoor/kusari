@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useMemo, useRef } from 'react';
 import { useConversationData } from './ConversationDataProvider';
-import { useEthosScores } from '@/hooks/useEthosScore';
+import { useEthosScores, generateAddressesKey } from '@/hooks/useEthosScore';
 import type { ConversationPreview } from '@/types/conversation';
 import type { EthosProfile } from '@/services/ethos';
 
@@ -74,9 +74,16 @@ function extractValidAddresses(previews: ConversationPreview[]): string[] {
 export function ConversationListProvider({ children }: { children: React.ReactNode }) {
   // Track if we've ever completed a full load cycle (persists across refreshes)
   const hasLoadedOnceRef = useRef(false);
+  // Track if we've ever seen an actual loading state (not just the "no client" fallback)
+  const hasSeenLoadingRef = useRef(false);
 
   // Get allowed conversations from centralized provider
   const data = useConversationData();
+
+  // Track when a real load cycle starts
+  if (data.isLoading) {
+    hasSeenLoadingRef.current = true;
+  }
   const previews = data.allowedPreviews;
 
   // Only extract addresses when data has loaded
@@ -88,14 +95,27 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
   }, [data.hasAttemptedLoad, data.isLoading, previews]);
 
   // Ethos data (only fetches when addresses become available)
-  const { profiles: ethosProfiles, isLoading: isEthosLoading } = useEthosScores(addressesForEthos);
+  const { profiles: ethosProfiles, isLoading: isEthosLoading, completedKey } =
+    useEthosScores(addressesForEthos);
+
+  // Compute expected addresses key to verify Ethos has processed the exact addresses we expect
+  const expectedAddressesKey = useMemo(
+    () => generateAddressesKey(addressesForEthos),
+    [addressesForEthos]
+  );
+
+  // Ethos is ready when it has processed the addresses we expect
+  // This handles the timing gap where addresses change but Ethos hasn't started fetching yet
+  const ethosReady = !isEthosLoading && completedKey === expectedAddressesKey;
 
   // Combined loading state
-  const isLoading = data.isLoading || isEthosLoading;
+  const isLoading = data.isLoading || !ethosReady;
   const isReady = !isLoading;
 
-  // Mark as loaded once all data is ready
-  const allDataReady = data.hasAttemptedLoad && !data.isLoading && !isEthosLoading;
+  // Mark as loaded once all data is ready (XMTP finished + Ethos in sync)
+  // Requires hasSeenLoadingRef to ensure a real load happened (not just "no client" fallback)
+  const allDataReady =
+    hasSeenLoadingRef.current && data.hasAttemptedLoad && !data.isLoading && ethosReady;
   if (allDataReady) {
     hasLoadedOnceRef.current = true;
   }
