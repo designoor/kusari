@@ -301,6 +301,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ className }) => {
                     score={ethosProfile.score}
                     level={ethosProfile.level}
                     positiveReviews={ethosProfile.reviews.positive}
+                    neutralReviews={ethosProfile.reviews.neutral}
                     negativeReviews={ethosProfile.reviews.negative}
                     size="md"
                     className={styles.ethosStats}

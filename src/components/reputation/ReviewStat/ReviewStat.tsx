@@ -1,8 +1,8 @@
 import React from 'react';
-import { ThumbsUpIcon, ThumbsDownIcon } from '@/components/ui/Icon/icons';
+import { ThumbsUpIcon, ThumbsDownIcon, MinusIcon } from '@/components/ui/Icon/icons';
 import styles from './ReviewStat.module.css';
 
-export type ReviewStatVariant = 'positive' | 'negative';
+export type ReviewStatVariant = 'positive' | 'negative' | 'neutral';
 export type ReviewStatSize = 'sm' | 'md' | 'lg';
 
 export interface ReviewStatProps {
@@ -22,6 +22,12 @@ const ICON_SIZE_MAP: Record<ReviewStatSize, number> = {
   lg: 16,
 };
 
+const ICON_MAP = {
+  positive: ThumbsUpIcon,
+  negative: ThumbsDownIcon,
+  neutral: MinusIcon,
+};
+
 /**
  * ReviewStat displays a review count with an icon and tinted background.
  *
@@ -29,6 +35,7 @@ const ICON_SIZE_MAP: Record<ReviewStatSize, number> = {
  * ```tsx
  * <ReviewStat variant="positive" count={42} />
  * <ReviewStat variant="negative" count={3} size="sm" />
+ * <ReviewStat variant="neutral" count={5} />
  * ```
  */
 export const ReviewStat: React.FC<ReviewStatProps> = ({
@@ -37,7 +44,7 @@ export const ReviewStat: React.FC<ReviewStatProps> = ({
   size = 'md',
   className,
 }) => {
-  const Icon = variant === 'positive' ? ThumbsUpIcon : ThumbsDownIcon;
+  const Icon = ICON_MAP[variant];
   const iconSize = ICON_SIZE_MAP[size];
 
   return (

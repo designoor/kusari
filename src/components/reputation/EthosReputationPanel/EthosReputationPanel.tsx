@@ -97,7 +97,7 @@ const ProfileContent: React.FC<{
   showVouches: boolean;
   showProfileLink: boolean;
 }> = ({ profile, address, showUserInfo, showReviews, showVouches, showProfileLink }) => {
-  const totalReviews = profile.reviews.positive + profile.reviews.negative;
+  const totalReviews = profile.reviews.positive + profile.reviews.neutral + profile.reviews.negative;
   const totalVouches = profile.vouches.given + profile.vouches.received;
 
   const handleOpenProfile = () => {
@@ -148,6 +148,7 @@ const ProfileContent: React.FC<{
           </span>
           <div className={styles.statsRow}>
             <ReviewStat variant="positive" count={profile.reviews.positive} />
+            <ReviewStat variant="neutral" count={profile.reviews.neutral} />
             <ReviewStat variant="negative" count={profile.reviews.negative} />
           </div>
         </div>

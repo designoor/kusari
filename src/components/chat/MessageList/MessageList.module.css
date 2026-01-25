@@ -7,7 +7,7 @@
 .messages {
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-md);
+  padding: var(--spacing-md) 0;
   padding-bottom: 64px; /* Space for sticky MessageInput (48px + extra) */
   min-height: 100%;
 }
@@ -44,23 +44,30 @@
 .dateSeparator {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--spacing-md) 0;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.dateSeparator::before,
+.dateSeparator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
 }
 
 .dateText {
   font-size: var(--font-size-sm);
   color: var(--color-content-secondary);
-  background-color: var(--color-bg-secondary);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 /* Message group */
 .messageGroup {
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: 0 var(--spacing-md);
 }
 
 .messageGroup:last-child {
