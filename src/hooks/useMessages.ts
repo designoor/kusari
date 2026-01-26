@@ -11,9 +11,20 @@ import {
   streamMessages,
   syncConversation,
 } from '@/services/xmtp/messages';
+import { getLastReadTimes } from '@/services/xmtp/readReceipts';
 import type { Conversation } from '@/types/conversation';
 import type { MessageDisplay, PendingMessage, MessageGroup, MessageType } from '@/types/message';
 import { truncateAddress } from '@/lib/address';
+
+/**
+ * XMTP content type structure
+ */
+interface ContentType {
+  authorityId: string;
+  typeId: string;
+  versionMajor: number;
+  versionMinor: number;
+}
 
 /**
  * XMTP group_updated content structure
@@ -28,16 +39,6 @@ interface GroupUpdatedContent {
   addedSuperAdminInboxes?: { inboxId: string }[];
   removedSuperAdminInboxes?: { inboxId: string }[];
   metadataFieldChanges?: unknown[];
-}
-
-/**
- * XMTP content type structure
- */
-interface ContentType {
-  authorityId: string;
-  typeId: string;
-  versionMajor: number;
-  versionMinor: number;
 }
 
 /**
@@ -115,11 +116,13 @@ interface UseMessagesReturn extends UseMessagesState {
   messageGroups: MessageGroup[];
   sendMessage: (content: string) => Promise<void>;
   refresh: () => Promise<void>;
+  /** Peer's last read timestamp in nanoseconds (for read receipt UI) */
+  peerLastReadTime: bigint | null;
 }
 
 /**
  * Hook to manage messages for a specific conversation
- * Provides message list, streaming updates, and send functionality
+ * Provides message list, streaming updates, send functionality, and real-time read receipts
  *
  * @param conversationId The ID of the conversation to manage messages for
  * @returns Message state and helper methods
@@ -135,6 +138,9 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     isSending: false,
     error: null,
   });
+
+  // Read receipt state - updated from initial fetch and real-time stream
+  const [peerLastReadTime, setPeerLastReadTime] = useState<bigint | null>(null);
 
   /**
    * Load all messages for the conversation
@@ -328,7 +334,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     };
   }, [conversation]);
 
-  // Stream new messages
+  // Stream new messages and read receipts
   useEffect(() => {
     if (!conversation || !client) {
       return;
@@ -337,6 +343,25 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     const currentInboxId = client.inboxId;
 
     const cleanup = streamMessages(conversation, (newMessage) => {
+      // Check if this is a read receipt from the peer
+      const contentType = newMessage.contentType as ContentType | undefined;
+      if (contentType?.typeId === 'readReceipt') {
+        // Only update if this read receipt is from the peer (not ourselves)
+        if (newMessage.senderInboxId !== currentInboxId) {
+          // The sentAtNs of the read receipt indicates when it was sent,
+          // which means the peer has read all messages up to this point
+          setPeerLastReadTime((prev) => {
+            // Only update if this is a newer read time
+            if (!prev || newMessage.sentAtNs > prev) {
+              return newMessage.sentAtNs;
+            }
+            return prev;
+          });
+        }
+        // Don't add read receipts to the message list
+        return;
+      }
+
       setState((prev) => {
         // Check if message already exists
         const exists = prev.messages.some((m) => m.id === newMessage.id);
@@ -367,6 +392,34 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     return cleanup;
   }, [conversation, client]);
 
+  // Fetch initial read times when conversation loads
+  useEffect(() => {
+    if (!conversation || !client) {
+      setPeerLastReadTime(null);
+      return;
+    }
+
+    const currentInboxId = client.inboxId;
+
+    const fetchInitialReadTimes = async () => {
+      try {
+        const lastReadTimesMap = await getLastReadTimes(conversation);
+
+        // Find the peer's last read time (not our own)
+        for (const [inboxId, timestamp] of lastReadTimesMap) {
+          if (inboxId !== currentInboxId) {
+            setPeerLastReadTime(timestamp);
+            break;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch initial read times:', error);
+      }
+    };
+
+    void fetchInitialReadTimes();
+  }, [conversation, client]);
+
   // Mark conversation as read when messages are loaded
   useEffect(() => {
     if (conversationId && !state.isLoading && state.messages.length > 0) {
@@ -389,13 +442,22 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
       .map((msg): MessageDisplay | null => {
         // Text messages (string content)
         if (typeof msg.content === 'string') {
+          const isFromCurrentUser = msg.senderInboxId === currentInboxId;
+
+          // Determine status: check if message has been read by peer
+          let status: MessageDisplay['status'] = 'sent';
+          if (isFromCurrentUser && peerLastReadTime && msg.sentAtNs <= peerLastReadTime) {
+            status = 'read';
+          }
+
           return {
             id: msg.id,
             content: msg.content,
             senderInboxId: msg.senderInboxId,
             sentAt: msg.sentAt,
-            isFromCurrentUser: msg.senderInboxId === currentInboxId,
-            status: 'sent' as const,
+            sentAtNs: msg.sentAtNs,
+            isFromCurrentUser,
+            status,
             type: 'text' as MessageType,
           };
         }
@@ -409,13 +471,14 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
             content: formatGroupUpdatedMessage(groupContent, groupContent.initiatedByInboxId),
             senderInboxId: msg.senderInboxId,
             sentAt: msg.sentAt,
+            sentAtNs: msg.sentAtNs,
             isFromCurrentUser: false, // System messages are never "from current user"
             status: 'sent' as const,
             type: 'system' as MessageType,
           };
         }
 
-        // Skip other non-text content types (read_receipts, reactions, etc.)
+        // Skip other non-text content types (readReceipt, reactions, etc.)
         return null;
       })
       .filter((msg): msg is MessageDisplay => msg !== null);
@@ -426,6 +489,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
       content: msg.content,
       senderInboxId: currentInboxId,
       sentAt: msg.createdAt,
+      sentAtNs: BigInt(msg.createdAt.getTime()) * BigInt(1_000_000),
       isFromCurrentUser: true,
       status: msg.status,
       type: 'text' as MessageType,
@@ -435,7 +499,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     return [...regularMessages, ...pending].sort(
       (a, b) => a.sentAt.getTime() - b.sentAt.getTime()
     );
-  }, [client, state.messages, state.pendingMessages]);
+  }, [client, state.messages, state.pendingMessages, peerLastReadTime]);
 
   /**
    * Group consecutive messages from the same sender
@@ -485,6 +549,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     messageGroups,
     sendMessage,
     refresh,
+    peerLastReadTime,
   };
 }
 

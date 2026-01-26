@@ -9,6 +9,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CheckIcon,
+  CheckDoubleIcon,
   XIcon,
   LoaderIcon,
   MessageIcon,
@@ -37,6 +38,7 @@ export type IconName =
   | 'chevron-left'
   | 'chevron-right'
   | 'check'
+  | 'check-double'
   | 'x'
   | 'loader'
   | 'message'
@@ -80,6 +82,7 @@ const ICON_MAP = {
   'chevron-left': ChevronLeftIcon,
   'chevron-right': ChevronRightIcon,
   check: CheckIcon,
+  'check-double': CheckDoubleIcon,
   x: XIcon,
   loader: LoaderIcon,
   message: MessageIcon,

@@ -15,6 +15,8 @@ export interface MessageDisplay {
   content: string;
   senderInboxId: string;
   sentAt: Date;
+  /** Sent time in nanoseconds for precise read receipt comparison */
+  sentAtNs: bigint;
   isFromCurrentUser: boolean;
   status: MessageStatus;
   /** Type of message - 'text' for user messages, 'system' for membership changes etc. */
@@ -24,7 +26,7 @@ export interface MessageDisplay {
 /**
  * Message status for optimistic UI updates
  */
-export type MessageStatus = 'sending' | 'sent' | 'failed';
+export type MessageStatus = 'sending' | 'sent' | 'failed' | 'read';
 
 /**
  * Pending message (optimistic UI)
