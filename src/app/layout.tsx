@@ -19,8 +19,38 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Kusari - Web3 Messaging",
-  description:
-    "Decentralized messaging built on XMTP protocol with Ethos Network reputation",
+  description: "Reputation driven crypto native messaging",
+  metadataBase: new URL("https://kusari.xyz"),
+  openGraph: {
+    title: "Kusari - Web3 Messaging",
+    description: "Reputation driven crypto native messaging",
+    url: "https://kusari.xyz",
+    siteName: "Kusari",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Kusari - Web3 Messaging",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kusari - Web3 Messaging",
+    description: "Reputation driven crypto native messaging",
+    creator: "@kusarixyz",
+    images: [
+      {
+        url: "/twitter-image.png",
+        width: 1200,
+        height: 600,
+        alt: "Kusari - Web3 Messaging",
+      },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

@@ -10,7 +10,7 @@ function ContactsLayoutContent({ children }: { children: React.ReactNode }) {
   const navItems = useNavItems();
 
   return (
-    <AppShell navItems={navItems} logo={<Logo />}>
+    <AppShell navItems={navItems} logo={<Logo animated />}>
       {children}
     </AppShell>
   );
