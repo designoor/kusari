@@ -13,6 +13,37 @@ const XmtpContext = createContext<XmtpContextValue | null>(null);
 // Error thrown by probe signer to detect when signature is needed
 const XMTP_IDENTITY_PROBE_ERROR = 'XMTP_IDENTITY_PROBE';
 
+// Error patterns for installation limit detection
+const INSTALLATION_LIMIT_PATTERNS = [
+  'too many installations',
+  'installation limit',
+  'max installations',
+  'exceeded installation',
+];
+
+/**
+ * Check if an error is related to the XMTP installation limit (10 per inbox)
+ */
+function isInstallationLimitError(error: Error): boolean {
+  const message = error.message.toLowerCase();
+  return INSTALLATION_LIMIT_PATTERNS.some(pattern => message.includes(pattern));
+}
+
+/**
+ * Custom error class for installation limit errors
+ * Provides better user-facing messaging
+ */
+export class InstallationLimitError extends Error {
+  constructor(originalError?: Error) {
+    super(
+      'You have reached the maximum number of active sessions (10). ' +
+      'Please go to Settings > Active Sessions to revoke old sessions.'
+    );
+    this.name = 'InstallationLimitError';
+    this.cause = originalError;
+  }
+}
+
 /**
  * Sync conversations and preferences from the XMTP network.
  * Ensures fresh data after client initialization.
@@ -79,7 +110,13 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
       setClient(xmtpClient);
       setIsInitialized(true);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to initialize XMTP client');
+      let error: Error;
+      if (err instanceof Error) {
+        // Check for installation limit error and wrap with user-friendly message
+        error = isInstallationLimitError(err) ? new InstallationLimitError(err) : err;
+      } else {
+        error = new Error('Failed to initialize XMTP client');
+      }
       setError(error);
       console.error('XMTP initialization error:', error);
       throw error;
@@ -166,8 +203,15 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
           // This is the expected path for users without XMTP identity.
         } else {
           // Real error during identity check
-          setError(err instanceof Error ? err : new Error('Identity check failed'));
-          console.error('XMTP identity check failed:', err);
+          let error: Error;
+          if (err instanceof Error) {
+            // Check for installation limit error and wrap with user-friendly message
+            error = isInstallationLimitError(err) ? new InstallationLimitError(err) : err;
+          } else {
+            error = new Error('Identity check failed');
+          }
+          setError(error);
+          console.error('XMTP identity check failed:', error);
         }
       } finally {
         setHasAttemptedAutoInit(true);

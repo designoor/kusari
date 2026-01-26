@@ -2,11 +2,14 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Avatar, Button, Icon, PageHeader, Section, Toggle } from '@/components/ui';
+import { useWalletClient } from 'wagmi';
+import { Avatar, Button, Icon, Modal, PageHeader, Section, Skeleton, Toggle } from '@/components/ui';
 import { useWallet } from '@/hooks/useWallet';
 import { usePreferences } from '@/hooks/usePreferences';
 import { useEthosScore } from '@/hooks/useEthosScore';
+import { useInstallations } from '@/hooks/useInstallations';
 import { useToast } from '@/providers/ToastProvider';
+import { createXmtpSigner } from '@/services/xmtp';
 import { truncateAddress } from '@/lib';
 import {
   isBrowserNotificationSupported,
@@ -16,11 +19,20 @@ import {
 } from '@/lib/notifications';
 import styles from './settings.module.css';
 
+/** Truncate installation ID for display */
+function truncateInstallationId(id: string, prefixLength = 8, suffixLength = 4): string {
+  if (id.length <= prefixLength + suffixLength + 3) {
+    return id;
+  }
+  return `${id.slice(0, prefixLength)}...${id.slice(-suffixLength)}`;
+}
+
 const APP_VERSION = '0.1.0';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { address, disconnectAsync, isConnected } = useWallet();
+  const { data: walletClient } = useWalletClient();
   const { data: ethosProfile } = useEthosScore(address ?? null);
   const toast = useToast();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -39,6 +51,25 @@ export default function SettingsPage() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermissionState>('default');
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const notificationsSupported = isBrowserNotificationSupported();
+
+  // Active Sessions (XMTP Installations)
+  const {
+    installations,
+    currentInstallationId,
+    isLoading: installationsLoading,
+    isRevoking,
+    revokeInstallation,
+    revokeAllOther,
+    maxInstallations,
+  } = useInstallations();
+
+  // Confirmation dialog state
+  const [revokeConfirmation, setRevokeConfirmation] = useState<{
+    isOpen: boolean;
+    type: 'single' | 'all';
+    installationId?: string;
+    error?: string;
+  }>({ isOpen: false, type: 'single' });
 
   // Load initial notification permission state
   useEffect(() => {
@@ -96,6 +127,51 @@ export default function SettingsPage() {
       setNotificationsEnabled(false);
     }
   }, [notificationPermission, setNotificationsEnabled, toast]);
+
+  // Open confirmation dialog for revoking a single session
+  const handleRevokeClick = useCallback((installationId: string) => {
+    setRevokeConfirmation({ isOpen: true, type: 'single', installationId });
+  }, []);
+
+  // Open confirmation dialog for revoking all other sessions
+  const handleRevokeAllClick = useCallback(() => {
+    setRevokeConfirmation({ isOpen: true, type: 'all' });
+  }, []);
+
+  // Close confirmation dialog and clear error
+  const handleCloseConfirmation = useCallback(() => {
+    setRevokeConfirmation({ isOpen: false, type: 'single', error: undefined });
+  }, []);
+
+  // Confirm and execute revoke action
+  const handleConfirmRevoke = useCallback(async () => {
+    // Clear any previous error
+    setRevokeConfirmation(prev => ({ ...prev, error: undefined }));
+
+    if (!walletClient || !address) {
+      setRevokeConfirmation(prev => ({ ...prev, error: 'Wallet not connected' }));
+      return;
+    }
+
+    // Create signer for the revocation (requires wallet signature)
+    const signer = createXmtpSigner(walletClient, address);
+
+    try {
+      if (revokeConfirmation.type === 'single' && revokeConfirmation.installationId) {
+        await revokeInstallation(revokeConfirmation.installationId, signer);
+        toast.success('Session revoked');
+      } else if (revokeConfirmation.type === 'all') {
+        await revokeAllOther(signer);
+        toast.success('All other sessions revoked');
+      }
+      // Only close on success
+      handleCloseConfirmation();
+    } catch (err) {
+      console.error('Failed to revoke session(s):', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setRevokeConfirmation(prev => ({ ...prev, error: errorMessage }));
+    }
+  }, [walletClient, address, revokeConfirmation, revokeInstallation, revokeAllOther, toast, handleCloseConfirmation]);
 
   return (
     <div className={styles.container}>
@@ -160,6 +236,7 @@ export default function SettingsPage() {
               </span>
             </div>
             <Toggle
+              size='sm'
               checked={disableReadReceipts}
               onChange={setDisableReadReceipts}
               aria-label="Disable read receipts"
@@ -217,6 +294,74 @@ export default function SettingsPage() {
           </div>
         </Section>
 
+        {/* Active Sessions Section */}
+        <Section title="Active Sessions">
+          <div className={styles.sessionsHeader}>
+            <span className={styles.sessionsCount}>
+              {installationsLoading ? (
+                <Skeleton width={80} height={16} />
+              ) : (
+                `${installations.length} of ${maxInstallations} sessions used`
+              )}
+            </span>
+          </div>
+
+          {installationsLoading ? (
+            <div className={styles.sessionsList}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className={styles.sessionItem}>
+                  <Skeleton width={120} height={16} />
+                  <Skeleton width={60} height={32} />
+                </div>
+              ))}
+            </div>
+          ) : installations.length === 0 ? (
+            <p className={styles.sessionsEmpty}>No active sessions found.</p>
+          ) : (
+            <>
+              <div className={styles.sessionsList}>
+                {installations.map((installation) => {
+                  const isCurrent = installation.id === currentInstallationId;
+                  return (
+                    <div key={installation.id} className={styles.sessionItem}>
+                      <div className={styles.sessionInfo}>
+                        <span className={styles.sessionId}>
+                          {truncateInstallationId(installation.id)}
+                        </span>
+                        {isCurrent && (
+                          <span className={styles.currentBadge}>This device</span>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRevokeClick(installation.id)}
+                        disabled={isCurrent || isRevoking}
+                        aria-label={isCurrent ? 'Cannot revoke current session' : 'Revoke session'}
+                      >
+                        Revoke
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {installations.length > 1 && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleRevokeAllClick}
+                  disabled={isRevoking}
+                  loading={isRevoking}
+                  className={styles.revokeAllButton}
+                >
+                  Revoke All Other Sessions
+                </Button>
+              )}
+            </>
+          )}
+        </Section>
+
         {/* Tech Stack Section */}
         <Section title="Tech Stack">
           <div className={styles.aboutCard}>
@@ -260,6 +405,38 @@ export default function SettingsPage() {
           </div>
         </Section>
       </div>
+
+      {/* Revoke Confirmation Dialog */}
+      <Modal
+        isOpen={revokeConfirmation.isOpen}
+        onClose={handleCloseConfirmation}
+        title="Revoke Session"
+        size="sm"
+        footer={
+          <div className={styles.confirmationFooter}>
+            <Button variant="secondary" size="md" onClick={handleCloseConfirmation}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="md"
+              onClick={() => void handleConfirmRevoke()}
+              loading={isRevoking}
+            >
+              Revoke
+            </Button>
+          </div>
+        }
+      >
+        <p className={styles.confirmationText}>
+          {revokeConfirmation.type === 'all'
+            ? 'This will sign out all other devices. You will remain signed in on this device.'
+            : 'This will sign out the selected device. Continue?'}
+        </p>
+        {revokeConfirmation.error && (
+          <p className={styles.confirmationError}>{revokeConfirmation.error}</p>
+        )}
+      </Modal>
     </div>
   );
 }

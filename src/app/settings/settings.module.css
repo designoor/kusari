@@ -159,6 +159,95 @@
   height: 100%;
 }
 
+/* Active Sessions Section */
+.sessionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.sessionsCount {
+  font-size: var(--font-size-sm);
+  color: var(--color-content-secondary);
+}
+
+.sessionsEmpty {
+  font-size: var(--font-size-md);
+  color: var(--color-content-tertiary);
+  margin: 0;
+}
+
+.sessionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sessionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  gap: var(--spacing-md);
+}
+
+.sessionInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  flex: 1;
+}
+
+.sessionId {
+  font-size: var(--font-size-sm);
+  font-family: monospace;
+  color: var(--color-content-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.currentBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-accent-subtle);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.revokeAllButton {
+  margin-top: var(--spacing-md);
+}
+
+/* Confirmation Dialog */
+.confirmationText {
+  font-size: var(--font-size-md);
+  color: var(--color-content-secondary);
+  line-height: var(--line-height-base);
+  margin: 0;
+}
+
+.confirmationError {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin: var(--spacing-sm) 0 0 0;
+}
+
+.confirmationFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .profileCard {
