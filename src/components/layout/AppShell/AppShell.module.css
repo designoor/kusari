@@ -10,16 +10,19 @@
   overflow: hidden;
 }
 
-/* Desktop layout - content offset by sidebar */
-.content.desktop {
-  margin-left: var(--nav-width-desktop);
-  height: 100vh;
-}
-
-/* Mobile layout - content offset by bottom nav */
-.content.mobile {
+/* Mobile first - content offset by bottom nav */
+.content {
   margin-bottom: var(--nav-height-mobile);
   height: calc(100vh - var(--nav-height-mobile));
+}
+
+/* Desktop - content offset by sidebar */
+@media (min-width: 768px) {
+  .content {
+    margin-left: var(--nav-width-desktop);
+    margin-bottom: 0;
+    height: 100vh;
+  }
 }
 
 /* Fullscreen layout - no nav offset (chat detail on mobile) */

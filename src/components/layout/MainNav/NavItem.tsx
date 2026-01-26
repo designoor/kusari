@@ -14,14 +14,13 @@ export interface NavItemData {
 interface NavItemProps {
   item: NavItemData;
   isActive: boolean;
-  orientation: 'vertical' | 'horizontal';
 }
 
-export const NavItem: React.FC<NavItemProps> = ({ item, isActive, orientation }) => {
+export const NavItem: React.FC<NavItemProps> = ({ item, isActive }) => {
   return (
     <Link
       href={item.href}
-      className={`${styles.navItem} ${isActive ? styles.active : ''} ${styles[orientation]}`}
+      className={`${styles.navItem} ${isActive ? styles.active : ''}`}
       aria-current={isActive ? 'page' : undefined}
     >
       <span className={styles.iconWrapper}>
@@ -32,9 +31,7 @@ export const NavItem: React.FC<NavItemProps> = ({ item, isActive, orientation })
           </span>
         )}
       </span>
-      {orientation === 'vertical' && (
-        <span className={styles.label}>{item.label}</span>
-      )}
+      <span className={styles.label}>{item.label}</span>
     </Link>
   );
 };

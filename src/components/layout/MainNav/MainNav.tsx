@@ -7,11 +7,10 @@ import styles from './MainNav.module.css';
 
 export interface MainNavProps {
   items: NavItemData[];
-  orientation: 'vertical' | 'horizontal';
   logo?: React.ReactNode;
 }
 
-export const MainNav: React.FC<MainNavProps> = ({ items, orientation, logo }) => {
+export const MainNav: React.FC<MainNavProps> = ({ items, logo }) => {
   const pathname = usePathname();
 
   // Determine active item based on pathname
@@ -23,18 +22,12 @@ export const MainNav: React.FC<MainNavProps> = ({ items, orientation, logo }) =>
   };
 
   return (
-    <nav className={`${styles.mainNav} ${styles[orientation]}`} aria-label="Main navigation">
-      {orientation === 'vertical' && logo && (
-        <div className={styles.logo}>{logo}</div>
-      )}
+    <nav className={styles.mainNav} aria-label="Main navigation">
+      {logo && <div className={styles.logo}>{logo}</div>}
       <ul className={styles.navList}>
         {items.map((item) => (
           <li key={item.id}>
-            <NavItem
-              item={item}
-              isActive={isActive(item.href)}
-              orientation={orientation}
-            />
+            <NavItem item={item} isActive={isActive(item.href)} />
           </li>
         ))}
       </ul>

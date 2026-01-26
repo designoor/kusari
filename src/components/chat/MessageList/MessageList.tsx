@@ -69,7 +69,9 @@ export const MessageList: React.FC<MessageListProps> = ({
     // Only scroll if there are actually new messages AND user is near bottom
     // This prevents scrolling when the component re-renders with the same messages
     if (currentCount > prevCount && isNearBottomRef.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // Use instant scroll for initial load (prevCount === 0), smooth for new messages
+      const behavior = prevCount === 0 ? 'auto' : 'smooth';
+      messagesEndRef.current?.scrollIntoView({ behavior });
     }
 
     prevMessageCountRef.current = currentCount;

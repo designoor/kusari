@@ -7,7 +7,7 @@ import { useCoordinatedMessageRequests } from '@/hooks/useCoordinatedConversatio
 import styles from '../subpage.module.css';
 
 export default function RequestsPage() {
-  const { previews: requests, ethosProfiles, isLoading, refresh } = useCoordinatedMessageRequests();
+  const { previews: requests, ethosProfiles, isInitialLoading, refresh } = useCoordinatedMessageRequests();
 
   const handleRefresh = useCallback(() => {
     void refresh();
@@ -26,7 +26,7 @@ export default function RequestsPage() {
         <ContactList
           contacts={requests}
           ethosProfiles={ethosProfiles}
-          isLoading={isLoading}
+          isLoading={isInitialLoading}
           emptyTitle="No pending requests"
           emptyDescription="When someone messages you for the first time, their request will appear here"
           emptyAction={{

@@ -4,22 +4,8 @@
   border: 1px solid var(--color-border);
 }
 
-/* Vertical orientation (desktop) */
-.mainNav.vertical {
-  flex-direction: column;
-  width: var(--nav-width-desktop);
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  border-right: 1px solid var(--color-border);
-  border-top: none;
-  border-left: none;
-  border-bottom: none;
-}
-
-/* Horizontal orientation (mobile) */
-.mainNav.horizontal {
+/* Mobile first - horizontal bottom nav */
+.mainNav {
   flex-direction: row;
   height: var(--nav-height-mobile);
   width: 100%;
@@ -33,9 +19,26 @@
   z-index: var(--z-fixed);
 }
 
-/* Logo area (vertical only) */
+/* Desktop - vertical left nav */
+@media (min-width: 768px) {
+  .mainNav {
+    flex-direction: column;
+    width: var(--nav-width-desktop);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: auto;
+    border-right: 1px solid var(--color-border);
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+  }
+}
+
+/* Logo area (desktop only via CSS) */
 .logo {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   height: var(--nav-width-desktop);
@@ -44,22 +47,18 @@
   color: var(--color-content-primary);
 }
 
-/* Nav list */
+@media (min-width: 768px) {
+  .logo {
+    display: flex;
+  }
+}
+
+/* Nav list - mobile first (horizontal) */
 .navList {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.mainNav.vertical .navList {
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  flex: 1;
-}
-
-.mainNav.horizontal .navList {
   flex-direction: row;
   width: 100%;
   align-items: center;
@@ -67,8 +66,24 @@
   gap: var(--spacing-sm);
 }
 
-.mainNav.horizontal .navList li {
+.navList li {
   flex: 1;
+}
+
+/* Nav list - desktop (vertical) */
+@media (min-width: 768px) {
+  .navList {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    flex: 1;
+    width: auto;
+    align-items: stretch;
+  }
+
+  .navList li {
+    flex: none;
+  }
 }
 
 /* Nav item */
@@ -96,21 +111,24 @@
   background-color: rgba(91, 255, 140, 0.1);
 }
 
-/* Vertical nav item */
-.navItem.vertical {
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  width: 100%;
-  min-height: 56px;
-}
-
-/* Horizontal nav item */
-.navItem.horizontal {
+/* Nav item - mobile first (horizontal style) */
+.navItem {
   flex-direction: column;
   padding: var(--spacing-xs);
   flex: 1;
   min-height: 48px;
+}
+
+/* Nav item - desktop (vertical style) */
+@media (min-width: 768px) {
+  .navItem {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    width: 100%;
+    min-height: 56px;
+    flex: none;
+  }
 }
 
 /* Icon wrapper */
@@ -122,12 +140,19 @@
   flex-shrink: 0;
 }
 
-/* Label */
+/* Label - hidden on mobile, shown on desktop */
 .label {
+  display: none;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   text-align: center;
   white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .label {
+    display: block;
+  }
 }
 
 /* Badge positioning */

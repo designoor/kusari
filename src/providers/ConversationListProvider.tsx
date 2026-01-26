@@ -120,8 +120,10 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
     hasLoadedOnceRef.current = true;
   }
 
-  // Show skeleton until first complete load cycle finishes
-  const isInitialLoading = !hasLoadedOnceRef.current;
+  // Parent provider (ConversationDataProvider) persists across navigation
+  // If it has already loaded data, we should show it immediately (not skeleton)
+  const hasCachedData = data.hasAttemptedLoad && !data.isLoading;
+  const isInitialLoading = !hasLoadedOnceRef.current && !hasCachedData;
 
   const value = useMemo(
     () => ({
