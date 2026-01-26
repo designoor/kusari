@@ -4,6 +4,7 @@ export * from './useMediaQuery';
 export * from './useWallet';
 export * from './useWalletConnection';
 export * from './useXmtp';
+export * from './useInstallations';
 
 // Chat Hooks
 export * from './useConversations';
