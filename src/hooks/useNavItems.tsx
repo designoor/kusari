@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Icon } from '@/components/ui/Icon';
+import { NavProfileAvatar } from '@/components/layout/MainNav/NavProfileAvatar';
 import { useNewRequestsCount } from './useNewRequestsCount';
 import { useAllowedConversations } from './useConversations';
 import { useUnreadContext } from '@/providers/UnreadProvider';
@@ -52,7 +53,7 @@ export function useNavItems(): NavItem[] {
         id: 'settings',
         label: 'Settings',
         href: '/settings',
-        icon: <Icon name="gear" size="md" />,
+        icon: <NavProfileAvatar />,
       },
     ],
     [newRequestsCount, allowedUnreadCount]
