@@ -3,6 +3,7 @@
 import React from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { AuthGuard } from '@/components/layout/AuthGuard';
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { Logo } from '@/components/ui/Logo';
 import { ConversationListProvider } from '@/providers/ConversationListProvider';
 import { useNavItems } from '@/hooks';
@@ -24,9 +25,11 @@ export default function ChatLayout({
 }) {
   return (
     <AuthGuard>
-      <ConversationListProvider>
-        <ChatLayoutContent>{children}</ChatLayoutContent>
-      </ConversationListProvider>
+      <ErrorBoundary>
+        <ConversationListProvider>
+          <ChatLayoutContent>{children}</ChatLayoutContent>
+        </ConversationListProvider>
+      </ErrorBoundary>
     </AuthGuard>
   );
 }

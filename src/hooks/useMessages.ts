@@ -38,7 +38,6 @@ interface GroupUpdatedContent {
   removedAdminInboxes?: { inboxId: string }[];
   addedSuperAdminInboxes?: { inboxId: string }[];
   removedSuperAdminInboxes?: { inboxId: string }[];
-  metadataFieldChanges?: unknown[];
 }
 
 /**

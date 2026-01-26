@@ -5,10 +5,10 @@ import { mainnet, sepolia, type AppKitNetwork } from '@reown/appkit/networks';
 export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
 if (!projectId) {
-  console.error(
-    'CRITICAL: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. ' +
-      'WalletConnect functionality will NOT work. ' +
-      'Get a project ID at https://cloud.reown.com'
+  throw new Error(
+    'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. ' +
+      'WalletConnect requires a project ID to function. ' +
+      'Get one at https://cloud.reown.com'
   );
 }
 
@@ -25,7 +25,7 @@ export const metadata = {
 
 // Create Wagmi adapter for Reown AppKit
 export const wagmiAdapter = new WagmiAdapter({
-  projectId: projectId || '',
+  projectId,
   networks,
   ssr: true,
 });

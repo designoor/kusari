@@ -185,7 +185,7 @@ const PageHeaderInner: React.FC<PageHeaderProps> = ({
           {actionsElement}
           {actions?.map((action, index) => (
             <Button
-              key={index}
+              key={`${action.label}-${index}`}
               variant={action.variant ?? 'ghost'}
               size={action.size ?? 'sm'}
               onClick={action.onClick}
