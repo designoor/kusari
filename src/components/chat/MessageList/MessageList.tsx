@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -77,6 +77,20 @@ export const MessageList: React.FC<MessageListProps> = ({
     prevMessageCountRef.current = currentCount;
   }, [messageGroups]);
 
+  // Find the last message from current user (for showing read status only on that message)
+  const lastMessageFromUserId = useMemo(() => {
+    for (let i = messageGroups.length - 1; i >= 0; i--) {
+      const group = messageGroups[i];
+      if (group?.isFromCurrentUser) {
+        const lastMsg = group.messages[group.messages.length - 1];
+        if (lastMsg) {
+          return lastMsg.id;
+        }
+      }
+    }
+    return null;
+  }, [messageGroups]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -142,6 +156,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                     showTimestamp={msgIndex === group.messages.length - 1}
                     isFirst={msgIndex === 0}
                     isLast={msgIndex === group.messages.length - 1}
+                    isLastFromUser={message.id === lastMessageFromUserId}
                   />
                 ))}
               </div>

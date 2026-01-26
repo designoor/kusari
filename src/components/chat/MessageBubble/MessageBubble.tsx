@@ -11,6 +11,8 @@ export interface MessageBubbleProps {
   showTimestamp?: boolean;
   isFirst?: boolean;
   isLast?: boolean;
+  /** Whether this is the last message from the current user (for showing read status) */
+  isLastFromUser?: boolean;
 }
 
 const StatusIndicator = React.memo(({ status }: { status: MessageStatus }) => {
@@ -30,7 +32,15 @@ const StatusIndicator = React.memo(({ status }: { status: MessageStatus }) => {
     );
   }
 
-  // Sent status - show checkmark
+  if (status === 'read') {
+    return (
+      <span className={`${styles.status} ${styles.read}`} aria-label="Read">
+        <Icon name="check-double" size="sm" />
+      </span>
+    );
+  }
+
+  // Sent status - show single checkmark
   return (
     <span className={`${styles.status} ${styles.sent}`} aria-label="Sent">
       <Icon name="check" size="sm" />
@@ -45,6 +55,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   showTimestamp = false,
   isFirst = false,
   isLast = false,
+  isLastFromUser = false,
 }) => {
   const { content, isFromCurrentUser, sentAt, status, type } = message;
 
@@ -79,7 +90,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           {showTimestamp && (
             <span className={styles.time}>{formatMessageTime(sentAt)}</span>
           )}
-          {isFromCurrentUser && <StatusIndicator status={status} />}
+          {isFromCurrentUser && isLastFromUser && <StatusIndicator status={status} />}
         </div>
       </div>
     </div>

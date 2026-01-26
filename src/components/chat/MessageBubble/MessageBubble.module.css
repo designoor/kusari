@@ -39,6 +39,10 @@
   color: var(--color-error);
 }
 
+.bubble.sent .status.read {
+  color: var(--color-primary);
+}
+
 /* Received messages */
 .bubble.received {
   background-color: var(--color-bg-tertiary);
