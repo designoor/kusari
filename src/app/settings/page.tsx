@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Avatar, Button, Icon, PageHeader, Section, Toggle } from '@/components/ui';
 import { useWallet } from '@/hooks/useWallet';
 import { usePreferences } from '@/hooks/usePreferences';
+import { useEthosScore } from '@/hooks/useEthosScore';
 import { useToast } from '@/providers/ToastProvider';
 import { truncateAddress } from '@/lib';
 import {
@@ -20,6 +21,7 @@ const APP_VERSION = '0.1.0';
 export default function SettingsPage() {
   const router = useRouter();
   const { address, disconnectAsync, isConnected } = useWallet();
+  const { data: ethosProfile } = useEthosScore(address ?? null);
   const toast = useToast();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const {
@@ -104,7 +106,7 @@ export default function SettingsPage() {
         <Section title="Profile">
           <div className={styles.profileCard}>
             <div className={styles.profileInfo}>
-              <Avatar address={address ?? ''} size="lg" />
+              <Avatar address={address ?? ''} src={ethosProfile?.avatarUrl} size="lg" />
               <div className={styles.profileDetails}>
                 <span className={styles.profileLabel}>Connected Wallet</span>
                 <span className={styles.profileAddress}>

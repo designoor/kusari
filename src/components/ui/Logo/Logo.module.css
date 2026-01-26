@@ -6,3 +6,115 @@
   justify-content: center;
   color: var(--color-text-primary);
 }
+
+/* Animated chromatic aberration effect */
+.animated {
+  position: relative;
+}
+
+.chromaticContainer {
+  position: relative;
+  width: 24px;
+  height: 26px;
+}
+
+.chromaticContainer svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  mix-blend-mode: screen;
+}
+
+/* RGB channel colors */
+.channelRed {
+  color: #ff0040;
+  animation: chromaticCircleRed 3s ease-in-out infinite, chromaticPulse 2s ease-in-out infinite;
+}
+
+.channelGreen {
+  color: #00ff80;
+  animation: chromaticCircleGreen 3s ease-in-out infinite, chromaticPulse 2s ease-in-out infinite 0.33s;
+}
+
+.channelBlue {
+  color: #0080ff;
+  animation: chromaticCircleBlue 3s ease-in-out infinite, chromaticPulse 2s ease-in-out infinite 0.66s;
+}
+
+/* Circling animations - each channel orbits around center with phase offset */
+@keyframes chromaticCircleRed {
+  0%, 100% {
+    transform: translate(1.5px, 0);
+  }
+  25% {
+    transform: translate(0, 1.5px);
+  }
+  50% {
+    transform: translate(-1.5px, 0);
+  }
+  75% {
+    transform: translate(0, -1.5px);
+  }
+}
+
+@keyframes chromaticCircleGreen {
+  0%, 100% {
+    transform: translate(-0.75px, -1.3px);
+  }
+  25% {
+    transform: translate(1.3px, -0.75px);
+  }
+  50% {
+    transform: translate(0.75px, 1.3px);
+  }
+  75% {
+    transform: translate(-1.3px, 0.75px);
+  }
+}
+
+@keyframes chromaticCircleBlue {
+  0%, 100% {
+    transform: translate(-0.75px, 1.3px);
+  }
+  25% {
+    transform: translate(-1.3px, -0.75px);
+  }
+  50% {
+    transform: translate(0.75px, -1.3px);
+  }
+  75% {
+    transform: translate(1.3px, 0.75px);
+  }
+}
+
+/* Pulsating opacity animation */
+@keyframes chromaticPulse {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion support - show single solid logo */
+@media (prefers-reduced-motion: reduce) {
+  .channelRed,
+  .channelGreen,
+  .channelBlue {
+    animation: none;
+    transform: none;
+  }
+
+  /* Show only one channel as a solid logo */
+  .channelRed {
+    color: var(--color-text-primary);
+    opacity: 1;
+    mix-blend-mode: normal;
+  }
+
+  .channelGreen,
+  .channelBlue {
+    display: none;
+  }
+}

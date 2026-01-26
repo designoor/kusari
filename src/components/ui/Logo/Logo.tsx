@@ -4,26 +4,78 @@ import styles from './Logo.module.css';
 export interface LogoProps {
   /** Additional CSS class */
   className?: string;
+  /** Enable chromatic aberration animation */
+  animated?: boolean;
 }
+
+const LOGO_PATH =
+  'M6.923.008a.52.52 0 0 0-.34.272l-.038.072-.004 3.316a350 350 0 0 1-.012 3.316c-.005 0-1.316-.736-2.914-1.635A245 245 0 0 0 .643 3.692a.55.55 0 0 0-.368.034.5.5 0 0 0-.231.65c.055.117.115.176.273.268.073.043 1.38.779 2.904 1.636s2.772 1.563 2.772 1.568-1.248.71-2.772 1.568C.069 11.188.194 11.116.13 11.182a.503.503 0 0 0 .141.785c.11.056.271.072.371.037.037-.013 1.374-.759 2.972-1.658s2.91-1.634 2.914-1.634.01 1.492.012 3.316l.004 3.316.04.077a.49.49 0 0 0 .448.272c.195 0 .36-.1.448-.272l.04-.077.004-3.316c.002-1.824.008-3.316.012-3.316s1.315.735 2.914 1.634c1.598.9 2.935 1.645 2.971 1.658.1.035.26.019.371-.037a.5.5 0 0 0 .136-.787c-.065-.068.08.015-3.084-1.764a325 325 0 0 1-2.772-1.568c0-.005 1.247-.71 2.772-1.568 3.164-1.78 3.019-1.696 3.084-1.764a.5.5 0 0 0-.136-.787.53.53 0 0 0-.37-.037c-.037.013-1.374.758-2.972 1.657-1.599.9-2.91 1.635-2.914 1.635s-.01-1.492-.012-3.316L7.52.352 7.48.275A.57.57 0 0 0 7.236.04a.6.6 0 0 0-.313-.032';
 
 /**
  * Logo displays the Kusari app logo.
+ * When animated is true, displays a chromatic aberration effect.
  */
-export const Logo: React.FC<LogoProps> = ({ className }) => {
+export const Logo: React.FC<LogoProps> = ({ className, animated = false }) => {
+  if (animated) {
+    return (
+      <div
+        className={`${styles.logo} ${styles.animated} ${className ?? ''}`}
+        aria-label="Kusari logo"
+      >
+        <div className={styles.chromaticContainer}>
+          <svg
+            className={styles.channelRed}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="26"
+            fill="none"
+            viewBox="0 0 15 16"
+            aria-hidden="true"
+          >
+            <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={LOGO_PATH} />
+          </svg>
+          <svg
+            className={styles.channelGreen}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="26"
+            fill="none"
+            viewBox="0 0 15 16"
+            aria-hidden="true"
+          >
+            <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={LOGO_PATH} />
+          </svg>
+          <svg
+            className={styles.channelBlue}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="26"
+            fill="none"
+            viewBox="0 0 15 16"
+            aria-hidden="true"
+          >
+            <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={LOGO_PATH} />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`${styles.logo} ${className ?? ''}`}>
+    <div className={`${styles.logo} ${className ?? ''}`} aria-label="Kusari logo">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="26"
         fill="none"
         viewBox="0 0 15 16"
+        aria-hidden="true"
       >
         <path
           fill="currentColor"
           fillRule="evenodd"
           clipRule="evenodd"
-          d="M6.923.008a.52.52 0 0 0-.34.272l-.038.072-.004 3.316a350 350 0 0 1-.012 3.316c-.005 0-1.316-.736-2.914-1.635A245 245 0 0 0 .643 3.692a.55.55 0 0 0-.368.034.5.5 0 0 0-.231.65c.055.117.115.176.273.268.073.043 1.38.779 2.904 1.636s2.772 1.563 2.772 1.568-1.248.71-2.772 1.568C.069 11.188.194 11.116.13 11.182a.503.503 0 0 0 .141.785c.11.056.271.072.371.037.037-.013 1.374-.759 2.972-1.658s2.91-1.634 2.914-1.634.01 1.492.012 3.316l.004 3.316.04.077a.49.49 0 0 0 .448.272c.195 0 .36-.1.448-.272l.04-.077.004-3.316c.002-1.824.008-3.316.012-3.316s1.315.735 2.914 1.634c1.598.9 2.935 1.645 2.971 1.658.1.035.26.019.371-.037a.5.5 0 0 0 .136-.787c-.065-.068.08.015-3.084-1.764a325 325 0 0 1-2.772-1.568c0-.005 1.247-.71 2.772-1.568 3.164-1.78 3.019-1.696 3.084-1.764a.5.5 0 0 0-.136-.787.53.53 0 0 0-.37-.037c-.037.013-1.374.758-2.972 1.657-1.599.9-2.91 1.635-2.914 1.635s-.01-1.492-.012-3.316L7.52.352 7.48.275A.57.57 0 0 0 7.236.04a.6.6 0 0 0-.313-.032"
+          d={LOGO_PATH}
         />
       </svg>
     </div>
