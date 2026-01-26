@@ -104,6 +104,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       showNotification({
         title,
         body,
+        icon: '/icons/icon-192x192.png',
         tag: `kusari-${message.conversationId}`,
         onClick: () => {
           // Focus the window and navigate to the conversation
