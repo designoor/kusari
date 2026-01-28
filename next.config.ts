@@ -65,9 +65,24 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  // Ensure WASM files are served with correct headers
+  // Headers for WASM files and cross-origin isolation (required for XMTP SDK)
   async headers() {
     return [
+      // Cross-origin isolation headers required for SharedArrayBuffer (used by XMTP SDK's OPFS storage)
+      // Without these, SharedArrayBuffer is unavailable in production, causing identity persistence to fail
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'credentialless',
+          },
+        ],
+      },
       {
         source: '/:path*.wasm',
         headers: [
