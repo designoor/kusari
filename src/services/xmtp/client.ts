@@ -270,21 +270,13 @@ export async function buildXmtpClient(address: string): Promise<Client | null> {
 export async function createXmtpClient(signer: EOASigner): Promise<Client> {
   const config = getClientConfig();
 
-  // Debug: Log environment and check prerequisites
-  console.log('[XMTP] createXmtpClient called');
-  console.log('[XMTP] Environment:', config.env);
-  console.log('[XMTP] SharedArrayBuffer available:', typeof SharedArrayBuffer !== 'undefined');
-  console.log('[XMTP] crossOriginIsolated:', typeof crossOriginIsolated !== 'undefined' ? crossOriginIsolated : 'N/A');
-
   try {
-    console.log('[XMTP] Calling Client.create...');
     const client = await Client.create(signer, {
       env: config.env,
-      loggingLevel: LogLevel.Error,
+      loggingLevel: LogLevel.Off,
       appVersion: 'kusari/1.0.0',
       ...(config.apiUrl && { apiUrl: config.apiUrl }),
     });
-    console.log('[XMTP] Client.create succeeded, inboxId:', client.inboxId);
 
     // Save session for future resumption
     const identifier = await Promise.resolve(signer.getIdentifier());
@@ -297,13 +289,6 @@ export async function createXmtpClient(signer: EOASigner): Promise<Client> {
 
     return client;
   } catch (error) {
-    // Debug: Log the full error
-    console.error('[XMTP] Client.create failed');
-    console.error('[XMTP] Error type:', typeof error);
-    console.error('[XMTP] Error:', error);
-    console.error('[XMTP] Error message:', error instanceof Error ? error.message : String(error));
-    console.error('[XMTP] Error stack:', error instanceof Error ? error.stack : 'N/A');
-
     // Rethrow the original error to preserve the message
     if (error instanceof Error) {
       throw error;

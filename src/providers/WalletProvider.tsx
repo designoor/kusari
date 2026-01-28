@@ -35,6 +35,13 @@ createAppKit({
     email: false,
     socials: [],
   },
+  // Featured wallets shown at the top of the wallet picker
+  featuredWalletIds: [
+    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+    'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393', // Phantom
+    '971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709', // OKX
+    '18388be9ac2d02726dbac9777c96efaac06d744b2f6d580fccdd4127a6d01fd1', // Rabby
+  ],
   // Disable Coinbase Wallet - incompatible with cross-origin isolation headers
   // required by XMTP SDK (COOP: same-origin breaks Coinbase Smart Wallet popups)
   enableCoinbase: false,

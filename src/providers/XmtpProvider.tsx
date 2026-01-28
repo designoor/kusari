@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useWalletClient } from 'wagmi';
+import { ConsentState } from '@xmtp/browser-sdk';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
 import { createXmtpClient, clearXmtpSession } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
@@ -41,13 +42,16 @@ export class InstallationLimitError extends Error {
 }
 
 /**
- * Sync conversations and preferences from the XMTP network.
- * Ensures fresh data after client initialization.
+ * Sync conversations, messages, and preferences from the XMTP network.
+ * Uses syncAll to fetch messages for allowed conversations, ensuring
+ * data is available when logging in on a new device.
  * Failures are logged but don't block initialization.
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    await xmtpClient.conversations.sync();
+    // syncAll syncs welcomes, conversations with unread messages, and preferences
+    // Only sync allowed conversations to avoid spam and reduce network usage
+    await xmtpClient.conversations.syncAll([ConsentState.Allowed]);
     await xmtpClient.preferences.sync();
   } catch (syncError) {
     console.warn('Network sync failed, continuing with local data:', syncError);
