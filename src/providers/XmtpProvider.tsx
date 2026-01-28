@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useWalletClient } from 'wagmi';
+import { ConsentState } from '@xmtp/browser-sdk';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
 import { createXmtpClient, clearXmtpSession } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
@@ -50,7 +51,7 @@ async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
     // syncAll syncs welcomes, conversations with unread messages, and preferences
     // Only sync allowed conversations to avoid spam and reduce network usage
-    await xmtpClient.conversations.syncAll(['allowed']);
+    await xmtpClient.conversations.syncAll([ConsentState.Allowed]);
     await xmtpClient.preferences.sync();
   } catch (syncError) {
     console.warn('Network sync failed, continuing with local data:', syncError);
