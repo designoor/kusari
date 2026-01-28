@@ -3,15 +3,11 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useWalletClient } from 'wagmi';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
-import { IdentifierKind } from '@xmtp/browser-sdk';
-import { createXmtpClient } from '@/services/xmtp';
+import { createXmtpClient, clearXmtpSession } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 
 const XmtpContext = createContext<XmtpContextValue | null>(null);
-
-// Error thrown by probe signer to detect when signature is needed
-const XMTP_IDENTITY_PROBE_ERROR = 'XMTP_IDENTITY_PROBE';
 
 // Error patterns for installation limit detection
 const INSTALLATION_LIMIT_PATTERNS = [
@@ -136,6 +132,8 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
       setClient(null);
       setIsInitialized(false);
       setError(null);
+      // Clear stored session when disconnecting
+      clearXmtpSession();
     }
   }, [client]);
 
@@ -170,49 +168,33 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     if (isProbing.current) return;
     isProbing.current = true;
 
-    // Check if XMTP identity exists using a probe signer.
-    // The probe signer throws when asked to sign, allowing us to detect
-    // whether identity creation (signature) is needed.
+    // Check if XMTP identity exists and restore client session.
+    // We use Client.build() which only loads from local OPFS database without network registration.
+    // This avoids the probe signer issue where Client.create() opens OPFS but then fails
+    // to close it when the signature is rejected, leaving the handle locked.
     const checkIdentity = async () => {
-      // Create probe signer that rejects signing
-      const probeSigner: EOASigner = {
-        type: 'EOA',
-        getIdentifier: () => ({
-          identifier: address,
-          identifierKind: IdentifierKind.Ethereum,
-        }),
-        signMessage: async () => {
-          throw new Error(XMTP_IDENTITY_PROBE_ERROR);
-        },
-      };
-
       try {
-        // Try to create client with probe signer
-        // If identity exists in local storage, this succeeds without signing
-        const xmtpClient = await createXmtpClient(probeSigner);
+        // Import buildXmtpClient dynamically to avoid circular deps
+        const { buildXmtpClient } = await import('@/services/xmtp/client');
+        const existingClient = await buildXmtpClient(address);
 
-        // Identity exists! Client was created without needing a signature.
-        // The probe signer was never asked to sign.
-        await syncClientData(xmtpClient);
-        setClient(xmtpClient);
-        setIsInitialized(true);
-      } catch (err) {
-        if (err instanceof Error && err.message === XMTP_IDENTITY_PROBE_ERROR) {
-          // No identity exists - signature would be needed.
-          // Don't auto-init. Let user see Sign step and click "Enable".
-          // This is the expected path for users without XMTP identity.
-        } else {
-          // Real error during identity check
-          let error: Error;
-          if (err instanceof Error) {
-            // Check for installation limit error and wrap with user-friendly message
-            error = isInstallationLimitError(err) ? new InstallationLimitError(err) : err;
-          } else {
-            error = new Error('Identity check failed');
-          }
-          setError(error);
-          console.error('XMTP identity check failed:', error);
+        if (existingClient) {
+          // Success! Client was restored from OPFS without needing a signature.
+          await syncClientData(existingClient);
+          setClient(existingClient);
+          setIsInitialized(true);
         }
+        // If no client returned, user needs to sign - this is expected for new users
+      } catch (err) {
+        // Real error during client restoration
+        let error: Error;
+        if (err instanceof Error) {
+          error = isInstallationLimitError(err) ? new InstallationLimitError(err) : err;
+        } else {
+          error = new Error('Identity check failed');
+        }
+        setError(error);
+        console.error('XMTP identity check failed:', error);
       } finally {
         setHasAttemptedAutoInit(true);
         isProbing.current = false;
@@ -235,9 +217,9 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     }
 
     // Case 2: Wallet reconnected (undefined -> valid address)
-    // This is the KEY FIX: Reset hasAttemptedAutoInit to allow probe to run
+    // Reset hasAttemptedAutoInit to allow identity check to run.
     // This handles the race condition where wallet appears disconnected briefly
-    // before reconnecting during page refresh
+    // before reconnecting during page refresh.
     if (previousAddress === undefined && address !== undefined) {
       previousAddressRef.current = address;
       setHasAttemptedAutoInit(false);
@@ -258,17 +240,29 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
     clientRef.current = client;
   }, [client]);
 
-  // Cleanup on unmount only
+  // Cleanup on unmount and before page unload
+  // This is critical for XMTP's OPFS storage - if the connection isn't closed,
+  // the OPFS file handle remains locked and can't be reopened after refresh
   useEffect(() => {
-    return () => {
+    const cleanup = () => {
       if (clientRef.current) {
         try {
           clientRef.current.close();
-        } catch (err) {
-          console.error('Error closing XMTP client on unmount:', err);
+        } catch {
+          // Ignore close errors during cleanup
         }
         clientRef.current = null;
       }
+    };
+
+    // Handle page refresh/close - critical for releasing OPFS handles
+    window.addEventListener('beforeunload', cleanup);
+    window.addEventListener('pagehide', cleanup);
+
+    return () => {
+      window.removeEventListener('beforeunload', cleanup);
+      window.removeEventListener('pagehide', cleanup);
+      cleanup();
     };
   }, []);
 

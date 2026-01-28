@@ -35,6 +35,9 @@ createAppKit({
     email: false,
     socials: [],
   },
+  // Disable Coinbase Wallet - incompatible with cross-origin isolation headers
+  // required by XMTP SDK (COOP: same-origin breaks Coinbase Smart Wallet popups)
+  enableCoinbase: false,
 });
 
 export interface WalletProviderProps {

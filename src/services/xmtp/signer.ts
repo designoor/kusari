@@ -17,7 +17,9 @@ export function createXmtpSigner(
   return {
     type: 'EOA',
     getIdentifier: () => ({
-      identifier: address,
+      // IMPORTANT: Must lowercase address to match xmtp.chat behavior
+      // This ensures the same inboxId is generated and the correct OPFS database is loaded
+      identifier: address.toLowerCase(),
       identifierKind: IdentifierKind.Ethereum,
     }),
     signMessage: async (message: string) => {
