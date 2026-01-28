@@ -46,13 +46,20 @@ export class InstallationLimitError extends Error {
  * Uses syncAll to fetch messages for allowed conversations, ensuring
  * data is available when logging in on a new device.
  * Failures are logged but don't block initialization.
+ *
+ * IMPORTANT: Preferences must be synced FIRST to fetch consent state from the
+ * network. Otherwise, on a new device, syncAll([ConsentState.Allowed]) would
+ * filter against empty local state and return no conversations.
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    // syncAll syncs welcomes, conversations with unread messages, and preferences
-    // Only sync allowed conversations to avoid spam and reduce network usage
-    await xmtpClient.conversations.syncAll([ConsentState.Allowed]);
+    // Step 1: Sync preferences FIRST to get consent state from network
+    // This is critical for new devices that don't have local consent data yet
     await xmtpClient.preferences.sync();
+
+    // Step 2: Now sync conversations - the consent filter will work correctly
+    // because we already have consent state from step 1
+    await xmtpClient.conversations.syncAll([ConsentState.Allowed]);
   } catch (syncError) {
     console.warn('Network sync failed, continuing with local data:', syncError);
   }
