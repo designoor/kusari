@@ -224,48 +224,12 @@ export async function buildXmtpClient(address: string): Promise<Client | null> {
       return null;
     }
 
-    // Verify the client can actually perform operations by doing a test sync
-    // This catches cases where the OPFS database is in an inconsistent state
-    try {
-      await client.conversations.sync();
-      // Clear the OPFS cleared flag on success
-      clearOpfsClearedFlag();
-      return client;
-    } catch (verifyError) {
-      // Check if this is an identity/registration error indicating corrupted OPFS.
-      // The XMTP SDK does not export typed error classes for identity errors -
-      // they come from the WASM bindings as generic Error objects with message strings.
-      // Known patterns: "identity not found", "not registered", "identity does not exist"
-      const isIdentityError =
-        verifyError instanceof Error &&
-        (verifyError.message.toLowerCase().includes('identity') ||
-          verifyError.message.toLowerCase().includes('register'));
-
-      if (isIdentityError) {
-        // Close the broken client
-        try {
-          client.close();
-        } catch {
-          // Ignore close errors
-        }
-
-        // Clear session and OPFS if we haven't already tried in this session
-        clearXmtpSession();
-
-        if (!hasOpfsBeenCleared()) {
-          const cleared = await clearXmtpDatabase();
-          if (cleared) {
-            markOpfsCleared();
-          }
-        }
-
-        return null;
-      }
-
-      // For other errors (network issues), still return the client
-      // as it may work offline
-      return client;
-    }
+    // Client is registered and valid - clear the OPFS cleared flag
+    // Note: We intentionally do NOT call conversations.sync() here because it
+    // can pull conversations from the history service where the current device
+    // is not an active member, causing "Group is inactive" errors when chatting.
+    clearOpfsClearedFlag();
+    return client;
   } catch {
     // Clear invalid session
     clearXmtpSession();
