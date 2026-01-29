@@ -51,16 +51,12 @@ export class InstallationLimitError extends Error {
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
     // Sync preferences to get consent state from network
-    console.log('[XMTP Sync] Starting preferences sync...');
     await xmtpClient.preferences.sync();
-    console.log('[XMTP Sync] Preferences sync complete');
 
     // Sync all messages for conversations
-    console.log('[XMTP Sync] Starting conversations syncAll...');
     await xmtpClient.conversations.syncAll();
-    console.log('[XMTP Sync] Conversations syncAll complete');
-  } catch (syncError) {
-    console.warn('[XMTP Sync] Network sync failed, continuing with local data:', syncError);
+  } catch {
+    // Network sync failed, continue with local data
   }
 }
 
@@ -97,13 +93,11 @@ export function XmtpProvider({ children }: XmtpProviderProps) {
   const initialize = useCallback(async (signer: EOASigner) => {
     // Prevent multiple simultaneous initialization attempts
     if (isInitializing) {
-      console.warn('XMTP initialization already in progress');
       return;
     }
 
     // If already initialized with a client, skip
     if (client && isInitialized) {
-      console.log('XMTP client already initialized');
       return;
     }
 

@@ -176,10 +176,8 @@ export async function syncConversation(
     // Silently handle "inactive" errors - these happen for imported conversations
     // and don't affect the ability to read cached messages
     if (error instanceof Error && error.message.includes('inactive')) {
-      console.log('Conversation is inactive, skipping sync');
       return;
     }
-    console.error('Failed to sync conversation:', error);
     throw new Error('Failed to sync conversation');
   }
 }

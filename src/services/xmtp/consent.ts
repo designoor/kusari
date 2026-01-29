@@ -29,7 +29,6 @@ export async function setInboxConsent(
 
     // Ensure consent state is published to the network for cross-device sync
     await client.preferences.sync();
-    console.log(`[Consent] Set ${inboxIds.length} inbox(es) to state ${state} and synced to network`);
   } catch (error) {
     console.error('Failed to set inbox consent:', error);
     throw new Error('Failed to set inbox consent');

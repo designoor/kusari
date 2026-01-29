@@ -236,7 +236,6 @@ export default function SettingsPage() {
               </span>
             </div>
             <Toggle
-              size='sm'
               checked={disableReadReceipts}
               onChange={setDisableReadReceipts}
               aria-label="Disable read receipts"

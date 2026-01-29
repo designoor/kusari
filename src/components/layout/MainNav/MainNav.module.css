@@ -24,7 +24,7 @@
   .mainNav {
     flex-direction: column;
     width: var(--nav-width-desktop);
-    height: 100vh;
+    height: 100dvh;
     position: fixed;
     left: 0;
     top: 0;
