@@ -5,6 +5,7 @@ export type XmtpEnv = 'local' | 'dev' | 'production';
 export interface XmtpClientConfig {
   env: XmtpEnv;
   apiUrl?: string;
+  historySyncUrl?: string;
 }
 
 export interface XmtpState {

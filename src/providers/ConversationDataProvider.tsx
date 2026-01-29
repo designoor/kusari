@@ -15,7 +15,6 @@ import { useUnreadContext } from './UnreadProvider';
 import {
   listConversations,
   streamConversations,
-  syncConversations,
   getConversationById,
 } from '@/services/xmtp/conversations';
 import { getLatestMessage, streamAllMessages } from '@/services/xmtp/messages';
@@ -170,6 +169,7 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
       let consentState: ConsentState;
       if (conversationIsDm && peerInboxId) {
         consentState = await getInboxConsentState(client, peerInboxId);
+        console.log(`[Consent Debug] InboxId: ${peerInboxId.slice(0, 8)}..., State: ${consentState}`);
       } else {
         consentState = ConsentState.Allowed;
       }
@@ -229,11 +229,11 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Sync conversations from network
-      await syncConversations(client);
-
-      // Get all conversations
+      // XmtpProvider already synced preferences and conversations during initialization.
+      // We just need to list the conversations that were synced.
+      // If we sync again here, it can cause timing issues where list() returns empty.
       const conversationList = await listConversations(client);
+      console.log(`[ConversationData] Found ${conversationList.length} conversations`);
 
       // Build previews for all conversations
       const previewPromises = conversationList.map((conv) => buildPreview(conv));
