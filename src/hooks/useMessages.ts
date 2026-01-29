@@ -9,7 +9,6 @@ import {
   listMessages,
   sendMessage as sendMessageService,
   streamMessages,
-  syncConversation,
 } from '@/services/xmtp/messages';
 import { getLastReadTimes } from '@/services/xmtp/readReceipts';
 import type { Conversation } from '@/types/conversation';
@@ -117,6 +116,8 @@ interface UseMessagesReturn extends UseMessagesState {
   refresh: () => Promise<void>;
   /** Peer's last read timestamp in nanoseconds (for read receipt UI) */
   peerLastReadTime: bigint | null;
+  /** Whether the conversation is active (can send messages). Inactive conversations are read-only. */
+  isActive: boolean;
 }
 
 /**
@@ -130,6 +131,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
   const { client, isInitialized } = useXmtpContext();
   const { markAsRead } = useUnreadContext();
   const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [isActive, setIsActive] = useState(true);
   const [state, setState] = useState<UseMessagesState>({
     messages: [],
     pendingMessages: [],
@@ -152,10 +154,8 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Sync conversation first to get latest messages
-      await syncConversation(conversation);
-
-      // Load all messages
+      // Load messages from local cache
+      // We don't sync here to avoid "inactive" conversation issues
       const messages = await listMessages(conversation);
 
       setState((prev) => ({
@@ -238,6 +238,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
   useEffect(() => {
     if (!isInitialized || !client || !conversationId) {
       setConversation(null);
+      setIsActive(true);
       return;
     }
 
@@ -246,13 +247,23 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     const load = async () => {
       try {
         const conv = await getConversationById(client, conversationId);
-        if (!cancelled) {
+        if (!cancelled && conv) {
           setConversation(conv);
+          // Check if conversation is active (can send messages)
+          // Inactive conversations are read-only (e.g., imported from another device)
+          const active = await conv.isActive();
+          if (!cancelled) {
+            setIsActive(active);
+          }
+        } else if (!cancelled) {
+          setConversation(null);
+          setIsActive(true);
         }
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to load conversation:', err);
           setConversation(null);
+          setIsActive(true);
         }
       }
     };
@@ -284,34 +295,18 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        // Step 1: Load cached messages immediately for fast display
-        const cachedMessages = await listMessages(conversation);
+        // Load messages from local cache
+        // We don't sync here to avoid "inactive" conversation issues
+        // New messages arrive via streaming
+        const messages = await listMessages(conversation);
 
         if (!cancelled) {
           setState((prev) => ({
             ...prev,
-            messages: cachedMessages,
+            messages,
             isLoading: false,
             error: null,
           }));
-        }
-
-        // Step 2: Sync in background (non-blocking) to get any new messages
-        try {
-          await syncConversation(conversation);
-
-          if (!cancelled) {
-            // Step 3: Reload messages after sync to get any new ones
-            const freshMessages = await listMessages(conversation);
-
-            // Only update if there are changes (avoid unnecessary re-renders)
-            if (freshMessages.length !== cachedMessages.length) {
-              setState((prev) => ({ ...prev, messages: freshMessages }));
-            }
-          }
-        } catch (syncErr) {
-          // Sync failure is non-critical - we already showed cached messages
-          console.warn('Background sync failed:', syncErr);
         }
       } catch (err) {
         if (!cancelled) {
@@ -549,6 +544,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     sendMessage,
     refresh,
     peerLastReadTime,
+    isActive,
   };
 }
 

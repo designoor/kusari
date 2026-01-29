@@ -41,35 +41,21 @@ export class InstallationLimitError extends Error {
 }
 
 /**
- * Sync conversations, messages, and preferences from the XMTP network.
- * Uses preferences.sync + sendSyncRequest + syncAll for cross-device sync.
+ * Sync consent preferences and messages from the XMTP network.
  * Failures are logged but don't block initialization.
  *
- * IMPORTANT: Order of operations matters for new devices:
- * 1. preferences.sync() - Sync consent state AND discover other installations (welcomes)
- * 2. sendSyncRequest() - Request history from discovered installations
- * 3. conversations.syncAll() - Sync conversations and messages
- *
- * preferences.sync() must come first because it "syncs welcomes to ensure that
- * you have all potential new installations before syncing" (per XMTP docs).
- * We need to discover other installations before we can request sync from them.
+ * NOTE: We do NOT call conversations.sync() because it can cause conversations
+ * to become "inactive" which blocks sending. syncAll handles message syncing
+ * without this issue.
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    // Step 1: Sync preferences AND discover other installations via welcomes
-    // This must happen first so we know about all devices that have our data
-    console.log('[XMTP Sync] Starting preferences sync (includes welcome discovery)...');
+    // Step 1: Sync preferences to get consent state from network
+    console.log('[XMTP Sync] Starting preferences sync...');
     await xmtpClient.preferences.sync();
     console.log('[XMTP Sync] Preferences sync complete');
 
-    // Step 2: Request history from other devices now that we know about them
-    // This triggers other installations to upload encrypted history to the sync server
-    console.log('[XMTP Sync] Sending sync request to other devices...');
-    await xmtpClient.sendSyncRequest();
-    console.log('[XMTP Sync] Sync request sent');
-
-    // Step 3: Sync all conversations (welcomes + messages)
-    // This fetches conversations and messages that are now available
+    // Step 2: Sync all messages for conversations
     console.log('[XMTP Sync] Starting conversations syncAll...');
     await xmtpClient.conversations.syncAll();
     console.log('[XMTP Sync] Conversations syncAll complete');
