@@ -22,6 +22,7 @@ html {
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
   height: 100%;
+  height: var(--visual-viewport-height, 100%);
   overflow: hidden;
 }
 
@@ -34,6 +35,7 @@ ol {
 /* Set core body defaults */
 body {
   height: 100%;
+  height: var(--visual-viewport-height, 100%);
   overflow: hidden;
   line-height: 1.5;
 }
