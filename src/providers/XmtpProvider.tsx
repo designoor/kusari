@@ -50,20 +50,12 @@ export class InstallationLimitError extends Error {
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    // Step 1: Request sync from other devices
-    // This signals other installations to upload their data (including consent states)
-    // to the history sync server. Helps with interrupted automatic syncs.
-    console.log('[XMTP Sync] Sending sync request to other devices...');
-    await xmtpClient.sendSyncRequest();
-    console.log('[XMTP Sync] Sync request sent');
-
-    // Step 2: Sync preferences to get consent state from network
-    // Any late-arriving consent updates will come via the consent stream
+    // Step 1: Sync preferences to get consent state from network
     console.log('[XMTP Sync] Starting preferences sync...');
     await xmtpClient.preferences.sync();
     console.log('[XMTP Sync] Preferences sync complete');
 
-    // Step 3: Sync all messages for conversations
+    // Step 2: Sync all messages for conversations
     console.log('[XMTP Sync] Starting conversations syncAll...');
     await xmtpClient.conversations.syncAll();
     console.log('[XMTP Sync] Conversations syncAll complete');
