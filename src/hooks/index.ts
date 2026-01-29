@@ -1,6 +1,7 @@
 // Hook Exports
 export * from './useAppState';
 export * from './useMediaQuery';
+export * from './useKeyboardHeight';
 export * from './useWallet';
 export * from './useWalletConnection';
 export * from './useXmtp';
