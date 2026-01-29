@@ -97,6 +97,16 @@ function getXmtpEnv(): XmtpEnv {
 }
 
 /**
+ * Pre-configured URLs for the XMTP history sync service based on the environment.
+ * This service enables cross-device sync by storing encrypted conversation history.
+ */
+const HISTORY_SYNC_URLS: Record<XmtpEnv, string | null> = {
+  local: null, // No history sync for local dev
+  dev: 'https://message-history.dev.ephemera.network',
+  production: 'https://message-history.production.ephemera.network',
+};
+
+/**
  * Gets the XMTP client configuration from environment variables
  *
  * @returns The client configuration object
@@ -104,10 +114,12 @@ function getXmtpEnv(): XmtpEnv {
 function getClientConfig(): XmtpClientConfig {
   const env = getXmtpEnv();
   const apiUrl = process.env.NEXT_PUBLIC_XMTP_API_URL;
+  const historySyncUrl = HISTORY_SYNC_URLS[env];
 
   return {
     env,
     ...(apiUrl && { apiUrl }),
+    ...(historySyncUrl && { historySyncUrl }),
   };
 }
 
@@ -193,6 +205,7 @@ export async function buildXmtpClient(address: string): Promise<Client | null> {
       env: config.env,
       loggingLevel: LogLevel.Off,
       ...(config.apiUrl && { apiUrl: config.apiUrl }),
+      ...(config.historySyncUrl && { historySyncUrl: config.historySyncUrl }),
     });
 
     // Use async isRegistered() method to verify with the network
@@ -276,6 +289,7 @@ export async function createXmtpClient(signer: EOASigner): Promise<Client> {
       loggingLevel: LogLevel.Off,
       appVersion: 'kusari/1.0.0',
       ...(config.apiUrl && { apiUrl: config.apiUrl }),
+      ...(config.historySyncUrl && { historySyncUrl: config.historySyncUrl }),
     });
 
     // Save session for future resumption

@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useWalletClient } from 'wagmi';
-import { ConsentState } from '@xmtp/browser-sdk';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
 import { createXmtpClient, clearXmtpSession } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
@@ -55,13 +54,18 @@ async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
     // Step 1: Sync preferences FIRST to get consent state from network
     // This is critical for new devices that don't have local consent data yet
+    console.log('[XMTP Sync] Starting preferences sync...');
     await xmtpClient.preferences.sync();
+    console.log('[XMTP Sync] Preferences sync complete');
 
-    // Step 2: Now sync conversations - the consent filter will work correctly
-    // because we already have consent state from step 1
-    await xmtpClient.conversations.syncAll([ConsentState.Allowed]);
+    // Step 2: Sync all conversations (welcomes + messages)
+    // We sync ALL conversations first to ensure they're discovered on new devices,
+    // then filter by consent state in the UI layer
+    console.log('[XMTP Sync] Starting conversations syncAll...');
+    await xmtpClient.conversations.syncAll();
+    console.log('[XMTP Sync] Conversations syncAll complete');
   } catch (syncError) {
-    console.warn('Network sync failed, continuing with local data:', syncError);
+    console.warn('[XMTP Sync] Network sync failed, continuing with local data:', syncError);
   }
 }
 
