@@ -34,7 +34,7 @@ export default function ConversationPage() {
   const router = useRouter();
   const conversationId = params.conversationId as string;
   const isMobile = useIsMobile();
-  const { isKeyboardOpen, viewportHeight } = useKeyboardHeight();
+  const { isKeyboardOpen } = useKeyboardHeight();
   const { client, isInitialized } = useXmtpContext();
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
@@ -131,13 +131,10 @@ export default function ConversationPage() {
     if (!isMobile || !isKeyboardOpen) {
       return;
     }
+    // Only set overflow hidden - avoid fixed positioning which breaks layout
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
     };
   }, [isMobile, isKeyboardOpen]);
 
@@ -302,17 +299,10 @@ export default function ConversationPage() {
     );
   };
 
-  // Mobile: Only show conversation panel with keyboard-aware height
+  // Mobile: Only show conversation panel (height controlled via CSS custom property)
   if (isMobile) {
-    const mobileStyle = isKeyboardOpen
-      ? { height: `${viewportHeight}px` }
-      : undefined;
-
     return (
-      <div
-        className={`${styles.container} ${isKeyboardOpen ? styles.keyboardOpen : ''}`}
-        style={mobileStyle}
-      >
+      <div className={styles.container}>
         {renderConversationPanel()}
       </div>
     );

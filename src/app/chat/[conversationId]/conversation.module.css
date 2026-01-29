@@ -6,17 +6,6 @@
   background-color: var(--color-bg-primary);
 }
 
-/* Mobile keyboard open state - use fixed positioning to prevent viewport push */
-@media (max-width: 767px) {
-  .container.keyboardOpen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    /* height is set dynamically via inline style */
-  }
-}
-
 /* Sidebar (conversation list) - desktop only */
 .sidebar {
   display: none;

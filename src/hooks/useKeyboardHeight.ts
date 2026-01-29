@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface KeyboardState {
   isKeyboardOpen: boolean;
@@ -14,6 +14,9 @@ interface KeyboardState {
  *
  * This works by comparing the visual viewport height to the layout viewport height.
  * When the keyboard opens, the visual viewport shrinks while the layout viewport stays the same.
+ *
+ * Also sets a CSS custom property --visual-viewport-height on document.documentElement
+ * which can be used instead of 100dvh for proper keyboard-aware layouts on iOS.
  */
 export function useKeyboardHeight(): KeyboardState {
   const [state, setState] = useState<KeyboardState>({
@@ -22,14 +25,25 @@ export function useKeyboardHeight(): KeyboardState {
     viewportHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
   });
 
+  // Track if we've set the CSS variable so we can clean it up
+  const hasCssVarRef = useRef(false);
+
   const updateViewport = useCallback(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) {
+    if (typeof window === 'undefined') {
       return;
     }
 
     const visualViewport = window.visualViewport;
+    const visualViewportHeight = visualViewport?.height ?? window.innerHeight;
     const layoutViewportHeight = window.innerHeight;
-    const visualViewportHeight = visualViewport.height;
+
+    // Set CSS custom property for visual viewport height
+    // This allows CSS to use the actual visible height instead of 100dvh
+    document.documentElement.style.setProperty(
+      '--visual-viewport-height',
+      `${visualViewportHeight}px`
+    );
+    hasCssVarRef.current = true;
 
     // Calculate the difference - this is approximately the keyboard height
     // We use a threshold of 150px to distinguish keyboard from minor viewport changes
@@ -44,26 +58,35 @@ export function useKeyboardHeight(): KeyboardState {
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) {
+    if (typeof window === 'undefined') {
       return;
     }
-
-    const visualViewport = window.visualViewport;
 
     // Initial check
     updateViewport();
 
-    // Listen to viewport resize events (includes keyboard show/hide)
-    visualViewport.addEventListener('resize', updateViewport);
-    visualViewport.addEventListener('scroll', updateViewport);
+    const visualViewport = window.visualViewport;
+
+    if (visualViewport) {
+      // Listen to viewport resize events (includes keyboard show/hide)
+      visualViewport.addEventListener('resize', updateViewport);
+      visualViewport.addEventListener('scroll', updateViewport);
+    }
 
     // Also listen to window resize for fallback
     window.addEventListener('resize', updateViewport);
 
     return () => {
-      visualViewport.removeEventListener('resize', updateViewport);
-      visualViewport.removeEventListener('scroll', updateViewport);
+      if (visualViewport) {
+        visualViewport.removeEventListener('resize', updateViewport);
+        visualViewport.removeEventListener('scroll', updateViewport);
+      }
       window.removeEventListener('resize', updateViewport);
+
+      // Clean up CSS variable
+      if (hasCssVarRef.current) {
+        document.documentElement.style.removeProperty('--visual-viewport-height');
+      }
     };
   }, [updateViewport]);
 
