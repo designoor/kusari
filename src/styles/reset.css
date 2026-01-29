@@ -21,6 +21,8 @@ html {
   -moz-text-size-adjust: none;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Remove default list styles */
@@ -31,7 +33,8 @@ ol {
 
 /* Set core body defaults */
 body {
-  min-height: 100dvh;
+  height: 100%;
+  overflow: hidden;
   line-height: 1.5;
 }
 
