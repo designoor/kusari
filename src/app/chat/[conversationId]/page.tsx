@@ -22,6 +22,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { getConversationById, isDm } from '@/services/xmtp/conversations';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import { useActiveConversation } from '@/providers/ActiveConversationProvider';
 import { truncateAddress } from '@/lib';
@@ -33,6 +34,7 @@ export default function ConversationPage() {
   const router = useRouter();
   const conversationId = params.conversationId as string;
   const isMobile = useIsMobile();
+  const { isKeyboardOpen, viewportHeight } = useKeyboardHeight();
   const { client, isInitialized } = useXmtpContext();
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
@@ -123,6 +125,21 @@ export default function ConversationPage() {
     setActiveConversationId(conversationId);
     return () => setActiveConversationId(null);
   }, [conversationId, setActiveConversationId]);
+
+  // Prevent body scroll when keyboard is open on mobile (iOS fix)
+  useEffect(() => {
+    if (!isMobile || !isKeyboardOpen) {
+      return;
+    }
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isMobile, isKeyboardOpen]);
 
   const handleSendMessage = async (content: string) => {
     await sendMessage(content);
@@ -285,9 +302,20 @@ export default function ConversationPage() {
     );
   };
 
-  // Mobile: Only show conversation panel
+  // Mobile: Only show conversation panel with keyboard-aware height
   if (isMobile) {
-    return <div className={styles.container}>{renderConversationPanel()}</div>;
+    const mobileStyle = isKeyboardOpen
+      ? { height: `${viewportHeight}px` }
+      : undefined;
+
+    return (
+      <div
+        className={`${styles.container} ${isKeyboardOpen ? styles.keyboardOpen : ''}`}
+        style={mobileStyle}
+      >
+        {renderConversationPanel()}
+      </div>
+    );
   }
 
   // Desktop: Split view with sidebar
