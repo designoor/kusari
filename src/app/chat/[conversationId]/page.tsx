@@ -129,39 +129,107 @@ export default function ConversationPage() {
   // Ref for the container element to apply keyboard styles
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Pin container to visual viewport when keyboard is open on iOS
+  // Completely lock the document when keyboard is open on iOS
+  // This prevents the rubber-band/jelly scroll effect
   useEffect(() => {
-    if (!isMobile || !containerRef.current) {
+    if (!isMobile || !isKeyboardOpen) {
       return;
     }
 
+    const html = document.documentElement;
+    const body = document.body;
     const container = containerRef.current;
 
-    if (isKeyboardOpen) {
-      // Pin the container to the visual viewport
+    // Lock html and body in place
+    html.style.position = 'fixed';
+    html.style.top = '0';
+    html.style.left = '0';
+    html.style.right = '0';
+    html.style.bottom = '0';
+    html.style.overflow = 'hidden';
+
+    body.style.position = 'fixed';
+    body.style.top = '0';
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.bottom = '0';
+    body.style.overflow = 'hidden';
+
+    // Pin container to visual viewport
+    if (container) {
       container.style.position = 'fixed';
       container.style.top = `${viewportOffset}px`;
       container.style.left = '0';
       container.style.right = '0';
       container.style.height = 'var(--visual-viewport-height)';
-      document.body.style.overflow = 'hidden';
-    } else {
-      // Reset to normal flow
-      container.style.position = '';
-      container.style.top = '';
-      container.style.left = '';
-      container.style.right = '';
-      container.style.height = '';
-      document.body.style.overflow = '';
+      container.style.overflow = 'hidden';
     }
 
+    // Prevent touchmove on document (blocks rubber-band effect)
+    // Allow scrolling only inside elements marked with data-scrollable
+    const preventBounce = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollableParent = target.closest('[data-scrollable]');
+
+      if (!scrollableParent) {
+        e.preventDefault();
+        return;
+      }
+
+      // Check if the scrollable element is actually scrollable
+      const el = scrollableParent as HTMLElement;
+      const isAtTop = el.scrollTop <= 0;
+      const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight;
+
+      // If at bounds and trying to scroll further, prevent it
+      const touch = e.touches[0];
+      if (touch) {
+        const startY = (e as TouchEvent & { startY?: number }).startY ?? touch.clientY;
+        const deltaY = touch.clientY - startY;
+
+        if ((isAtTop && deltaY > 0) || (isAtBottom && deltaY < 0)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    // Track touch start position
+    const trackTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (touch) {
+        (e as TouchEvent & { startY?: number }).startY = touch.clientY;
+      }
+    };
+
+    document.addEventListener('touchstart', trackTouchStart, { passive: true });
+    document.addEventListener('touchmove', preventBounce, { passive: false });
+
     return () => {
-      container.style.position = '';
-      container.style.top = '';
-      container.style.left = '';
-      container.style.right = '';
-      container.style.height = '';
-      document.body.style.overflow = '';
+      html.style.position = '';
+      html.style.top = '';
+      html.style.left = '';
+      html.style.right = '';
+      html.style.bottom = '';
+      html.style.overflow = '';
+
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      body.style.bottom = '';
+      body.style.overflow = '';
+
+      if (container) {
+        container.style.position = '';
+        container.style.top = '';
+        container.style.left = '';
+        container.style.right = '';
+        container.style.height = '';
+        container.style.overflow = '';
+      }
+
+      document.removeEventListener('touchstart', trackTouchStart);
+      document.removeEventListener('touchmove', preventBounce);
     };
   }, [isMobile, isKeyboardOpen, viewportOffset]);
 
@@ -309,7 +377,7 @@ export default function ConversationPage() {
           size="lg"
           overlay
         />
-        <div className={styles.messagesArea}>
+        <div className={styles.messagesArea} data-scrollable>
           <MessageList
             messageGroups={messageGroups}
             isLoading={isLoadingMessages}
