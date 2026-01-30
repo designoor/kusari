@@ -35,7 +35,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter conversations based on search query
+  // Filter conversations based on search query (searches contact name/address, not message content)
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) {
       return conversations;
@@ -43,12 +43,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
     const query = searchQuery.toLowerCase();
     return conversations.filter((conv) => {
-      const matchesInboxId = conv.peerInboxId?.toLowerCase().includes(query);
-      const matchesGroupName = conv.groupName?.toLowerCase().includes(query);
-      const matchesContent = conv.lastMessage?.content.toLowerCase().includes(query);
-      return matchesInboxId || matchesGroupName || matchesContent;
+      // For group chats, search by group name
+      if (!conv.isDm) {
+        return conv.groupName?.toLowerCase().includes(query);
+      }
+
+      // For DMs, search by address or Ethos username
+      const address = (conv.peerAddress ?? conv.peerInboxId)?.toLowerCase();
+      const matchesAddress = address?.includes(query);
+
+      // Check Ethos username if profile exists
+      const ethosProfile = address ? ethosProfiles.get(address) : undefined;
+      const matchesUsername = ethosProfile?.username?.toLowerCase().includes(query);
+
+      return matchesAddress || matchesUsername;
     });
-  }, [conversations, searchQuery]);
+  }, [conversations, searchQuery, ethosProfiles]);
 
   // Render content based on state
   const renderContent = () => {
@@ -105,7 +115,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           })
         ) : (
           <div className={styles.noResults}>
-            <p>No conversations match &ldquo;{searchQuery}&rdquo;</p>
+            <p>No contacts match &ldquo;{searchQuery}&rdquo;</p>
           </div>
         )}
       </div>
@@ -120,7 +130,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       <div className={styles.searchWrapper}>
         <Input
           size="md"
-          placeholder="Search conversations..."
+          placeholder="Search contacts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           disabled={isSearchDisabled}
