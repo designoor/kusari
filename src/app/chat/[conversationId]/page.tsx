@@ -34,7 +34,7 @@ export default function ConversationPage() {
   const router = useRouter();
   const conversationId = params.conversationId as string;
   const isMobile = useIsMobile();
-  const { isKeyboardOpen, viewportOffset, viewportHeight, keyboardHeight } = useKeyboardHeight();
+  const { isKeyboardOpen, viewportOffset } = useKeyboardHeight();
   const { client, isInitialized } = useXmtpContext();
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
@@ -128,6 +128,8 @@ export default function ConversationPage() {
 
   // Ref for the container element to apply keyboard styles
   const containerRef = useRef<HTMLDivElement>(null);
+  // Ref for messages area to scroll to bottom when keyboard opens
+  const messagesAreaRef = useRef<HTMLDivElement>(null);
 
   // Completely lock the document when keyboard is open on iOS
   // This prevents the rubber-band/jelly scroll effect
@@ -163,6 +165,11 @@ export default function ConversationPage() {
       container.style.right = '0';
       container.style.height = 'var(--visual-viewport-height)';
       container.style.overflow = 'hidden';
+    }
+
+    // Scroll messages to bottom when keyboard opens
+    if (messagesAreaRef.current) {
+      messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
     }
 
     // Prevent touchmove on document (blocks rubber-band effect)
@@ -377,7 +384,7 @@ export default function ConversationPage() {
           size="lg"
           overlay
         />
-        <div className={styles.messagesArea} data-scrollable>
+        <div ref={messagesAreaRef} className={styles.messagesArea} data-scrollable>
           <MessageList
             messageGroups={messageGroups}
             isLoading={isLoadingMessages}
@@ -398,21 +405,6 @@ export default function ConversationPage() {
   if (isMobile) {
     return (
       <div ref={containerRef} className={styles.container}>
-        {/* Debug indicator - remove after testing */}
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          background: isKeyboardOpen ? 'red' : 'green',
-          color: 'white',
-          padding: '4px 8px',
-          fontSize: '10px',
-          zIndex: 9999,
-          fontFamily: 'monospace'
-        }}>
-          KB: {isKeyboardOpen ? 'OPEN' : 'closed'} | H: {Math.round(viewportHeight)} | Off: {Math.round(viewportOffset)} | KBH: {keyboardHeight}
-        </div>
         {renderConversationPanel()}
       </div>
     );
