@@ -82,15 +82,17 @@
   border: 2px solid var(--color-accent);
 }
 
-.button.primary:hover:not(.disabled) {
-  background-color: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
-}
-
 .button.primary:active:not(.disabled) {
   background-color: var(--color-accent-active);
   border-color: var(--color-accent-active);
   transform: translateY(1px);
+}
+
+@media (hover: hover) {
+  .button.primary:hover:not(.disabled) {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
 }
 
 .button.secondary {
@@ -99,13 +101,15 @@
   border: 2px solid transparent;
 }
 
-.button.secondary:hover:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
 .button.secondary:active:not(.disabled) {
   background-color: rgba(255, 255, 255, 0.2);
   transform: translateY(1px);
+}
+
+@media (hover: hover) {
+  .button.secondary:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .button.ghost {
@@ -114,13 +118,15 @@
   border: 2px solid transparent;
 }
 
-.button.ghost:hover:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
 .button.ghost:active:not(.disabled) {
   background-color: rgba(255, 255, 255, 0.15);
   transform: translateY(1px);
+}
+
+@media (hover: hover) {
+  .button.ghost:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .button.danger {
@@ -129,15 +135,17 @@
   border: 2px solid var(--color-error);
 }
 
-.button.danger:hover:not(.disabled) {
-  background-color: #E65252;
-  border-color: #E65252;
-}
-
 .button.danger:active:not(.disabled) {
   background-color: #CC4949;
   border-color: #CC4949;
   transform: translateY(1px);
+}
+
+@media (hover: hover) {
+  .button.danger:hover:not(.disabled) {
+    background-color: #E65252;
+    border-color: #E65252;
+  }
 }
 
 /* States */
