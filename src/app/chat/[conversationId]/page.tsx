@@ -34,7 +34,7 @@ export default function ConversationPage() {
   const router = useRouter();
   const conversationId = params.conversationId as string;
   const isMobile = useIsMobile();
-  const { isKeyboardOpen, viewportOffset } = useKeyboardHeight();
+  const { isKeyboardOpen, viewportOffset, viewportHeight, keyboardHeight } = useKeyboardHeight();
   const { client, isInitialized } = useXmtpContext();
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
@@ -330,6 +330,21 @@ export default function ConversationPage() {
   if (isMobile) {
     return (
       <div ref={containerRef} className={styles.container}>
+        {/* Debug indicator - remove after testing */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          background: isKeyboardOpen ? 'red' : 'green',
+          color: 'white',
+          padding: '4px 8px',
+          fontSize: '10px',
+          zIndex: 9999,
+          fontFamily: 'monospace'
+        }}>
+          KB: {isKeyboardOpen ? 'OPEN' : 'closed'} | H: {Math.round(viewportHeight)} | Off: {Math.round(viewportOffset)} | KBH: {keyboardHeight}
+        </div>
         {renderConversationPanel()}
       </div>
     );
