@@ -227,14 +227,6 @@ export async function buildXmtpClient(address: string): Promise<Client | null> {
     // Client is registered and valid - clear the OPFS cleared flag
     clearOpfsClearedFlag();
 
-    // Kick off conversation sync in the background (non-blocking)
-    // This pulls conversations from the network for fresh installs
-    // We don't await because it can be slow and may cause "Group is inactive"
-    // errors for groups - those errors are logged but don't affect DMs
-    client.conversations.sync().catch((err) => {
-      console.warn('[XMTP] Background conversation sync warning:', err);
-    });
-
     return client;
   } catch {
     // Clear invalid session

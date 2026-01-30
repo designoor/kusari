@@ -19,6 +19,9 @@ export async function setInboxConsent(
   try {
     if (inboxIds.length === 0) return;
 
+    // Sync BEFORE to get latest consent state from network (prevents overwriting other devices)
+    await client.preferences.sync();
+
     const records: Consent[] = inboxIds.map((inboxId) => ({
       entityType: ConsentEntityType.InboxId,
       entity: inboxId,
@@ -27,7 +30,7 @@ export async function setInboxConsent(
 
     await client.preferences.setConsentStates(records);
 
-    // Ensure consent state is published to the network for cross-device sync
+    // Sync AFTER to publish changes to network
     await client.preferences.sync();
   } catch (error) {
     console.error('Failed to set inbox consent:', error);
@@ -93,6 +96,9 @@ export async function setConversationConsent(
   state: ConsentState
 ): Promise<void> {
   try {
+    // Sync BEFORE to get latest consent state from network (prevents overwriting other devices)
+    await client.preferences.sync();
+
     const records: Consent[] = [
       {
         entityType: ConsentEntityType.GroupId,
@@ -102,6 +108,9 @@ export async function setConversationConsent(
     ];
 
     await client.preferences.setConsentStates(records);
+
+    // Sync AFTER to publish changes to network
+    await client.preferences.sync();
   } catch (error) {
     console.error('Failed to set conversation consent:', error);
     throw new Error('Failed to set conversation consent');
