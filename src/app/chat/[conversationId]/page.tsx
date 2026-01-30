@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { MessageList } from '@/components/chat/MessageList';
@@ -34,7 +34,7 @@ export default function ConversationPage() {
   const router = useRouter();
   const conversationId = params.conversationId as string;
   const isMobile = useIsMobile();
-  const { isKeyboardOpen } = useKeyboardHeight();
+  const { isKeyboardOpen, viewportOffset } = useKeyboardHeight();
   const { client, isInitialized } = useXmtpContext();
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
@@ -126,17 +126,44 @@ export default function ConversationPage() {
     return () => setActiveConversationId(null);
   }, [conversationId, setActiveConversationId]);
 
-  // Prevent body scroll when keyboard is open on mobile (iOS fix)
+  // Ref for the container element to apply keyboard styles
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Pin container to visual viewport when keyboard is open on iOS
   useEffect(() => {
-    if (!isMobile || !isKeyboardOpen) {
+    if (!isMobile || !containerRef.current) {
       return;
     }
-    // Only set overflow hidden - avoid fixed positioning which breaks layout
-    document.body.style.overflow = 'hidden';
+
+    const container = containerRef.current;
+
+    if (isKeyboardOpen) {
+      // Pin the container to the visual viewport
+      container.style.position = 'fixed';
+      container.style.top = `${viewportOffset}px`;
+      container.style.left = '0';
+      container.style.right = '0';
+      container.style.height = 'var(--visual-viewport-height)';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Reset to normal flow
+      container.style.position = '';
+      container.style.top = '';
+      container.style.left = '';
+      container.style.right = '';
+      container.style.height = '';
+      document.body.style.overflow = '';
+    }
+
     return () => {
+      container.style.position = '';
+      container.style.top = '';
+      container.style.left = '';
+      container.style.right = '';
+      container.style.height = '';
       document.body.style.overflow = '';
     };
-  }, [isMobile, isKeyboardOpen]);
+  }, [isMobile, isKeyboardOpen, viewportOffset]);
 
   const handleSendMessage = async (content: string) => {
     await sendMessage(content);
@@ -299,10 +326,10 @@ export default function ConversationPage() {
     );
   };
 
-  // Mobile: Only show conversation panel (height controlled via CSS custom property)
+  // Mobile: Only show conversation panel (pinned to visual viewport via ref)
   if (isMobile) {
     return (
-      <div className={styles.container}>
+      <div ref={containerRef} className={styles.container}>
         {renderConversationPanel()}
       </div>
     );
