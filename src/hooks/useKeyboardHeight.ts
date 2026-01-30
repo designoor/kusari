@@ -7,9 +7,6 @@ interface KeyboardState {
   keyboardHeight: number;
   viewportHeight: number;
   viewportOffset: number;
-  // Debug values
-  layoutHeight: number;
-  heightDiff: number;
 }
 
 // Check if device is mobile/tablet (has touch and small screen)
@@ -38,8 +35,6 @@ export function useKeyboardHeight(): KeyboardState {
     keyboardHeight: 0,
     viewportHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
     viewportOffset: 0,
-    layoutHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
-    heightDiff: 0,
   });
 
   // Track if an input is focused (for immediate keyboard detection)
@@ -78,8 +73,6 @@ export function useKeyboardHeight(): KeyboardState {
       keyboardHeight: isKeyboardOpen ? Math.max(heightDiff, 0) : 0,
       viewportHeight: visualViewportHeight,
       viewportOffset: visualViewportOffset,
-      layoutHeight: layoutViewportHeight,
-      heightDiff,
     });
   }, []);
 
