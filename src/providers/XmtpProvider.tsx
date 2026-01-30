@@ -41,19 +41,36 @@ export class InstallationLimitError extends Error {
 }
 
 /**
- * Sync consent preferences and messages from the XMTP network.
+ * Sync consent preferences, conversations, and messages from the XMTP network.
  * Failures are logged but don't block initialization.
  *
- * NOTE: We do NOT call sendSyncRequest() or conversations.sync() because they
- * can cause issues with the XMTP client state. syncAll handles message syncing
- * without these issues.
+ * Flow:
+ * 1. preferences.sync() - get consent state from network
+ * 2. conversations.sync() - discover conversations from network (needed for fresh installs)
+ * 3. conversations.syncAll() - sync messages for discovered conversations
+ *
+ * Note: conversations.sync() can cause "Group is inactive" errors for groups
+ * where the current device isn't an active member. We catch and log these
+ * but continue, since DMs will still work correctly.
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    // Sync preferences to get consent state from network
+    // First sync preferences to get consent state from network
     await xmtpClient.preferences.sync();
 
-    // Sync all messages for conversations
+    // Sync conversation list from network
+    // This is needed for fresh installs to discover existing conversations
+    // syncAll() only syncs conversations with unread messages, so we need
+    // sync() to get the full conversation list first
+    try {
+      await xmtpClient.conversations.sync();
+    } catch (syncError) {
+      // sync() can cause "Group is inactive" errors for groups where
+      // this device isn't an active member. Log but don't fail.
+      console.warn('[XMTP] Conversation sync warning (may be expected for groups):', syncError);
+    }
+
+    // Then sync all messages for discovered conversations
     await xmtpClient.conversations.syncAll();
   } catch {
     // Network sync failed, continue with local data
