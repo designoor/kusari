@@ -7,14 +7,26 @@ interface KeyboardState {
   keyboardHeight: number;
   viewportHeight: number;
   viewportOffset: number;
+  // Debug values
+  layoutHeight: number;
+  heightDiff: number;
+}
+
+// Check if device is mobile/tablet (has touch and small screen)
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    'ontouchstart' in window &&
+    window.innerWidth < 1024
+  );
 }
 
 /**
- * Hook to detect mobile keyboard visibility and height using the Visual Viewport API.
- * Returns the keyboard height and whether the keyboard is currently open.
+ * Hook to detect mobile keyboard visibility and height.
  *
- * This works by comparing the visual viewport height to the layout viewport height.
- * When the keyboard opens, the visual viewport shrinks while the layout viewport stays the same.
+ * Uses two detection methods:
+ * 1. Input focus events (immediate detection when input is focused)
+ * 2. Visual Viewport API (for accurate height measurements)
  *
  * Also sets CSS custom properties on document.documentElement:
  * - --visual-viewport-height: the visible height
@@ -26,12 +38,16 @@ export function useKeyboardHeight(): KeyboardState {
     keyboardHeight: 0,
     viewportHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
     viewportOffset: 0,
+    layoutHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
+    heightDiff: 0,
   });
 
+  // Track if an input is focused (for immediate keyboard detection)
+  const inputFocusedRef = useRef(false);
   // Track if we've set the CSS variables so we can clean them up
   const hasCssVarsRef = useRef(false);
 
-  const updateViewport = useCallback(() => {
+  const updateViewport = useCallback((forceKeyboardOpen?: boolean) => {
     if (typeof window === 'undefined') {
       return;
     }
@@ -53,15 +69,17 @@ export function useKeyboardHeight(): KeyboardState {
     hasCssVarsRef.current = true;
 
     // Calculate the difference - this is approximately the keyboard height
-    // We use a threshold of 150px to distinguish keyboard from minor viewport changes
     const heightDiff = layoutViewportHeight - visualViewportHeight;
-    const isKeyboardOpen = heightDiff > 150;
+    // Keyboard is open if: forced by focus event, OR height diff > 150px
+    const isKeyboardOpen = forceKeyboardOpen === true || heightDiff > 150;
 
     setState({
       isKeyboardOpen,
-      keyboardHeight: isKeyboardOpen ? heightDiff : 0,
+      keyboardHeight: isKeyboardOpen ? Math.max(heightDiff, 0) : 0,
       viewportHeight: visualViewportHeight,
       viewportOffset: visualViewportOffset,
+      layoutHeight: layoutViewportHeight,
+      heightDiff,
     });
   }, []);
 
@@ -77,19 +95,51 @@ export function useKeyboardHeight(): KeyboardState {
 
     if (visualViewport) {
       // Listen to viewport resize events (includes keyboard show/hide)
-      visualViewport.addEventListener('resize', updateViewport);
-      visualViewport.addEventListener('scroll', updateViewport);
+      visualViewport.addEventListener('resize', () => updateViewport(inputFocusedRef.current));
+      visualViewport.addEventListener('scroll', () => updateViewport(inputFocusedRef.current));
     }
 
     // Also listen to window resize for fallback
-    window.addEventListener('resize', updateViewport);
+    window.addEventListener('resize', () => updateViewport(inputFocusedRef.current));
+
+    // Listen for input focus/blur to detect keyboard on mobile
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT' ||
+                      target.tagName === 'TEXTAREA' ||
+                      target.isContentEditable;
+
+      if (isInput && isMobileDevice()) {
+        inputFocusedRef.current = true;
+        // Immediately mark keyboard as open on focus
+        updateViewport(true);
+      }
+    };
+
+    const handleFocusOut = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT' ||
+                      target.tagName === 'TEXTAREA' ||
+                      target.isContentEditable;
+
+      if (isInput && isMobileDevice()) {
+        inputFocusedRef.current = false;
+        // Small delay to let viewport update before checking
+        setTimeout(() => updateViewport(false), 100);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
 
     return () => {
       if (visualViewport) {
-        visualViewport.removeEventListener('resize', updateViewport);
-        visualViewport.removeEventListener('scroll', updateViewport);
+        visualViewport.removeEventListener('resize', () => updateViewport(inputFocusedRef.current));
+        visualViewport.removeEventListener('scroll', () => updateViewport(inputFocusedRef.current));
       }
-      window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('resize', () => updateViewport(inputFocusedRef.current));
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
 
       // Clean up CSS variables
       if (hasCssVarsRef.current) {
