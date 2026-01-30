@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
 import { FeatureItem } from '../FeatureItem';
+import { AsciiLogo } from '../AsciiLogo';
 import { useWallet } from '@/hooks/useWallet';
 import styles from './WelcomeStep.module.css';
 
@@ -20,14 +20,10 @@ export const WelcomeStep: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.iconContainer}>
-          <Icon name="message" size="xl" />
-        </div>
-
-        <h1 className={styles.title}>Welcome to Kusari</h1>
+        <AsciiLogo />
 
         <p className={styles.description}>
-          Your decentralized messaging app. Connect with Web3 identities securely and privately.
+          Decentralised crypto native messaging app. Connect with Web3 accounts securely and privately.
         </p>
 
         <div className={styles.features}>
@@ -35,6 +31,7 @@ export const WelcomeStep: React.FC = () => {
             icon="shield"
             title="Privacy-First"
             description="End-to-end encrypted messages via XMTP"
+            color="#E93D82"
           />
           <FeatureItem
             icon="verified"
@@ -43,7 +40,7 @@ export const WelcomeStep: React.FC = () => {
             color="#F5A623"
           />
           <FeatureItem
-            icon="wallet"
+            icon="chain"
             title="Web3 Native"
             description="Wallet-based identity, no email or password required"
             color="#00D4FF"

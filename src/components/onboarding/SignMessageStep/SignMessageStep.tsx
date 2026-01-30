@@ -79,7 +79,7 @@ export const SignMessageStep: React.FC<SignMessageStepProps> = ({
               description="Your messages are encrypted and only you and your recipients can read them"
             />
             <FeatureItem
-              icon="wallet"
+              icon="gear"
               title="One-Time Setup"
               description="You only need to sign once to create your messaging identity"
               color="#00D4FF"
