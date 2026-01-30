@@ -8,18 +8,15 @@ import {
   ContactList,
 } from '@/components/contacts';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Icon } from '@/components/ui/Icon';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { InboxIcon, BanIcon } from '@/components/ui/Icon/icons';
 import { useCoordinatedConversations } from '@/hooks/useCoordinatedConversations';
 import { useMessageRequests, useDeniedConversations } from '@/hooks/useConversations';
-import { useNewChatModal } from '@/providers/NewChatModalProvider';
 import styles from './contacts.module.css';
 
 export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const { openModal } = useNewChatModal();
 
   // Get allowed contacts with coordinated Ethos loading (shares cache with /chat)
   const { previews: allowedContacts, ethosProfiles, isLoading, isInitialLoading, error, refresh } =
@@ -33,16 +30,20 @@ export default function ContactsPage() {
     void refresh();
   }, [refresh]);
 
-  // Apply search filter (by wallet address or inbox ID)
+  // Apply search filter (by wallet address, inbox ID, or Ethos username)
   const filteredContacts = useMemo(() => {
     if (!searchQuery) return allowedContacts;
 
     const query = searchQuery.toLowerCase();
-    return allowedContacts.filter((contact) =>
-      contact.peerAddress?.toLowerCase().includes(query) ||
-      contact.peerInboxId?.toLowerCase().includes(query)
-    );
-  }, [allowedContacts, searchQuery]);
+    return allowedContacts.filter((contact) => {
+      const matchesAddress = contact.peerAddress?.toLowerCase().includes(query);
+      const matchesInboxId = contact.peerInboxId?.toLowerCase().includes(query);
+      const address = (contact.peerAddress ?? contact.peerInboxId)?.toLowerCase();
+      const ethosProfile = address ? ethosProfiles.get(address) : undefined;
+      const matchesUsername = ethosProfile?.username?.toLowerCase().includes(query);
+      return matchesAddress || matchesInboxId || matchesUsername;
+    });
+  }, [allowedContacts, searchQuery, ethosProfiles]);
 
   // Error state
   if (error && !isLoading) {
@@ -63,12 +64,6 @@ export default function ContactsPage() {
     <div className={styles.container}>
       <PageHeader
         title="Contacts"
-        actions={[{
-          label: 'New Chat',
-          onClick: openModal,
-          variant: 'ghost',
-          icon: <Icon name="plus" size="sm" />
-        }]}
         size="lg"
       />
       <div className={styles.searchContainer}>
@@ -84,7 +79,6 @@ export default function ContactsPage() {
           href="/contacts/requests"
           icon={<InboxIcon size={20} />}
           title="New requests"
-          description="Message requests from unknown contacts"
           count={requestPreviews.length}
           variant="new"
         />
@@ -93,7 +87,6 @@ export default function ContactsPage() {
           href="/contacts/denied"
           icon={<BanIcon size={20} />}
           title="Denied"
-          description="Blocked contacts"
           count={deniedPreviews.length}
           variant="default"
         />

@@ -117,13 +117,13 @@
 
 .systemContent {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   color: var(--color-content-secondary);
   text-align: center;
 }
 
 .systemTime {
-  font-size: 10px;
+  font-size: var(--font-size-sm);
   color: var(--color-content-tertiary);
 }
 

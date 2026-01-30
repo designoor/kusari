@@ -53,3 +53,21 @@
     width: 360px;
   }
 }
+
+/* Header action buttons */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Icon-only header buttons */
+.iconButton {
+  padding: 0 var(--spacing-xs) !important;
+}
+
+/* Refresh button state */
+.refreshing {
+  color: var(--color-content-tertiary) !important;
+  pointer-events: none;
+}
