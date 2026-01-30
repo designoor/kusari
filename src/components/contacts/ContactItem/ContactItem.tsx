@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Avatar } from '@/components/ui/Avatar';
 import { Icon } from '@/components/ui/Icon';
@@ -43,11 +43,6 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
   // Use Ethos username if available, otherwise fall back to displayName
   const ethosName = ethosProfile?.username ?? displayName;
 
-  /** Opens Ethos profile in a new tab */
-  const handleProfileClick = useCallback((url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }, []);
-
   const content = (
     <>
       <Avatar address={address} src={ethosProfile?.avatarUrl} size="md" className={styles.avatar} />
@@ -59,7 +54,6 @@ export const ContactItem: React.FC<ContactItemProps> = React.memo(({
             profile={ethosProfile}
             size="sm"
             variant="compact"
-            onProfileClick={handleProfileClick}
           />
         </div>
         {ethosName && <span className={styles.address}>{address}</span>}
