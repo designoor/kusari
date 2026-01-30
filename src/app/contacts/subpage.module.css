@@ -5,6 +5,10 @@
   overflow-y: auto;
 }
 
+.searchContainer {
+  padding: 0;
+}
+
 .content {
   flex: 1;
   padding-bottom: var(--spacing-lg);

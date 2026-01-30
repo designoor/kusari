@@ -11,6 +11,7 @@ import {
   streamMessages,
 } from '@/services/xmtp/messages';
 import { getLastReadTimes } from '@/services/xmtp/readReceipts';
+import { getAddressesForInboxIds } from '@/services/xmtp/identity';
 import type { Conversation } from '@/types/conversation';
 import type { MessageDisplay, PendingMessage, MessageGroup, MessageType } from '@/types/message';
 import { truncateAddress } from '@/lib/address';
@@ -40,10 +41,22 @@ interface GroupUpdatedContent {
 }
 
 /**
+ * Get display name for an inbox ID (resolved address or truncated inbox ID)
+ */
+function getDisplayName(inboxId: string, addressMap: Map<string, string | null>): string {
+  const address = addressMap.get(inboxId);
+  return truncateAddress(address ?? inboxId);
+}
+
+/**
  * Convert group_updated content to a human-readable system message
  */
-function formatGroupUpdatedMessage(content: GroupUpdatedContent, initiatorId?: string): string {
-  const initiator = initiatorId ? truncateAddress(initiatorId) : 'Someone';
+function formatGroupUpdatedMessage(
+  content: GroupUpdatedContent,
+  initiatorId: string | undefined,
+  addressMap: Map<string, string | null>
+): string {
+  const initiator = initiatorId ? getDisplayName(initiatorId, addressMap) : 'Someone';
 
   // Check for added members
   const addedInboxes = content.addedInboxes ?? [];
@@ -53,9 +66,9 @@ function formatGroupUpdatedMessage(content: GroupUpdatedContent, initiatorId?: s
       const addedId = firstAdded.inboxId;
       // Check if the person added themselves (joined)
       if (addedId === initiatorId) {
-        return `${truncateAddress(addedId)} joined the conversation`;
+        return `${getDisplayName(addedId, addressMap)} joined the conversation`;
       }
-      return `${initiator} added ${truncateAddress(addedId)} to the conversation`;
+      return `${initiator} added ${getDisplayName(addedId, addressMap)} to the conversation`;
     }
     return `${initiator} added ${addedInboxes.length} members to the conversation`;
   }
@@ -65,7 +78,7 @@ function formatGroupUpdatedMessage(content: GroupUpdatedContent, initiatorId?: s
   if (removedInboxes.length > 0) {
     const firstRemoved = removedInboxes[0];
     if (removedInboxes.length === 1 && firstRemoved) {
-      return `${initiator} removed ${truncateAddress(firstRemoved.inboxId)} from the conversation`;
+      return `${initiator} removed ${getDisplayName(firstRemoved.inboxId, addressMap)} from the conversation`;
     }
     return `${initiator} removed ${removedInboxes.length} members from the conversation`;
   }
@@ -75,7 +88,7 @@ function formatGroupUpdatedMessage(content: GroupUpdatedContent, initiatorId?: s
   if (leftInboxes.length > 0) {
     const firstLeft = leftInboxes[0];
     if (leftInboxes.length === 1 && firstLeft) {
-      return `${truncateAddress(firstLeft.inboxId)} left the conversation`;
+      return `${getDisplayName(firstLeft.inboxId, addressMap)} left the conversation`;
     }
     return `${leftInboxes.length} members left the conversation`;
   }
@@ -85,7 +98,7 @@ function formatGroupUpdatedMessage(content: GroupUpdatedContent, initiatorId?: s
   if (addedAdmins.length > 0) {
     const firstAdmin = addedAdmins[0];
     if (firstAdmin) {
-      return `${initiator} made ${truncateAddress(firstAdmin.inboxId)} an admin`;
+      return `${initiator} made ${getDisplayName(firstAdmin.inboxId, addressMap)} an admin`;
     }
   }
 
@@ -93,7 +106,7 @@ function formatGroupUpdatedMessage(content: GroupUpdatedContent, initiatorId?: s
   if (removedAdmins.length > 0) {
     const firstRemovedAdmin = removedAdmins[0];
     if (firstRemovedAdmin) {
-      return `${initiator} removed admin rights from ${truncateAddress(firstRemovedAdmin.inboxId)}`;
+      return `${initiator} removed admin rights from ${getDisplayName(firstRemovedAdmin.inboxId, addressMap)}`;
     }
   }
 
@@ -142,6 +155,9 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
 
   // Read receipt state - updated from initial fetch and real-time stream
   const [peerLastReadTime, setPeerLastReadTime] = useState<bigint | null>(null);
+
+  // Address resolution map for system messages (inbox ID -> Ethereum address)
+  const [inboxAddressMap, setInboxAddressMap] = useState<Map<string, string | null>>(new Map());
 
   /**
    * Load all messages for the conversation
@@ -421,6 +437,72 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     }
   }, [conversationId, state.isLoading, state.messages.length, markAsRead]);
 
+  // Resolve inbox IDs to Ethereum addresses for system messages
+  useEffect(() => {
+    if (!client || state.messages.length === 0) {
+      return;
+    }
+
+    // Extract all unique inbox IDs from system messages
+    const inboxIds = new Set<string>();
+    for (const msg of state.messages) {
+      const contentType = msg.contentType as ContentType | undefined;
+      if (contentType?.typeId === 'group_updated' && msg.content) {
+        const groupContent = msg.content as GroupUpdatedContent;
+
+        // Collect all inbox IDs from the update
+        if (groupContent.initiatedByInboxId) {
+          inboxIds.add(groupContent.initiatedByInboxId);
+        }
+        for (const item of groupContent.addedInboxes ?? []) {
+          inboxIds.add(item.inboxId);
+        }
+        for (const item of groupContent.removedInboxes ?? []) {
+          inboxIds.add(item.inboxId);
+        }
+        for (const item of groupContent.leftInboxes ?? []) {
+          inboxIds.add(item.inboxId);
+        }
+        for (const item of groupContent.addedAdminInboxes ?? []) {
+          inboxIds.add(item.inboxId);
+        }
+        for (const item of groupContent.removedAdminInboxes ?? []) {
+          inboxIds.add(item.inboxId);
+        }
+      }
+    }
+
+    // Skip if no inbox IDs to resolve or all are already resolved
+    const unresolved = Array.from(inboxIds).filter((id) => !inboxAddressMap.has(id));
+    if (unresolved.length === 0) {
+      return;
+    }
+
+    let cancelled = false;
+    const resolve = async () => {
+      try {
+        const resolved = await getAddressesForInboxIds(client, unresolved);
+        if (!cancelled) {
+          setInboxAddressMap((prev) => {
+            const updated = new Map(prev);
+            for (const [inboxId, address] of resolved) {
+              updated.set(inboxId, address);
+            }
+            return updated;
+          });
+        }
+      } catch (error) {
+        console.error('Failed to resolve inbox IDs to addresses:', error);
+      }
+    };
+
+    void resolve();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [client, state.messages, inboxAddressMap]);
+
   /**
    * Convert messages to display format
    */
@@ -462,7 +544,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
           const groupContent = msg.content as GroupUpdatedContent;
           return {
             id: msg.id,
-            content: formatGroupUpdatedMessage(groupContent, groupContent.initiatedByInboxId),
+            content: formatGroupUpdatedMessage(groupContent, groupContent.initiatedByInboxId, inboxAddressMap),
             senderInboxId: msg.senderInboxId,
             sentAt: msg.sentAt,
             sentAtNs: msg.sentAtNs,
@@ -493,7 +575,7 @@ export function useMessages(conversationId: string | null): UseMessagesReturn {
     return [...regularMessages, ...pending].sort(
       (a, b) => a.sentAt.getTime() - b.sentAt.getTime()
     );
-  }, [client, state.messages, state.pendingMessages, peerLastReadTime]);
+  }, [client, state.messages, state.pendingMessages, peerLastReadTime, inboxAddressMap]);
 
   /**
    * Group consecutive messages from the same sender
