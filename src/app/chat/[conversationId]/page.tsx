@@ -14,12 +14,13 @@ import { EthosScore } from '@/components/reputation/EthosScore';
 import { BanIcon, InboxIcon, ContactsIcon } from '@/components/ui/Icon/icons';
 import { useMessages } from '@/hooks/useMessages';
 import { useConversationList } from '@/providers/ConversationListProvider';
+import { useConversationData } from '@/providers/ConversationDataProvider';
 import { useEthosScore } from '@/hooks/useEthosScore';
 import { useInboxConsent, useConsent } from '@/hooks/useConsent';
 import { ConsentState } from '@xmtp/browser-sdk';
 import { useXmtpContext } from '@/providers/XmtpProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { getConversationById, isDm } from '@/services/xmtp/conversations';
+import { isDm } from '@/services/xmtp/conversations';
 import { getAddressForInboxId } from '@/services/xmtp/identity';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
@@ -39,14 +40,24 @@ export default function ConversationPage() {
 
   // Get conversation list for desktop sidebar with coordinated Ethos loading
   const { previews, ethosProfiles: sidebarEthosProfiles, isInitialLoading: isLoadingConversations } = useConversationList();
+  // Get cached conversation data for instant navigation
+  const { previews: previewsMap, getConversation } = useConversationData();
   const { openModal } = useNewChatModal();
   const { setActiveConversationId } = useActiveConversation();
+
+  // Look up cached preview for instant display (no network call needed)
+  const cachedPreview = previewsMap.get(conversationId);
+  // Ref to access cached preview without creating callback dependency
+  const cachedPreviewRef = useRef(cachedPreview);
+  cachedPreviewRef.current = cachedPreview;
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [peerInboxId, setPeerInboxId] = useState<string | undefined>();
   const [peerAddress, setPeerAddress] = useState<string | undefined>();
-  const [isLoadingConversation, setIsLoadingConversation] = useState(true);
+  // Start with loading=false if we have cached data, loading=true otherwise
+  const [isLoadingConversation, setIsLoadingConversation] = useState(!cachedPreview);
   const [loadError, setLoadError] = useState<Error | null>(null);
+  const [loadAttempted, setLoadAttempted] = useState(false);
 
   const {
     messageGroups,
@@ -61,14 +72,23 @@ export default function ConversationPage() {
   const toast = useToast();
   const [isConsentActionLoading, setIsConsentActionLoading] = useState(false);
 
-  // Fetch Ethos profile for DMs
+  // Use cached Ethos profile from sidebar when available (avoids redundant fetch)
   const addressForEthos = peerAddress ?? peerInboxId;
-  const { data: ethosProfile } = useEthosScore(addressForEthos);
+  const cachedEthosProfile = peerAddress
+    ? sidebarEthosProfiles.get(peerAddress.toLowerCase())
+    : undefined;
+  // Only fetch if not in sidebar cache
+  const { data: fetchedEthosProfile } = useEthosScore(cachedEthosProfile ? null : addressForEthos);
+  const ethosProfile = cachedEthosProfile ?? fetchedEthosProfile;
 
-  // Compute primary name for display
+  // Compute primary name for display - use cached preview when conversation not loaded yet
   const primaryName = useMemo(() => {
+    // Check if it's a group (not DM)
     if (conversation && !isDm(conversation)) {
       return conversation.name ?? 'Group Chat';
+    }
+    if (!conversation && cachedPreview && !cachedPreview.isDm) {
+      return cachedPreview.groupName ?? 'Group Chat';
     }
     const ethosUsername = ethosProfile?.username || ethosProfile?.displayName;
     if (ethosUsername) {
@@ -81,21 +101,32 @@ export default function ConversationPage() {
       return truncateAddress(peerInboxId);
     }
     return 'Unknown';
-  }, [conversation, ethosProfile, peerAddress, peerInboxId]);
+  }, [conversation, cachedPreview, ethosProfile, peerAddress, peerInboxId]);
 
-  // Load conversation metadata
+  // Load conversation metadata - uses cached preview data when available for instant display
   const loadConversation = useCallback(async () => {
     if (!client || !isInitialized || !conversationId) {
       return;
     }
 
-    setIsLoadingConversation(true);
+    // Use ref to access cached preview without dependency (avoids re-runs on preview updates)
+    const cached = cachedPreviewRef.current;
+
+    // If we have cached preview, use it for instant display (no loading state)
+    if (cached) {
+      setPeerInboxId(cached.peerInboxId);
+      setPeerAddress(cached.peerAddress);
+    } else {
+      setIsLoadingConversation(true);
+    }
     setLoadError(null);
 
     try {
-      const conv = await getConversationById(client, conversationId);
+      // Use getConversation which checks cache first before network
+      const conv = await getConversation(conversationId);
       if (conv) {
         setConversation(conv);
+        // Always resolve peer data from conversation (source of truth)
         if (isDm(conv)) {
           const peerId = await conv.peerInboxId();
           setPeerInboxId(peerId);
@@ -113,8 +144,9 @@ export default function ConversationPage() {
       setLoadError(error instanceof Error ? error : new Error('Failed to load conversation'));
     } finally {
       setIsLoadingConversation(false);
+      setLoadAttempted(true);
     }
-  }, [client, isInitialized, conversationId]);
+  }, [client, isInitialized, conversationId, getConversation]);
 
   useEffect(() => {
     void loadConversation();
@@ -308,12 +340,15 @@ export default function ConversationPage() {
   );
 
   // Show dropdown only for allowed DM contacts
-  const showContactMenu = conversation && isDm(conversation) && peerInboxId && consentState === ConsentState.Allowed;
+  // Use cached preview for isDm check if conversation not loaded yet
+  const isConversationDm = conversation ? isDm(conversation) : cachedPreview?.isDm ?? false;
+  const showContactMenu = (conversation || cachedPreview) && isConversationDm && peerInboxId && consentState === ConsentState.Allowed;
 
   // Render conversation panel content
   const renderConversationPanel = () => {
-    // Loading state
-    if (isLoadingConversation) {
+    // Loading state - only show skeleton if we don't have cached preview data
+    // With cached data, we can render the header immediately while messages load
+    if (isLoadingConversation && !cachedPreview) {
       return (
         <div className={styles.conversationPanel}>
           <PageHeader
@@ -355,8 +390,8 @@ export default function ConversationPage() {
       );
     }
 
-    // Not found state - conversation doesn't exist
-    if (!conversation) {
+    // Not found state - conversation doesn't exist (only show after load attempt completes)
+    if (!conversation && loadAttempted) {
       return (
         <div className={styles.conversationPanel}>
           <div className={styles.notFound}>
@@ -370,7 +405,8 @@ export default function ConversationPage() {
       );
     }
 
-    const conversationIsDm = isDm(conversation);
+    // Use conversation object if available, fall back to cached preview for isDm check
+    const conversationIsDm = conversation ? isDm(conversation) : cachedPreview?.isDm ?? false;
 
     return (
       <div className={styles.conversationPanel}>
