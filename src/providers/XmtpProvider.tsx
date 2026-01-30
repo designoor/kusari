@@ -70,34 +70,8 @@ async function syncClientData(xmtpClient: Client): Promise<void> {
     console.log('[XMTP Sync] Conversations synced.');
 
     // Log what we have after sync
-    let convos = await xmtpClient.conversations.list();
+    const convos = await xmtpClient.conversations.list();
     console.log(`[XMTP Sync] After sync: ${convos.length} conversations in local DB`);
-
-    // If no conversations found and we have other installations, wait for history sync
-    // sendSyncRequest is async - history arrives in the background
-    if (convos.length === 0) {
-      const inboxState = await xmtpClient.preferences.inboxState();
-      const installationCount = inboxState.installations?.length ?? 0;
-
-      if (installationCount > 1) {
-        console.log(`[XMTP Sync] No conversations but ${installationCount} installations exist. Waiting for history sync...`);
-
-        // Retry sync a few times with delays to catch incoming history
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-          console.log(`[XMTP Sync] Retry attempt ${attempt}/3...`);
-
-          await xmtpClient.conversations.syncAll();
-          convos = await xmtpClient.conversations.list();
-          console.log(`[XMTP Sync] After retry ${attempt}: ${convos.length} conversations`);
-
-          if (convos.length > 0) {
-            console.log('[XMTP Sync] History sync successful!');
-            break;
-          }
-        }
-      }
-    }
 
     // Log installation info
     const installations = await xmtpClient.preferences.inboxState();
