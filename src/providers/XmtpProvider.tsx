@@ -84,7 +84,7 @@ async function syncClientData(xmtpClient: Client): Promise<void> {
 
         // Retry sync a few times with delays to catch incoming history
         for (let attempt = 1; attempt <= 3; attempt++) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
           console.log(`[XMTP Sync] Retry attempt ${attempt}/3...`);
 
           await xmtpClient.conversations.syncAll();
