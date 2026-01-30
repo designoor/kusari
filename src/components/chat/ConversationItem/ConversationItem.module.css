@@ -51,12 +51,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: none;
 }
 
 .time {
   font-size: var(--font-size-sm);
   color: var(--color-content-secondary);
   flex-shrink: 0;
+  user-select: none;
 }
 
 .preview {
@@ -74,6 +76,7 @@
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  user-select: none;
 }
 
 .badge {

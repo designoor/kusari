@@ -3,4 +3,5 @@
   align-items: center;
   gap: 1px;
   flex-wrap: wrap;
+  user-select: none;
 }
