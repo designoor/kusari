@@ -317,6 +317,14 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
     }
 
     void loadConversations();
+
+    // Auto-refresh after a delay to catch any conversations from background sync
+    // This handles the race condition where sync completes after initial load
+    const refreshTimeout = setTimeout(() => {
+      void loadConversations();
+    }, 3000);
+
+    return () => clearTimeout(refreshTimeout);
   }, [isInitialized, client, loadConversations]);
 
   // Stream new conversations (single subscription)
