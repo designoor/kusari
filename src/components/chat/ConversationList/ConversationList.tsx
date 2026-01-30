@@ -62,8 +62,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   // Render content based on state
   const renderContent = () => {
-    // Loading skeleton
-    if (isLoading) {
+    // Loading skeleton - only show when loading AND no data
+    // This prevents empty state flash during refresh when we already have data
+    if (isLoading && conversations.length === 0) {
       return (
         <div className={styles.list} role="list">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -79,8 +80,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       );
     }
 
-    // Empty state
-    if (conversations.length === 0) {
+    // Empty state - only show when not loading
+    if (!isLoading && conversations.length === 0) {
       return (
         <div className={styles.emptyContainer}>
           <EmptyState
