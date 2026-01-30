@@ -41,18 +41,16 @@ export class InstallationLimitError extends Error {
 }
 
 /**
- * Sync consent preferences and messages from the XMTP network.
+ * Sync conversations and preferences from the XMTP network.
+ * Ensures fresh data after client initialization.
  * Failures are logged but don't block initialization.
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    // Sync preferences to get consent state from network
+    await xmtpClient.conversations.sync();
     await xmtpClient.preferences.sync();
-
-    // Sync all messages for conversations
-    await xmtpClient.conversations.syncAll();
-  } catch {
-    // Network sync failed, continue with local data
+  } catch (syncError) {
+    console.warn('Network sync failed, continuing with local data:', syncError);
   }
 }
 
