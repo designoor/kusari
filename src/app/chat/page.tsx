@@ -90,7 +90,7 @@ export default function ChatPage() {
         <ConversationList
           conversations={previews}
           ethosProfiles={ethosProfiles}
-          isLoading={isInitialLoading}
+          isLoading={isInitialLoading || isRefreshing}
           emptyStateTitle="No conversations yet"
           emptyStateDescription="Find contacts to start a new conversation"
           emptyStateAction={{

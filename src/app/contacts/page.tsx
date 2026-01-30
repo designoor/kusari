@@ -74,26 +74,28 @@ export default function ContactsPage() {
         />
       </div>
 
-      <div className={styles.sections}>
-        <ContactSectionLink
-          href="/contacts/requests"
-          icon={<InboxIcon size={20} />}
-          title="New requests"
-          count={requestPreviews.length}
-          variant="new"
-        />
+      {!searchQuery && (
+        <div className={styles.sections}>
+          <ContactSectionLink
+            href="/contacts/requests"
+            icon={<InboxIcon size={20} />}
+            title="New requests"
+            count={requestPreviews.length}
+            variant="new"
+          />
 
-        <ContactSectionLink
-          href="/contacts/denied"
-          icon={<BanIcon size={20} />}
-          title="Denied"
-          count={deniedPreviews.length}
-          variant="default"
-        />
-      </div>
+          <ContactSectionLink
+            href="/contacts/denied"
+            icon={<BanIcon size={20} />}
+            title="Denied"
+            count={deniedPreviews.length}
+            variant="default"
+          />
+        </div>
+      )}
 
       <div className={styles.contactsSection}>
-        <SectionTitle>Accepted Contacts</SectionTitle>
+        {!searchQuery && <SectionTitle>Accepted Contacts</SectionTitle>}
         <ContactList
           contacts={filteredContacts}
           ethosProfiles={ethosProfiles}
