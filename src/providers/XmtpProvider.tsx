@@ -43,41 +43,24 @@ export class InstallationLimitError extends Error {
 /**
  * Sync conversations and preferences from the XMTP network.
  * Ensures fresh data after client initialization.
- * Failures are logged but don't block initialization.
+ * Failures are silent and don't block initialization.
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    console.log('[XMTP Sync] Starting syncClientData...');
-    console.log('[XMTP Sync] InboxId:', xmtpClient.inboxId);
-
     // Request history from other installations (cross-device sync)
-    console.log('[XMTP Sync] Requesting history from other installations...');
     try {
       await xmtpClient.sendSyncRequest();
-      console.log('[XMTP Sync] Sync request sent.');
-    } catch (e) {
-      console.warn('[XMTP Sync] sendSyncRequest failed (may be expected for single installation):', e);
+    } catch {
+      // Expected to fail for single installation
     }
 
     // Sync preferences first to get fresh consent state from network
-    console.log('[XMTP Sync] Syncing preferences...');
     await xmtpClient.preferences.sync();
-    console.log('[XMTP Sync] Preferences synced.');
 
     // Then sync all conversations (Allowed + Unknown by default)
-    console.log('[XMTP Sync] Syncing all conversations...');
     await xmtpClient.conversations.syncAll();
-    console.log('[XMTP Sync] Conversations synced.');
-
-    // Log what we have after sync
-    const convos = await xmtpClient.conversations.list();
-    console.log(`[XMTP Sync] After sync: ${convos.length} conversations in local DB`);
-
-    // Log installation info
-    const installations = await xmtpClient.preferences.inboxState();
-    console.log('[XMTP Sync] Inbox state:', JSON.stringify(installations, (_, v) => typeof v === 'bigint' ? v.toString() : v));
-  } catch (syncError) {
-    console.error('[XMTP Sync] Network sync failed:', syncError);
+  } catch {
+    // Network sync failed, continue with local data
   }
 }
 

@@ -232,16 +232,7 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
       // XmtpProvider already synced preferences and conversations during initialization.
       // We just need to list the conversations that were synced.
       // If we sync again here, it can cause timing issues where list() returns empty.
-      console.log('[ConversationData] Starting to list conversations...');
       const conversationList = await listConversations(client);
-      console.log(`[ConversationData] Found ${conversationList.length} conversations`);
-
-      // Debug: Log conversation IDs
-      if (conversationList.length > 0) {
-        conversationList.forEach((conv, i) => {
-          console.log(`[ConversationData] Conversation ${i}: ${conv.id.slice(0, 8)}...`);
-        });
-      }
 
       // Build previews for all conversations
       const previewPromises = conversationList.map((conv) => buildPreview(conv));
@@ -265,15 +256,6 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
           console.error('Failed to build conversation preview:', result.reason);
         }
       }
-
-      // Debug: Log consent state distribution
-      const consentCounts = { allowed: 0, unknown: 0, denied: 0 };
-      for (const preview of previewsMap.values()) {
-        if (preview.consentState === ConsentState.Allowed) consentCounts.allowed++;
-        else if (preview.consentState === ConsentState.Unknown) consentCounts.unknown++;
-        else if (preview.consentState === ConsentState.Denied) consentCounts.denied++;
-      }
-      console.log(`[ConversationData] Consent distribution: allowed=${consentCounts.allowed}, unknown=${consentCounts.unknown}, denied=${consentCounts.denied}`);
 
       setState({
         conversations: conversationsMap,
@@ -323,9 +305,7 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
 
   // Load conversations on mount and when client changes
   useEffect(() => {
-    console.log(`[ConversationData] useEffect triggered: client=${!!client}, isInitialized=${isInitialized}`);
     if (!client || !isInitialized) {
-      console.log('[ConversationData] Client not ready, resetting state');
       setState({
         conversations: new Map(),
         previews: new Map(),
@@ -336,7 +316,6 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
       return;
     }
 
-    console.log('[ConversationData] Client ready, calling loadConversations...');
     void loadConversations();
   }, [isInitialized, client, loadConversations]);
 
