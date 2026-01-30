@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useWalletClient } from 'wagmi';
+import { ConsentState } from '@xmtp/browser-sdk';
 import type { Client, EOASigner } from '@xmtp/browser-sdk';
 import { createXmtpClient, clearXmtpSession } from '@/services/xmtp';
 import type { XmtpContextValue } from '@/services/xmtp';
@@ -47,7 +48,7 @@ export class InstallationLimitError extends Error {
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
-    await xmtpClient.conversations.sync();
+    await xmtpClient.conversations.syncAll([ConsentState.Allowed]);
     await xmtpClient.preferences.sync();
   } catch (syncError) {
     console.warn('Network sync failed, continuing with local data:', syncError);
