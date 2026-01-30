@@ -283,16 +283,6 @@ export default function SettingsPage() {
           </Section>
         )}
 
-        {/* Messaging Section */}
-        <Section title="Messaging">
-          <div className={styles.comingSoon}>
-            <span className={styles.comingSoonBadge}>Coming Soon</span>
-            <p className={styles.comingSoonText}>
-              Payment requirements for new contacts and other messaging settings will be available in a future update.
-            </p>
-          </div>
-        </Section>
-
         {/* Active Sessions Section */}
         <Section title="Active Sessions">
           <div className={styles.sessionsHeader}>
