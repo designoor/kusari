@@ -57,16 +57,15 @@ export default function ContactDetailPage() {
   // Handle consent change - redirect appropriately
   const handleConsentChange = useCallback(
     (newState: ConsentState) => {
-      if (newState === ConsentState.Allowed && conversationId) {
-        router.push(`/chat/${conversationId}`);
-      } else if (newState === ConsentState.Denied) {
+      // Stay on page after accepting - no redirect to chat
+      if (newState === ConsentState.Denied) {
         router.push('/contacts');
       } else if (newState === ConsentState.Unknown) {
         // Redirect back to contacts (not requests) after moving to requests
         router.push('/contacts');
       }
     },
-    [router, conversationId]
+    [router]
   );
 
   // Loading state
