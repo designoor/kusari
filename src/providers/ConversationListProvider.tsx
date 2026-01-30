@@ -93,12 +93,23 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
     hasEverHadDataRef.current = true;
   }
 
-  // Only extract addresses when data has loaded
+  // Track last known addresses to preserve Ethos data during refresh
+  const lastAddressesRef = useRef<string[]>([]);
+
+  // Extract addresses, but preserve last known during refresh to avoid Ethos flash
   const addressesForEthos = useMemo(() => {
-    if (!data.hasAttemptedLoad || data.isLoading) {
+    // Don't fetch until initial load attempt
+    if (!data.hasAttemptedLoad) {
       return [];
     }
-    return extractValidAddresses(previews);
+    // During refresh, keep last known addresses to preserve Ethos profiles
+    if (data.isLoading) {
+      return lastAddressesRef.current;
+    }
+    // Extract fresh addresses when data is ready
+    const addresses = extractValidAddresses(previews);
+    lastAddressesRef.current = addresses;
+    return addresses;
   }, [data.hasAttemptedLoad, data.isLoading, previews]);
 
   // Ethos data (only fetches when addresses become available)
@@ -128,8 +139,9 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
   }
 
   // Parent provider (ConversationDataProvider) persists across navigation
-  // If it has already loaded data, we should show it immediately (not skeleton)
-  const hasCachedData = data.hasAttemptedLoad && !data.isLoading;
+  // If it has already loaded data AND Ethos profiles, we should show it immediately (not skeleton)
+  // Including ethosReady prevents flash of addresses before usernames load
+  const hasCachedData = data.hasAttemptedLoad && !data.isLoading && ethosReady;
   // Show initial loading until we've completed a full cycle AND have data (or confirmed empty)
   // This prevents empty state from flashing during auto-refresh
   const isInitialLoading = !hasLoadedOnceRef.current && !hasCachedData && !hasEverHadDataRef.current;
