@@ -13,6 +13,11 @@
   box-sizing: border-box;
 }
 
+/* Prevent iOS bounce/pull-to-refresh on all scrollable areas */
+* {
+  overscroll-behavior: none;
+}
+
 /* Global styles */
 html {
   font-family: var(--font-inconsolata), 'Inconsolata', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -38,23 +43,14 @@ body {
   outline-offset: 2px;
 }
 
-/* Scrollbar styling for webkit browsers */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Hide scrollbars while allowing scroll */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-heavy);
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* Selection styling */
