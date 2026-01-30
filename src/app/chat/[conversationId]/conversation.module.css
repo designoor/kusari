@@ -40,6 +40,8 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Add top padding to MessageList content so it scrolls behind the header */
