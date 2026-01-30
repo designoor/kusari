@@ -76,6 +76,7 @@
   font-size: var(--font-size-md);
   line-height: var(--line-height-base);
   white-space: pre-wrap;
+  user-select: none;
 }
 
 .meta {
@@ -88,6 +89,7 @@
 
 .time {
   font-size: var(--font-size-sm);
+  user-select: none;
 }
 
 .status {
@@ -120,11 +122,13 @@
   font-size: var(--font-size-md);
   color: var(--color-content-secondary);
   text-align: center;
+  user-select: none;
 }
 
 .systemTime {
   font-size: var(--font-size-sm);
   color: var(--color-content-tertiary);
+  user-select: none;
 }
 
 /* Mobile adjustments */

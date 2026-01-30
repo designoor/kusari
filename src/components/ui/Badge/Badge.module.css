@@ -6,6 +6,7 @@
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   flex-shrink: 0;
+  user-select: none;
 }
 
 /* Count badge */
