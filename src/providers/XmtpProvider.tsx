@@ -47,12 +47,23 @@ export class InstallationLimitError extends Error {
  */
 async function syncClientData(xmtpClient: Client): Promise<void> {
   try {
+    console.log('[XMTP Sync] Starting syncClientData...');
+
     // Sync preferences first to get fresh consent state from network
+    console.log('[XMTP Sync] Syncing preferences...');
     await xmtpClient.preferences.sync();
+    console.log('[XMTP Sync] Preferences synced.');
+
     // Then sync all conversations (Allowed + Unknown by default)
+    console.log('[XMTP Sync] Syncing all conversations...');
     await xmtpClient.conversations.syncAll();
+    console.log('[XMTP Sync] Conversations synced.');
+
+    // Log what we have after sync
+    const convos = await xmtpClient.conversations.list();
+    console.log(`[XMTP Sync] After sync: ${convos.length} conversations in local DB`);
   } catch (syncError) {
-    console.warn('Network sync failed, continuing with local data:', syncError);
+    console.error('[XMTP Sync] Network sync failed:', syncError);
   }
 }
 

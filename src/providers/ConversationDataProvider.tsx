@@ -323,7 +323,9 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
 
   // Load conversations on mount and when client changes
   useEffect(() => {
+    console.log(`[ConversationData] useEffect triggered: client=${!!client}, isInitialized=${isInitialized}`);
     if (!client || !isInitialized) {
+      console.log('[ConversationData] Client not ready, resetting state');
       setState({
         conversations: new Map(),
         previews: new Map(),
@@ -334,6 +336,7 @@ export function ConversationDataProvider({ children }: { children: React.ReactNo
       return;
     }
 
+    console.log('[ConversationData] Client ready, calling loadConversations...');
     void loadConversations();
   }, [isInitialized, client, loadConversations]);
 
