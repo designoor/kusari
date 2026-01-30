@@ -25,6 +25,7 @@ import {
   ThumbsDownIcon,
   MinusIcon,
   ArrowUpRightIcon,
+  ChainIcon,
 } from './icons';
 import styles from './Icon.module.css';
 
@@ -53,7 +54,8 @@ export type IconName =
   | 'thumbsUp'
   | 'thumbsDown'
   | 'minus'
-  | 'arrow-up-right';
+  | 'arrow-up-right'
+  | 'chain';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -98,6 +100,7 @@ const ICON_MAP = {
   thumbsDown: ThumbsDownIcon,
   minus: MinusIcon,
   'arrow-up-right': ArrowUpRightIcon,
+  chain: ChainIcon,
 } as const;
 
 export const Icon: React.FC<IconProps> = React.memo(({

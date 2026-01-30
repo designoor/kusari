@@ -1,0 +1,55 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  user-select: none;
+}
+
+.logoContainer {
+  padding: var(--spacing-sm);
+}
+
+.ascii {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0;
+  margin: 0;
+  color: var(--color-content-primary);
+  white-space: pre;
+}
+
+.line {
+  display: block;
+  height: 1em;
+}
+
+.char {
+  display: inline-block;
+  transition: color 0.1s ease-out;
+}
+
+.char.scrambling {
+  color: var(--color-accent);
+}
+
+/* Responsive scaling */
+@media (max-width: 480px) {
+  .ascii {
+    font-size: 6px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .ascii {
+    font-size: 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .ascii {
+    font-size: 12px;
+  }
+}

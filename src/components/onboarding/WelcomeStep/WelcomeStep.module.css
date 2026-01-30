@@ -15,24 +15,6 @@
   gap: var(--spacing-lg);
 }
 
-.iconContainer {
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0;
-  background-color: var(--color-bg-tertiary);
-  color: var(--color-content-tertiary);
-}
-
-.title {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--color-content-primary);
-  margin: 0;
-}
-
 .description {
   font-size: var(--font-size-md);
   color: var(--color-content-secondary);
