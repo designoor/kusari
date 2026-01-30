@@ -76,6 +76,8 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
   const hasLoadedOnceRef = useRef(false);
   // Track if we've ever seen an actual loading state (not just the "no client" fallback)
   const hasSeenLoadingRef = useRef(false);
+  // Track if we've ever had actual data (prevents empty state flash during refresh)
+  const hasEverHadDataRef = useRef(false);
 
   // Get allowed conversations from centralized provider
   const data = useConversationData();
@@ -85,6 +87,11 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
     hasSeenLoadingRef.current = true;
   }
   const previews = data.allowedPreviews;
+
+  // Track if we've ever had data
+  if (previews.length > 0) {
+    hasEverHadDataRef.current = true;
+  }
 
   // Only extract addresses when data has loaded
   const addressesForEthos = useMemo(() => {
@@ -123,7 +130,9 @@ export function ConversationListProvider({ children }: { children: React.ReactNo
   // Parent provider (ConversationDataProvider) persists across navigation
   // If it has already loaded data, we should show it immediately (not skeleton)
   const hasCachedData = data.hasAttemptedLoad && !data.isLoading;
-  const isInitialLoading = !hasLoadedOnceRef.current && !hasCachedData;
+  // Show initial loading until we've completed a full cycle AND have data (or confirmed empty)
+  // This prevents empty state from flashing during auto-refresh
+  const isInitialLoading = !hasLoadedOnceRef.current && !hasCachedData && !hasEverHadDataRef.current;
 
   const value = useMemo(
     () => ({
