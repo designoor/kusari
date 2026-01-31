@@ -11,6 +11,53 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
 
+  // Image optimization configuration
+  images: {
+    remotePatterns: [
+      // Ethos Network avatars
+      {
+        protocol: 'https',
+        hostname: '*.ethos.network',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.ethos.network',
+      },
+      // IPFS gateways (common for Web3 avatars)
+      {
+        protocol: 'https',
+        hostname: 'ipfs.io',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ipfs.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cloudflare-ipfs.com',
+      },
+      // ENS avatars
+      {
+        protocol: 'https',
+        hostname: 'euc.li',
+      },
+      {
+        protocol: 'https',
+        hostname: 'metadata.ens.domains',
+      },
+      // Gravatar (fallback for some services)
+      {
+        protocol: 'https',
+        hostname: '*.gravatar.com',
+      },
+    ],
+    formats: ['image/avif', 'image/webp'],
+  },
+
   // Empty turbopack config to silence the warning
   // We use webpack for WASM support required by XMTP
   turbopack: {},
